@@ -1,0 +1,36 @@
+.navigator-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.button-container {
+  display: flex;
+  flex-direction: column;
+  width: 78px;
+  margin: 4px;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  background: none;
+  border: 1px solid #424040;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 4px;
+
+  &:hover {
+    background: #2d2c2c;
+    border: 1px solid lightgrey;
+  }
+
+  @media (max-width: 767px) {
+    width: 48px ;
+  }
+}
+
+
+.icon-name {
+  @media (max-width: 767px) {
+    display: none;
+  }
+}
