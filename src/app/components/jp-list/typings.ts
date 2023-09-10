@@ -13,3 +13,8 @@ export type LinkType =
   | 'Guides'
   | 'Novels'
   | 'Downloads';
+
+export interface Category {
+  text: LinkType | string;
+  icon: string;
+}

@@ -49,6 +49,14 @@
   color: white;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  .mat-mdc-card-content {
+    padding: 16px 16px 16px 4px;
+  }
 }
 
 .divider {

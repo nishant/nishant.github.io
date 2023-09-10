@@ -1,5 +1,8 @@
-<div class="section-container">
+<div class="section-container" [id]="heading">
   <mat-card class="heading">
+    <span class="material-symbols-outlined">
+      {{ icon }}
+    </span>
     <mat-card-content>{{ heading }}</mat-card-content>
   </mat-card>
 

@@ -1,19 +1,20 @@
 <div class="page-container">
+  <app-navigator></app-navigator>
   <div class="row">
     <div class="column">
       <div class="column-1">
-        <app-section [links]="getLinksByType('Streaming')" [heading]="'Streaming'"></app-section>
-        <app-section [links]="getLinksByType('Schedules')" [heading]="'Schedules'"></app-section>
-        <app-section [links]="getLinksByType('Information')" [heading]="'Information'"></app-section>
-        <app-section [links]="getLinksByType('Downloads')" [heading]="'Downloads'"></app-section>
+        <app-section [links]="getLinksByType('Streaming')" heading="Streaming" icon="play_arrow"></app-section>
+        <app-section [links]="getLinksByType('Schedules')" heading="Schedules" icon="calendar_month"></app-section>
+        <app-section [links]="getLinksByType('Information')" heading="Information" icon="info"></app-section>
+        <app-section [links]="getLinksByType('Downloads')" heading="Downloads" icon="download"></app-section>
       </div>
     </div>
     <div class="column">
       <div class="column-2">
-        <app-section [links]="getLinksByType('Manga')" [heading]="'Manga'"></app-section>
-        <app-section [links]="getLinksByType('Novels')" [heading]="'Novels'"></app-section>
-        <app-section [links]="getLinksByType('Guides')" [heading]="'Guides'"></app-section>
-        <app-section [links]="getLinksByType('Tools')" [heading]="'Tools'"></app-section>
+        <app-section [links]="getLinksByType('Manga')" heading="Manga" icon="dashboard"></app-section>
+        <app-section [links]="getLinksByType('Novels')" heading="Novels" icon="library_books"></app-section>
+        <app-section [links]="getLinksByType('Guides')" heading="Guides" icon="developer_guide"></app-section>
+        <app-section [links]="getLinksByType('Tools')" heading="Tools" icon="construction"></app-section>
       </div>
     </div>
   </div>
