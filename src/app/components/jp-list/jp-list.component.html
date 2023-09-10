@@ -1,0 +1,20 @@
+<div class="page-container">
+  <div class="row">
+    <div class="column">
+      <div class="column-1">
+        <app-section [links]="getLinksByType('Streaming')" [heading]="'Streaming'"></app-section>
+        <app-section [links]="getLinksByType('Schedules')" [heading]="'Schedules'"></app-section>
+        <app-section [links]="getLinksByType('Information')" [heading]="'Information'"></app-section>
+        <app-section [links]="getLinksByType('Downloads')" [heading]="'Downloads'"></app-section>
+      </div>
+    </div>
+    <div class="column">
+      <div class="column-2">
+        <app-section [links]="getLinksByType('Manga')" [heading]="'Manga'"></app-section>
+        <app-section [links]="getLinksByType('Novels')" [heading]="'Novels'"></app-section>
+        <app-section [links]="getLinksByType('Guides')" [heading]="'Guides'"></app-section>
+        <app-section [links]="getLinksByType('Tools')" [heading]="'Tools'"></app-section>
+      </div>
+    </div>
+  </div>
+</div>
