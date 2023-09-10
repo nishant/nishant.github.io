@@ -1,0 +1,19 @@
+<div class="section-container">
+  <mat-card class="heading">
+    <mat-card-content>{{ heading }}</mat-card-content>
+  </mat-card>
+
+  <mat-divider class="divider"></mat-divider>
+  <mat-nav-list class="list">
+    <a *ngFor="let link of links; let idx = index" [href]="link.link" target="_blank" class="link">
+      <mat-list-item>
+        {{idx + 1}}.
+        <button class="icon-button">
+          <img class="icon" [ngSrc]="getFavicon(link.link)" width="16" height="16" alt=""/>
+        </button>
+        <span class="link-text">{{ link.text }}</span>
+      </mat-list-item>
+    </a>
+  </mat-nav-list>
+  <mat-divider></mat-divider>
+</div>
