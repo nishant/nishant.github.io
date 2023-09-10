@@ -1,0 +1,23 @@
+.footer {
+  position: fixed;
+  bottom: 0;
+  background-color: #131313;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: lightgrey;
+  padding: 4px;
+  height: 12px;
+}
+
+.text {
+  margin-left: 64px;
+  margin-right: 64px;
+  font-size: 6pt;
+}
+
+.view-source {
+  text-decoration: none;
+  color: lightgrey;
+}
