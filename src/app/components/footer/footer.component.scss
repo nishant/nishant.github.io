@@ -15,6 +15,11 @@
   margin-left: 64px;
   margin-right: 64px;
   font-size: 6pt;
+
+  @media (max-width: 500px) {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
 }
 
 .view-source {
