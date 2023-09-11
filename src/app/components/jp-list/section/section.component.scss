@@ -32,13 +32,13 @@
   padding-top: 24px;
   padding-bottom: 24px;
 
-  @media (max-width: 650px) {
-    width: 300px
-  }
-
-  @media (max-width: 500px) {
+  @media (max-width: 767px) {
     width: 320px
   }
+
+  //@media (max-width: 500px) {
+  //  width: 320px
+  //}
 }
 
 .heading {
