@@ -1,0 +1,9 @@
+.editor-container {
+  //margin: 24px;
+  height: calc(80vh - 100px);
+  width: 80vw;
+
+  @media (max-width: 490px) {
+    width: 80vw;
+  }
+}
