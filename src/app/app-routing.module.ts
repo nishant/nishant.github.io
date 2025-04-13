@@ -1,10 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AppComponent } from './app.component';
+import { JpListComponent } from './components/jp-list/jp-list.component';
+import { HomeComponent } from './components/home/home.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/jp', pathMatch: 'full' },
-  { path: 'jp', component: AppComponent, title: 'Anime + Manga Dashboard' }
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: 'home', component: HomeComponent, title: 'Dashboard' },
+  { path: 'jp', component: JpListComponent, title: 'Anime + Manga Dashboard' },
 ];
 
 @NgModule({
