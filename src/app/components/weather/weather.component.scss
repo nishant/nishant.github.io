@@ -1,0 +1,42 @@
+#weather-container {
+  border-radius: 10px;
+  width: 300px;
+  height: 320px;
+  background: rgb(0,0,0);
+  background: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(8,7,42,1) 75%, rgb(8, 10, 63) 100%);
+  color: white;
+}
+
+.weather-widget-row {
+  display: block;
+  margin: 0 auto;
+  width: fit-content;
+}
+
+.weather-icon {
+  color: white;
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24
+}
+
+.icon {
+  filter: drop-shadow( 1px 1px 5px rgb(104, 175, 197));
+  animation-name: iconMovement;
+  animation-iteration-count: infinite;
+  animation-duration: 10s;
+  animation-timing-function: ease-in-out;
+  animation-direction: alternate;
+}
+
+@keyframes iconMovement {
+  from {
+    margin-left: -55px;
+  }
+
+  to {
+    margin-left: 65px;
+  }
+}
