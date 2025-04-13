@@ -36,3 +36,6 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Assets for local env
+src/assets/monaco
