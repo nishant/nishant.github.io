@@ -1,0 +1,11 @@
+<div class="content">
+  <form [formGroup]="form">
+    <div class="editor">
+      <ngx-editor-menu [editor]="editor!" [toolbar]="toolbar" [customMenuRef]="customMenu" />
+      <ng-template #customMenu>
+        <app-custom-menu [editor]="editor" />
+      </ng-template>
+      <ngx-editor [editor]="editor!" formControlName="editorContent" />
+    </div>
+  </form>
+</div>

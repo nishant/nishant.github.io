@@ -1,0 +1,26 @@
+::ng-deep  .NgxEditor {
+  border-radius: 0 !important;
+}
+
+.container {
+  padding: 32px;
+}
+
+::ng-deep .NgxEditor__MenuBar {
+  border: 2px solid black;
+  border-bottom: 1px solid black;
+}
+
+::ng-deep .NgxEditor__Content {
+  border: 1px solid black;
+}
+
+::ng-deep .material-symbols-outlined {
+  color: black;
+  padding-top: 3px;
+}
+
+.content {
+  z-index: 100;
+  position: relative;
+}
