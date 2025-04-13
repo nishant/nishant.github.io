@@ -29,11 +29,18 @@
     <div class="button" (click)="toggleStocks()" >
       <span class="material-symbols-outlined">query_stats</span>
     </div>
+    <div class="button" (click)="toggleSettings()" >
+      <span class="material-symbols-outlined">settings</span>
+    </div>
   </div>
 </div>
 
 <ng-template #notes>
   <app-notes />
+</ng-template>
+
+<ng-template #settings>
+  <app-settings />
 </ng-template>
 
 <!-- TODO: weather and stocks here -->

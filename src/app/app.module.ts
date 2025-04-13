@@ -16,7 +16,7 @@ import { FooterComponent } from './components/footer/footer.component';
 import { MatTableModule } from '@angular/material/table';
 import { NavigatorComponent } from './components/navigator/navigator.component';
 import { HomeComponent } from './components/home/home.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxEditorModule } from 'ngx-editor';
 import { NotesComponent } from './components/notes/notes.component';
 import { CustomMenuComponent } from './components/notes/custom-menu/custom-menu.component';
@@ -25,6 +25,17 @@ import { HttpClientModule } from '@angular/common/http';
 import { StocksComponent } from './components/stocks/stocks.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MonacoEditorModule, NGX_MONACO_EDITOR_CONFIG, NgxMonacoEditorConfig } from 'ngx-monaco-editor-v2';
+import { SettingsComponent } from './components/settings/settings.component';
+
+const monacoConfig: NgxMonacoEditorConfig = {
+  defaultOptions: { scrollBeyondLastLine: false },
+  baseUrl: './assets',
+  onMonacoLoad: () => {
+    const monaco = (window as any).monaco;
+    console.log(monaco);
+  }
+};
 
 @NgModule({
   declarations: [
@@ -38,6 +49,7 @@ import { MatDialogModule } from '@angular/material/dialog';
     CustomMenuComponent,
     WeatherComponent,
     StocksComponent,
+    SettingsComponent,
   ],
   imports: [
     BrowserModule,
@@ -54,9 +66,15 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatTableModule,
     ReactiveFormsModule,
     NgxEditorModule,
-    HttpClientModule
+    HttpClientModule,
+    // MonacoEditorModule.forRoot(),
+    MonacoEditorModule,
+    FormsModule,
+    // use forRoot() in main app module only.
   ],
-  providers: [],
+  providers: [
+    { provide: NGX_MONACO_EDITOR_CONFIG, useValue: monacoConfig }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

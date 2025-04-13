@@ -12,5 +12,4 @@ export class SectionComponent {
   @Input() icon: string = '';
   @Input() heading: LinkType | string = '';
   getFavicon = (url: string): string => this.GOOGLE_FAVICON_CACHE_URL + url;
-
 }
