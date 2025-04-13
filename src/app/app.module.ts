@@ -15,6 +15,16 @@ import { MatCardModule } from '@angular/material/card';
 import { FooterComponent } from './components/footer/footer.component';
 import { MatTableModule } from '@angular/material/table';
 import { NavigatorComponent } from './components/navigator/navigator.component';
+import { HomeComponent } from './components/home/home.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { NgxEditorModule } from 'ngx-editor';
+import { NotesComponent } from './components/notes/notes.component';
+import { CustomMenuComponent } from './components/notes/custom-menu/custom-menu.component';
+import { WeatherComponent } from './components/weather/weather.component';
+import { HttpClientModule } from '@angular/common/http';
+import { StocksComponent } from './components/stocks/stocks.component';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
@@ -23,18 +33,28 @@ import { NavigatorComponent } from './components/navigator/navigator.component';
     SectionComponent,
     FooterComponent,
     NavigatorComponent,
+    HomeComponent,
+    NotesComponent,
+    CustomMenuComponent,
+    WeatherComponent,
+    StocksComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     MatDividerModule,
+    MatSnackBarModule,
+    MatDialogModule,
     MatListModule,
     MatIconModule,
     MatLineModule,
     NgOptimizedImage,
     MatCardModule,
     MatTableModule,
+    ReactiveFormsModule,
+    NgxEditorModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
