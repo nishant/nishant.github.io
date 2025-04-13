@@ -1,0 +1,39 @@
+<div class="home-container">
+  <div class="search-block">
+    <form id="search-form" action="https://google.com/search" method="get">
+      <input type="text" name="q" id="search" autofocus="autofocus" autocomplete="off" placeholder="Search" />
+      <label for="search"><span id="search-icon" class="fa fa-search"></span></label>
+    </form>
+    <ul id="search-help" class="search-help" style="opacity: 0;"></ul>
+  </div>
+
+  <div class="blocks">
+    <ul *ngFor="let section of config?.sections" class="block">
+      <li class="header">{{ section.header }}</li>
+      <li *ngFor="let link of section.links" class="links">
+        <button class="icon-button">
+          <img class="icon" [ngSrc]="getFavicon(link.url)" width="16" height="16" alt=""/>
+        </button>
+        <a href="{{link.url}}">{{ link.text }}</a>
+      </li>
+    </ul>
+  </div>
+
+  <div id="apps-container">
+    <div class="button" (click)="toggleNotes()" >
+      <span class="material-symbols-outlined">description</span>
+    </div>
+    <div class="button" (click)="toggleWeather()" >
+      <span class="material-symbols-outlined">partly_cloudy_day</span>
+    </div>
+    <div class="button" (click)="toggleStocks()" >
+      <span class="material-symbols-outlined">query_stats</span>
+    </div>
+  </div>
+</div>
+
+<ng-template #notes>
+  <app-notes />
+</ng-template>
+
+<!-- TODO: weather and stocks here -->
