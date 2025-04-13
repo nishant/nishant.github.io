@@ -14,7 +14,7 @@ import { SettingsService } from '../settings/settings.service';
 })
 export class HomeComponent implements OnInit {
   isNotesOpen = false;
-  isWeatherOpen = false
+  isWeatherOpen = false;
   isStocksOpen = false;
   isSettingsOpen = false;
 
@@ -77,4 +77,8 @@ export class HomeComponent implements OnInit {
   }
 
   prettify = (obj: unknown) => JSON.stringify(obj, null, '\t');
+
+  onSearch = () => {
+    window.location.replace('https://google.com/search?q=' + (<HTMLInputElement> document.getElementById('search')).value)
+  }
 }

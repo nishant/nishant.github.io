@@ -33,7 +33,6 @@ const monacoConfig: NgxMonacoEditorConfig = {
   baseUrl: './assets',
   onMonacoLoad: () => {
     const monaco = (window as any).monaco;
-    console.log(monaco);
   }
 };
 
