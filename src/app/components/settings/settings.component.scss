@@ -1,9 +1,18 @@
 .editor-container {
   //margin: 24px;
-  height: calc(80vh - 100px);
+  height: 80vh;
   width: 80vw;
 
   @media (max-width: 490px) {
     width: 80vw;
   }
+}
+
+ngx-monaco-editor {
+  background: #1e1e1e;
+}
+
+mat-form-field {
+  background: #1e1e1e !important;
+  width: 100%;
 }

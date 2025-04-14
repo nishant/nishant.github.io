@@ -27,6 +27,8 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MonacoEditorModule, NGX_MONACO_EDITOR_CONFIG, NgxMonacoEditorConfig } from 'ngx-monaco-editor-v2';
 import { SettingsComponent } from './components/settings/settings.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 
 const monacoConfig: NgxMonacoEditorConfig = {
   defaultOptions: { scrollBeyondLastLine: false },
@@ -69,6 +71,8 @@ const monacoConfig: NgxMonacoEditorConfig = {
     // MonacoEditorModule.forRoot(),
     MonacoEditorModule,
     FormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
     // use forRoot() in main app module only.
   ],
   providers: [

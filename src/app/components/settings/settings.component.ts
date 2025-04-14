@@ -9,12 +9,14 @@ import { SettingsService } from './settings.service';
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss']
 })
-export class SettingsComponent implements OnInit
-{
+export class SettingsComponent implements OnInit {
+  selectedFont = 'Fira Code';
   editorOptions = {
     theme: 'vs-dark',
     language: 'json',
-    minimap: { enabled: false }
+    minimap: { enabled: false },
+    formatOnPaste: true,
+    formatOnType: true
   };
 
   code = localStorage.getItem('nishant.github.io-config') ?? '[]';
@@ -25,9 +27,22 @@ export class SettingsComponent implements OnInit
 
   ngOnInit(): void {
     this.settingService.onClose.subscribe(x => {
-      if (x === 'closed') { this.settingService.config.next(this.code) }
+      this.selectedFont = localStorage.getItem('nishant.github.io-font') ?? 'Fira Code';
+
+      if (x === 'closed') {
+        this.settingService.config.next(this.code);
+        // this.settingService.font.next(this.selectedFont);
+      }
     });
   }
+
+  onSelect = () => {
+    this.settingService.font.next(this.selectedFont);
+    localStorage.setItem('nishant.github.io-font', this.selectedFont);
+    document.querySelectorAll('*:not(.material-symbols-outlined)').forEach(x => {
+      (x as HTMLElement).style.fontFamily = this.selectedFont + ', monospace'
+    });
+  };
 
   prettify = (obj: unknown) => JSON.stringify(obj, null, '\t');
 }

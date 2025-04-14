@@ -32,6 +32,9 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
     this.setConfig();
+    document.querySelectorAll('*:not(.material-symbols-outlined)').forEach(x => {
+      (x as HTMLElement).style.fontFamily = localStorage.getItem('nishant.github.io-font') ?? this.settingsService.font.value + ', monospace'
+    });
   }
 
   toggleNotes = () => {
@@ -59,6 +62,11 @@ export class HomeComponent implements OnInit {
         this.config = JSON.parse(this.settingsService.config.value);
         this.saveConfig();
         this.setConfig();
+        this.saveFont();
+        document.querySelectorAll('*:not(.material-symbols-outlined)').forEach(x => {
+          console.log(x);
+          (x as HTMLElement).style.fontFamily = localStorage.getItem('nishant.github.io-font') ?? this.settingsService.font.value + ', monospace'
+        });
         this.isSettingsOpen = !this.isSettingsOpen
       });
     }
@@ -74,6 +82,10 @@ export class HomeComponent implements OnInit {
     const savedConfig = localStorage.getItem('nishant.github.io-config') ?? this.prettify(defaultConfigJson);
     this.config = JSON.parse(savedConfig);
     this.saveConfig();
+  }
+
+  saveFont = (): void => {
+    localStorage.setItem('nishant.github.io-font', this.settingsService.font.value);
   }
 
   prettify = (obj: unknown) => JSON.stringify(obj, null, '\t');

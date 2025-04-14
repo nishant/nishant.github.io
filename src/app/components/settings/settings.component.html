@@ -1,3 +1,19 @@
 <div class="editor-container">
   <ngx-monaco-editor style="height: 80vh" [options]="editorOptions" [(ngModel)]="code"></ngx-monaco-editor>
 </div>
+
+<mat-form-field>
+  <mat-label>Font</mat-label>
+  <mat-select [(value)]="selectedFont" (selectionChange)="onSelect()">
+    <mat-option value="Fira Code">Fira Code</mat-option>
+    <mat-option value="Roboto">Roboto</mat-option>
+    <mat-option value="Helvetica">Helvetica</mat-option>
+    <mat-option value="Verdana">Verdana</mat-option>
+    <mat-option value="Times">Times</mat-option>
+    <mat-option value="Times New Roman">Times New Roman</mat-option>
+    <mat-option value="Courier">Courier</mat-option>
+    <mat-option value="Courier New">Courier New</mat-option>
+    <mat-option value="Arial">Arial</mat-option>
+    <mat-option value="Arial Narrow">Arial Narrow</mat-option>
+  </mat-select>
+</mat-form-field>

@@ -54,7 +54,7 @@ $BP_XXS: 400px;
   margin: 0;
   padding: 0;
   line-height: 1.8;
-  font-family: "Fira Code", monospace;
+  //font-family: "Fira Code", monospace;
   font-weight: 400;
   opacity: 1.0;
 }
@@ -229,8 +229,13 @@ html, body {
 #apps-container {
   display: flex;
   justify-content: center;
-
+  margin-bottom: 72px !important;
+;
   @media (max-width: 490px) {
-    margin-bottom: 72px;
+    margin-bottom: 72px !important;
   }
+}
+
+mat-dialog-container {
+  background-color: transparent !important;
 }
