@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { IconCodes, RawWeatherData, WeatherData } from './weather';
+import { IconCodes, LocationResponse, WeatherData, WeatherResponse } from './weather';
 import Icon from 'ngx-editor/lib/icons';
 import { WeatherService } from './weather.service';
-import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-weather',
@@ -10,39 +9,26 @@ import { Observable } from 'rxjs';
   styleUrls: ['./weather.component.scss']
 })
 export class WeatherComponent implements OnInit {
-  OPEN_WEATHER_API_BASEURL = 'https://api.openweathermap.org/data/3.0/onecall?';
-  OPEN_WEATHER_API_KEY = '';
-
-  weatherData: WeatherData | null = null;
-  constructor(private service: WeatherService) {
+  location = '';
+  weatherData?: WeatherData;
+  constructor(private weatherService: WeatherService) {
   }
 
   ngOnInit(): void {
     this.getGeolocation();
   }
 
-  getWeatherData = async (lat: number, lon: number): Promise<RawWeatherData> => {
-    const requestUrl = `${this.OPEN_WEATHER_API_BASEURL}lat=${lat}&lon=${lon}&appid=${this.OPEN_WEATHER_API_KEY}`;
-    const response = await fetch(requestUrl);
-    const data = await response.json() as RawWeatherData;
-    console.log(data);
-    return data;
-  }
-
-  setWeatherData = (data: RawWeatherData): void => {
+  setWeatherData = (data: WeatherResponse): void => {
     this.weatherData = {
-      description: data.weather[0].description.split(' ').map(s => s.charAt(0).toUpperCase() + s.substring(1)).join(' '),
-      humidity: data.main.humidity,
-      icon: IconCodes.get(data.weather[0].icon) ?? '',
-      location: data.name,
-      sunrise: new Date(data.sys.sunrise * 1000).toLocaleTimeString(),
-      sunset: new Date(data.sys.sunset * 1000).toLocaleTimeString(),
-      tempFahrenheit: Math.round((data.main.temp - 273.15) * 1.8 + 32),
-      tempFeelsLike: Math.round((data.main.feels_like - 273.15) * 1.8 + 32),
-      tempMax: Math.round((data.main.temp_max - 273.15) * 1.8 + 32),
-      tempMin: Math.round((data.main.temp_min - 273.15) * 1.8 + 32),
+      location: this.location,
+      sunrise: this.getDateTime(data.current.sunrise),
+      sunset: this.getDateTime(data.current.sunset),
+      temp: this.kelvinToFahrenheit(data.current.temp),
+      feelsLike: this.kelvinToFahrenheit(data.current.feels_like),
+      humidity: data.current.humidity,
+      description: data.current.weather[0].main,
+      icon: IconCodes.get(data.current.weather[0].icon),
     };
-    console.log(this.weatherData)
   }
 
   getGeolocation = (): void => {
@@ -50,7 +36,32 @@ export class WeatherComponent implements OnInit {
 
     navigator.geolocation.getCurrentPosition(async position => {
       if (!position.coords) { return; }
-      this.setWeatherData(await this.getWeatherData(position.coords.latitude, position.coords.longitude))
+      console.log(position.coords)
+      // this.setWeatherData(this.getWeatherData(position.coords.latitude, position.coords.longitude))
+      this.weatherService.getWeatherData(position.coords.latitude, position.coords.longitude).subscribe(response => {
+        this.setWeatherData(response);
+      });
+
+      this.weatherService.getLocation(position.coords.latitude, position.coords.longitude).subscribe(response => {
+        this.location = response.city;
+      })
     });
   }
+
+  kelvinToFahrenheit = (kelvin: number) => {
+    return Math.round(9 / 5 * (kelvin - 273.15) + 32)
+  }
+
+  getDateTime = (dt: number) => {
+    const date = new Date(dt * 1000); // Multiply by 1000 to convert seconds to milliseconds
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${hours}:${minutes}`
+  };
 }

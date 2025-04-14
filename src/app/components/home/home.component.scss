@@ -239,3 +239,7 @@ html, body {
 mat-dialog-container {
   background-color: transparent !important;
 }
+
+::ng-deep .mat-mdc-dialog-surface {
+  background: transparent !important;
+}

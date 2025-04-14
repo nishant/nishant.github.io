@@ -1,15 +1,16 @@
 <div id="weather-container">
   <div class="wrapper">
-    <span class="weather-icon icon material-symbols-outlined">{{weatherData?.icon}}</span>
+<!--    <span class="weather-icon material-symbols-outlined">{{weatherData?.icon}}</span>-->
     <p class="weather-widget-row">
-      <span class="weather-icon material-symbols-outlined">my_location</span>
+<!--      <span class="weather-icon material-symbols-outlined">my_location</span>-->
+      <span class="weather-icon material-symbols-outlined">{{weatherData?.icon}}</span>
       {{weatherData?.location}}
     </p>
-    <p class="weather-widget-row">Temp {{weatherData?.tempFahrenheit}}</p>
-    <p class="weather-widget-row">Feels Like {{weatherData?.tempFeelsLike}}</p>
-    <p class="weather-widget-row">{{weatherData?.description}}</p>
-    <p class="weather-widget-row">Humidity {{weatherData?.humidity}}%</p>
-    <p class="weather-widget-row">H/L {{weatherData?.tempMin}} / {{weatherData?.tempMax}}</p>
-    <p class="weather-widget-row">S/S {{weatherData?.sunrise}} / {{ weatherData?.sunset}}</p>
+    <p class="weather-widget-row">Temperature: {{weatherData?.temp}}°F</p>
+    <p class="weather-widget-row">Feels Like:  {{weatherData?.feelsLike}}°F</p>
+    <p class="weather-widget-row">Description: {{weatherData?.description}}</p>
+    <p class="weather-widget-row">Humidity: {{weatherData?.humidity}}%</p>
+    <p class="weather-widget-row">Sunrise: {{weatherData?.sunrise}}</p>
+    <p class="weather-widget-row">Sunset: {{weatherData?.sunset}}</p>
   </div>
 </div>

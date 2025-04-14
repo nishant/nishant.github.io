@@ -1,56 +1,95 @@
-export interface RawWeatherData {
-  coord: {
-    lon: number,
-    lat: number
-  };
-  weather: [{
-    id: number,
-    main: string,
-    description: string,
-    icon: string
-  }];
-  base: string;
-  main: {
-    temp: number,
-    feels_like: number,
-    temp_min: number,
-    temp_max: number,
-    pressure: number,
-    humidity: number
-  };
-  visibility: number;
-  wind: {
-    speed: number,
-    deg: number
-  };
-  clouds: {
-    all: number;
-  };
-  dt: number;
-  sys: {
-    type: number,
-    id: number,
-    country: string,
-    sunrise: number,
-    sunset: number
-  };
-  timezone: number;
+export interface WeatherResponse {
+  current: CurrentWeather;
+  hourly: Array<HourlyWeather>;
+  daily: Array<DailyWeather>;
+}
+
+export interface Weather {
   id: number;
-  name: string;
-  cod: number;
+  main: string;
+  description: string;
+  icon: string;
+}
+
+export interface CurrentWeather {
+  dt: number;
+  sunrise: number;
+  sunset: number;
+  temp: number;
+  feels_like: number;
+  pressure: number;
+  humidity: number;
+  dew_point: number;
+  uvi: number;
+  clouds: number;
+  visibility: number;
+  wind_speed: number;
+  wind_deg: number;
+  wind_gust: number;
+  weather: Array<Weather>;
+}
+
+export interface HourlyWeather {
+  dt: number;
+  temp: number;
+  feels_like: number;
+  pressure: number;
+  humidity: number;
+  dew_point: number;
+  uvi: number;
+  clouds: number;
+  visibility: number;
+  wind_speed: number;
+  wind_deg: number;
+  wind_gust: number;
+  weather: Array<Weather>;
+  pop: number;
+}
+
+export interface DailyWeather {
+  dt: number;
+  sunrise: number;
+  sunset: number;
+  moonrise: number;
+  moonset: number;
+  moon_phase: number;
+  summary: string;
+  temp: {
+    day: number;
+    min: number;
+    max: number;
+    night: number;
+    eve: number;
+    morn: number;
+  };
+  feels_like: {
+    day: number;
+    night: number;
+    eve: number;
+    morn: number;
+  };
+  pressure: number;
+  humidity: number;
+  dew_point: number;
+  wind_speed: number;
+  wind_deg: number;
+  wind_gust: number;
+  weather: Array<Weather>;
+  clouds: number;
+  pop: number;
+  uvi: number;
+  rain?: number; // optional: only present on rainy days
 }
 
 export interface WeatherData {
   location: string;
   sunset: string;
   sunrise: string;
-  tempFahrenheit: number;
-  tempMin: number;
-  tempMax: number;
-  tempFeelsLike: number;
+  temp: number;
+  feelsLike: number;
   humidity: number;
   description: string;
-  icon: string;
+  icon?: string;
 }
 
 export const IconCodes = new Map<string, string>([
@@ -74,4 +113,11 @@ export const IconCodes = new Map<string, string>([
   ['50n', 'foggy'],
 ]);
 
+export interface LocationResponse {
+  city: string,
+  state: string,
+  country: string,
+  lat: number
+  lon: number
+}
 

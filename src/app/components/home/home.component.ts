@@ -25,6 +25,7 @@ export class HomeComponent implements OnInit {
 
   @ViewChild('notes', { static: true }) notes?: TemplateRef<unknown>;
   @ViewChild('settings', { static: true }) settings?: TemplateRef<unknown>;
+  @ViewChild('weather', { static: true }) weather?: TemplateRef<unknown>;
 
   GOOGLE_FAVICON_CACHE_URL = 'https://www.google.com/s2/favicons?domain=';
 
@@ -46,7 +47,10 @@ export class HomeComponent implements OnInit {
 
   toggleWeather = () => {
     this.isWeatherOpen = !this.isWeatherOpen;
-    this.alert('Weather is coming soon.')
+    if (this.isWeatherOpen) {
+      this.dialog.open(this.weather!).afterClosed().subscribe(() => this.isWeatherOpen = !this.isWeatherOpen);
+    }
+    // this.alert('Weather is coming soon.')
   };
 
   toggleStocks = () => {
@@ -64,7 +68,6 @@ export class HomeComponent implements OnInit {
         this.setConfig();
         this.saveFont();
         document.querySelectorAll('*:not(.material-symbols-outlined)').forEach(x => {
-          console.log(x);
           (x as HTMLElement).style.fontFamily = localStorage.getItem('nishant.github.io-font') ?? this.settingsService.font.value + ', monospace'
         });
         this.isSettingsOpen = !this.isSettingsOpen

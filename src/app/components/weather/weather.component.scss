@@ -3,7 +3,7 @@
   width: 300px;
   height: 320px;
   background: rgb(0,0,0);
-  background: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(8,7,42,1) 75%, rgb(8, 10, 63) 100%);
+  background: linear-gradient(180deg, rgb(23, 23, 25) 0%, rgb(9, 9, 11) 75%, rgb(15, 15, 18) 100%);
   color: white;
 }
 
@@ -14,6 +14,8 @@
 }
 
 .weather-icon {
+  display: flex;
+  justify-content: center;
   color: white;
   font-variation-settings:
     'FILL' 1,
@@ -33,10 +35,21 @@
 
 @keyframes iconMovement {
   from {
-    margin-left: -55px;
+    margin-left: 0px;
   }
 
   to {
     margin-left: 65px;
   }
+}
+
+.mat-mdc-dialog-surface, .mdc-dialog__surface {
+  background: transparent !important;
+}
+
+.wrapper {
+  justify-content: center;
+  display: flex;
+  flex-flow: column;
+  height: 100%;
 }
