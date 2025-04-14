@@ -45,7 +45,7 @@ export class WeatherComponent implements OnInit {
       this.weatherService.getLocation(position.coords.latitude, position.coords.longitude).subscribe(response => {
         this.location = response.city;
       })
-    });
+    }, null, { enableHighAccuracy: false, timeout: 5000 });
   }
 
   kelvinToFahrenheit = (kelvin: number) => {
