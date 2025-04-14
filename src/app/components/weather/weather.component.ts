@@ -34,18 +34,53 @@ export class WeatherComponent implements OnInit {
   getGeolocation = (): void => {
     if (!navigator.geolocation) { alert('Geolocation not supported.'); }
 
-    navigator.geolocation.getCurrentPosition(async position => {
-      if (!position.coords) { return; }
-      console.log(position.coords)
-      // this.setWeatherData(this.getWeatherData(position.coords.latitude, position.coords.longitude))
-      this.weatherService.getWeatherData(position.coords.latitude, position.coords.longitude).subscribe(response => {
-        this.setWeatherData(response);
+    // navigator.geolocation.getCurrentPosition(async position => {
+    //   if (!position.coords) { return; }
+    //   console.log(position.coords)
+    //   // this.setWeatherData(this.getWeatherData(position.coords.latitude, position.coords.longitude))
+    //   this.weatherService.getWeatherData(position.coords.latitude, position.coords.longitude).subscribe(response => {
+    //     this.setWeatherData(response);
+    //   });
+    //
+    //   this.weatherService.getLocation(position.coords.latitude, position.coords.longitude).subscribe(response => {
+    //     this.location = response.city;
+    //   })
+    // });
+
+    let id: number;
+    let target: { latitude: number, longitude: number };
+    let options: PositionOptions;
+
+    const success = (pos: any) => {
+      const crd = pos.coords;
+      console.log(crd)
+      navigator.geolocation.clearWatch(id);
+
+      this.weatherService.getLocation(crd.latitude, crd.longitude).subscribe(response => {
+        this.location = response.city;
       });
 
-      this.weatherService.getLocation(position.coords.latitude, position.coords.longitude).subscribe(response => {
-        this.location = response.city;
-      })
-    }, null, { enableHighAccuracy: false, timeout: 5000 });
+      this.weatherService.getWeatherData(crd.latitude, crd.longitude).subscribe(response => {
+        this.setWeatherData(response);
+      });
+    }
+
+    const error = (err: any) => {
+      console.error(`ERROR(${err.code}): ${err.message}`);
+    }
+
+    target = {
+      latitude: 0,
+      longitude: 0,
+    };
+
+    options = {
+      enableHighAccuracy: true,
+      timeout: 5000,
+      maximumAge: 0,
+    };
+
+    id = navigator.geolocation.watchPosition(success, error, options);
   }
 
   kelvinToFahrenheit = (kelvin: number) => {
