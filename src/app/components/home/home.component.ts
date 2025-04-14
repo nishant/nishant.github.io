@@ -6,6 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { config } from 'rxjs';
 import { SettingsService } from '../settings/settings.service';
+import { NotesComponent } from '../notes/notes.component';
 
 @Component({
   selector: 'app-home',
@@ -24,6 +25,7 @@ export class HomeComponent implements OnInit {
   dialog = inject(MatDialog);
 
   @ViewChild('notes', { static: true }) notes?: TemplateRef<unknown>;
+  @ViewChild(NotesComponent) _notes?: NotesComponent;
   @ViewChild('settings', { static: true }) settings?: TemplateRef<unknown>;
   @ViewChild('weather', { static: true }) weather?: TemplateRef<unknown>;
 
@@ -41,7 +43,15 @@ export class HomeComponent implements OnInit {
   toggleNotes = () => {
     this.isNotesOpen = !this.isNotesOpen;
     if (this.isNotesOpen) {
-      this.dialog.open(this.notes!).afterClosed().subscribe(() => this.isNotesOpen = !this.isNotesOpen);
+      this.dialog.open(this.notes!).beforeClosed().subscribe(() => {
+        if (confirm("Do you want to save before closing?")) {
+          console.log("User saved");
+          this._notes?.saveContent();
+        } else {
+          console.log("User didnt save");
+        }
+        this.isNotesOpen = !this.isNotesOpen
+      });
     }
   }
 
