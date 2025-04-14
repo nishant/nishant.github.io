@@ -7,8 +7,8 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class WeatherService {
-  // OPEN_WEATHER_API_BASEURL = 'https://nishant-github-io-api.onrender.com/api/weather';
-  OPEN_WEATHER_API_BASEURL = 'http://localhost:10000/api/weather';
+  OPEN_WEATHER_API_BASEURL = 'https://nishant-github-io-api.onrender.com/api/weather';
+  // OPEN_WEATHER_API_BASEURL = 'http://localhost:10000/api/weather';
 
   constructor(private http: HttpClient) { }
 
