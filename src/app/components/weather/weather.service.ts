@@ -1,14 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { LocationResponse, WeatherResponse } from './weather';
-import { Observable } from 'rxjs';
+import { LocationResponse, WeatherData, WeatherResponse } from './weather';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WeatherService {
-  OPEN_WEATHER_API_BASEURL = 'https://nishant-github-io-api.onrender.com/api/weather';
-  // OPEN_WEATHER_API_BASEURL = 'http://localhost:10000/api/weather';
+  // OPEN_WEATHER_API_BASEURL = 'https://nishant-github-io-api.onrender.com/api/weather';
+  OPEN_WEATHER_API_BASEURL = 'http://localhost:10000/api/weather';
+
+  lastGeoRequestTimestamp = new BehaviorSubject(0);
+  cachedWeatherResponse = new BehaviorSubject<WeatherResponse | null>(null);
+  cachedLocation = new BehaviorSubject('');
 
   constructor(private http: HttpClient) { }
 

@@ -11,6 +11,7 @@ import { WeatherService } from './weather.service';
 export class WeatherComponent implements OnInit {
   location = '';
   weatherData?: WeatherData;
+
   constructor(private weatherService: WeatherService) {
   }
 
@@ -34,18 +35,13 @@ export class WeatherComponent implements OnInit {
   getGeolocation = (): void => {
     if (!navigator.geolocation) { alert('Geolocation not supported.'); }
 
-    // navigator.geolocation.getCurrentPosition(async position => {
-    //   if (!position.coords) { return; }
-    //   console.log(position.coords)
-    //   // this.setWeatherData(this.getWeatherData(position.coords.latitude, position.coords.longitude))
-    //   this.weatherService.getWeatherData(position.coords.latitude, position.coords.longitude).subscribe(response => {
-    //     this.setWeatherData(response);
-    //   });
-    //
-    //   this.weatherService.getLocation(position.coords.latitude, position.coords.longitude).subscribe(response => {
-    //     this.location = response.city;
-    //   })
-    // });
+    if (Date.now() <= this.weatherService.lastGeoRequestTimestamp.value + 300000) { // 5 mins
+      if (this.weatherService.cachedWeatherResponse.value === null) { return; }
+      this.location = this.weatherService.cachedLocation.value;
+      this.setWeatherData(this.weatherService.cachedWeatherResponse.value);
+      return;
+    }
+
 
     let id: number;
     let target: { latitude: number, longitude: number };
@@ -56,23 +52,20 @@ export class WeatherComponent implements OnInit {
       console.log(crd)
       navigator.geolocation.clearWatch(id);
 
-      this.weatherService.getLocation(crd.latitude, crd.longitude).subscribe(response => {
-        this.location = response.city;
-      });
+      this.weatherService.getWeatherData(crd.latitude, crd.longitude).subscribe(dataResponse => {
+        this.weatherService.cachedWeatherResponse.next(dataResponse);
 
-      this.weatherService.getWeatherData(crd.latitude, crd.longitude).subscribe(response => {
-        this.setWeatherData(response);
+        this.weatherService.getLocation(crd.latitude, crd.longitude).subscribe(locationResponse => {
+          this.weatherService.cachedLocation.next(locationResponse.city);
+          this.location = locationResponse.city;
+          this.setWeatherData(dataResponse);
+        });
       });
     }
 
     const error = (err: any) => {
       console.error(`ERROR(${err.code}): ${err.message}`);
     }
-
-    target = {
-      latitude: 0,
-      longitude: 0,
-    };
 
     options = {
       enableHighAccuracy: true,
@@ -81,6 +74,8 @@ export class WeatherComponent implements OnInit {
     };
 
     id = navigator.geolocation.watchPosition(success, error, options);
+
+    this.weatherService.lastGeoRequestTimestamp.next(Date.now());
   }
 
   kelvinToFahrenheit = (kelvin: number) => {
