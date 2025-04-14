@@ -7,8 +7,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class WeatherService {
-  // OPEN_WEATHER_API_BASEURL = 'https://nishant-github-io-api.onrender.com/api/weather';
-  OPEN_WEATHER_API_BASEURL = 'http://localhost:10000/api/weather';
+  OPEN_WEATHER_API_BASEURL = 'https://nishant-github-io-api.onrender.com/api/weather';
+  // OPEN_WEATHER_API_BASEURL = 'http://localhost:10000/api/weather';
 
   lastGeoRequestTimestamp = new BehaviorSubject(0);
   cachedWeatherResponse = new BehaviorSubject<WeatherResponse | null>(null);
