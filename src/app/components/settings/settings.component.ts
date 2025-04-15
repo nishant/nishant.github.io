@@ -1,6 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { DiffEditorModel } from 'ngx-monaco-editor-v2';
-import * as monaco from 'monaco-editor';
 import { SettingsService } from './settings.service';
 
 

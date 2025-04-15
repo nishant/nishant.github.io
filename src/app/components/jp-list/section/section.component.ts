@@ -9,7 +9,7 @@ import { Link, LinkType } from '../typings';
 export class SectionComponent {
   GOOGLE_FAVICON_CACHE_URL = 'https://www.google.com/s2/favicons?domain='
   @Input() links: Array<Link> = [];
-  @Input() icon: string = '';
+  @Input() icon = '';
   @Input() heading: LinkType | string = '';
   getFavicon = (url: string): string => this.GOOGLE_FAVICON_CACHE_URL + url;
 }

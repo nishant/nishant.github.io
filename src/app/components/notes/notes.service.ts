@@ -7,6 +7,4 @@ import { BehaviorSubject } from 'rxjs';
 export class NotesService {
   content = '';
   action = new BehaviorSubject('');
-
-  constructor() { }
 }

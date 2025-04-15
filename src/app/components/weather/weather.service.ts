@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { LocationResponse, CurrentWeatherData, WeatherResponse, LocationData } from './weather';
+import { LocationResponse, WeatherResponse, LocationData } from './weather';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { string } from 'yaml/dist/schema/common/string';
 
 @Injectable({
   providedIn: 'root'

@@ -74,11 +74,7 @@ export class WeatherComponent implements OnInit {
       return;
     }
 
-    let id: number;
-    let target: { latitude: number, longitude: number };
-    let options: PositionOptions;
-
-    const success = (pos: any) => {
+    const success = (pos: GeolocationPosition) => {
       const crd = pos.coords;
       navigator.geolocation.clearWatch(id);
 
@@ -93,17 +89,12 @@ export class WeatherComponent implements OnInit {
       });
     }
 
-    const error = (err: any) => {
-      console.error(`ERROR(${err.code}): ${err.message}`);
+    const error = (err: { code: unknown, message: string }) => {
+      console.error(`ERROR ${err.code}: ${err.message}`);
     }
 
-    options = {
-      enableHighAccuracy: true,
-      timeout: 5000,
-      maximumAge: 0,
-    };
-
-    id = navigator.geolocation.watchPosition(success, error, options);
+    const options: PositionOptions = { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 };
+    const id = navigator.geolocation.watchPosition(success, error, options);
 
     this.weatherService.lastGeoRequestTimestamp.next(Date.now());
   }
@@ -119,12 +110,12 @@ export class WeatherComponent implements OnInit {
   getDateTime = (dt: number, dayDate = false) => {
     const date = new Date(dt * 1000);
 
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
-    const day = String(date.getDate()).padStart(2, '0');
+    // const year = date.getFullYear();
+    // const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    // const day = String(date.getDate()).padStart(2, '0');
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
+    // const seconds = String(date.getSeconds()).padStart(2, '0');
 
     if (dayDate) {
       const day = date.toDateString().split(' ')[0];

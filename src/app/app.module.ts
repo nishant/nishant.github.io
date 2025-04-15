@@ -33,9 +33,6 @@ import { MatSelectModule } from '@angular/material/select';
 const monacoConfig: NgxMonacoEditorConfig = {
   defaultOptions: { scrollBeyondLastLine: false },
   baseUrl: './assets',
-  onMonacoLoad: () => {
-    const monaco = (window as any).monaco;
-  }
 };
 
 @NgModule({

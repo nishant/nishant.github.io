@@ -1,10 +1,9 @@
-import { Component, inject, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Config } from '../../config/config';
 import defaultConfigJson from '../../config/config.json';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { config } from 'rxjs';
 import { SettingsService } from '../settings/settings.service';
 import { NotesComponent } from '../notes/notes.component';
 
@@ -104,6 +103,6 @@ export class HomeComponent implements OnInit {
   prettify = (obj: unknown) => JSON.stringify(obj, null, '\t');
 
   onSearch = () => {
-    window.location.replace('https://google.com/search?q=' + (<HTMLInputElement> document.getElementById('search')).value)
+    window.location.replace('https://google.com/search?q=' + (document.getElementById('search') as HTMLInputElement).value)
   }
 }
