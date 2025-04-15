@@ -81,7 +81,7 @@ export interface DailyWeather {
   rain?: number; // optional: only present on rainy days
 }
 
-export interface WeatherData {
+export interface CurrentWeatherData {
   location: string;
   sunset: string;
   sunrise: string;
@@ -90,6 +90,15 @@ export interface WeatherData {
   humidity: number;
   description: string;
   icon?: string;
+}
+
+export interface HourlyWeatherData {
+  data: Array<{
+    time: string,
+    temp: number,
+    feelsLike: number,
+    icon?: string
+  }>
 }
 
 export const IconCodes = new Map<string, string>([
@@ -121,3 +130,8 @@ export interface LocationResponse {
   lon: number
 }
 
+export interface LocationData {
+  location: string,
+  lat: number,
+  lon: number
+}

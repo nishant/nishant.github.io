@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { LocationResponse, WeatherData, WeatherResponse } from './weather';
+import { LocationResponse, CurrentWeatherData, WeatherResponse, LocationData } from './weather';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { string } from 'yaml/dist/schema/common/string';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,7 @@ export class WeatherService {
 
   lastGeoRequestTimestamp = new BehaviorSubject(0);
   cachedWeatherResponse = new BehaviorSubject<WeatherResponse | null>(null);
-  cachedLocation = new BehaviorSubject('');
+  cachedLocation = new BehaviorSubject<LocationData | null>(null);
 
   constructor(private http: HttpClient) { }
 

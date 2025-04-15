@@ -1,7 +1,7 @@
 #weather-container {
   border-radius: 10px;
   width: 300px;
-  height: 320px;
+  //height: 320px;
   background: rgb(0,0,0);
   background: linear-gradient(180deg, rgb(23, 23, 25) 0%, rgb(9, 9, 11) 75%, rgb(15, 15, 18) 100%);
   color: white;
@@ -48,8 +48,61 @@
 }
 
 .wrapper {
+  border: 2px solid #9c9c9c;
+  border-radius: 4px;
   justify-content: center;
   display: flex;
   flex-flow: column;
-  height: 100%;
+  padding: 28px 24px 24px;
+
+  .location {
+    display: flex;
+    font-size: 16px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
 }
+
+#weather-timing {
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 24px;
+
+  button, span {
+    cursor: pointer;
+  }
+}
+
+.hourly-row {
+  display: flex;
+}
+
+#hourly-weather {
+  display: flex;
+  justify-content: center;
+
+  .hourly-time {
+    width: 40px;
+    text-align: right;
+  }
+
+  .hourly-temp {
+    width: 56px;
+    text-align: right;
+  }
+
+  .hourly-feels-like {
+    width: 60px;
+    text-align: right;
+  }
+
+  .hourly-icon {
+    width: 58px;
+    text-align: right;
+  }
+
+  td {
+    width: 30px;
+  }
+}
+

@@ -1,16 +1,49 @@
 <div id="weather-container">
   <div class="wrapper">
-<!--    <span class="weather-icon material-symbols-outlined">{{weatherData?.icon}}</span>-->
     <p class="weather-widget-row">
-<!--      <span class="weather-icon material-symbols-outlined">my_location</span>-->
-      <span class="weather-icon material-symbols-outlined">{{weatherData?.icon}}</span>
-      <strong>{{weatherData?.location}}</strong>
+      <span class="weather-icon material-symbols-outlined">{{currentWeatherData?.icon}}</span>
+      <strong class="location">{{currentWeatherData?.location}}</strong>
     </p>
-    <p class="weather-widget-row">Temperature: {{weatherData?.temp}}°F</p>
-    <p class="weather-widget-row">Feels Like:  {{weatherData?.feelsLike}}°F</p>
-    <p class="weather-widget-row">Description: {{weatherData?.description}}</p>
-    <p class="weather-widget-row">Humidity: {{weatherData?.humidity}}%</p>
-    <p class="weather-widget-row">Sunrise: {{weatherData?.sunrise}}</p>
-    <p class="weather-widget-row">Sunset: {{weatherData?.sunset}}</p>
+
+    <div *ngIf="showCurrentWeather" id="current-weather">
+      <p class="weather-widget-row">Temperature: {{currentWeatherData?.temp}}°F</p>
+      <p class="weather-widget-row">Feels Like:  {{currentWeatherData?.feelsLike}}°F</p>
+      <p class="weather-widget-row">Description: {{currentWeatherData?.description}}</p>
+      <p class="weather-widget-row">Humidity: {{currentWeatherData?.humidity}}%</p>
+      <p class="weather-widget-row">Sunrise: {{currentWeatherData?.sunrise}}</p>
+      <p class="weather-widget-row">Sunset: {{currentWeatherData?.sunset}}</p>
+    </div>
+
+    <div *ngIf="showHourlyWeather" id="hourly-weather">
+      <table>
+        <tr *ngFor="let hour of hourlyWeatherData?.data" class="weather-widget-row hourly-row">
+          <td class="hourly-time">{{hour.time}}</td>
+          <td class="hourly-temp">{{hour.temp}}°F</td>
+          <td class="hourly-feels-like">~{{hour.feelsLike}}°F</td>
+          <span class="hourly-icon weather-icon material-symbols-outlined">{{hour?.icon}}</span>
+        </tr>
+      </table>
+
+<!--      <p *ngFor="let hour of hourlyWeatherData?.data" class="weather-widget-row hourly-row">-->
+<!--        {{hour.time}} {{hour.temp}} ~ {{hour.feelsLike}}-->
+<!--        <span class="weather-icon material-symbols-outlined">{{hour?.icon}}</span>-->
+<!--      </p>-->
+    </div>
+
+    <div *ngIf="showDailyWeather" id="daily-weather">
+      Daily!
+    </div>
+
+    <div id="weather-timing">
+      <div title="Current" class="button" (click)="getCurrentWeather()" >
+        <span class="material-symbols-outlined">notifications</span>
+      </div>
+      <div title="Hourly" class="button" (click)="getHourlyWeather()" >
+        <span class="material-symbols-outlined">schedule</span>
+      </div>
+      <div title="Daily" class="button" (click)="getDailyWeather()" >
+        <span class="material-symbols-outlined">date_range</span>
+      </div>
+    </div>
   </div>
 </div>

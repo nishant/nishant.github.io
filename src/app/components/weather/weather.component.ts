@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { IconCodes, LocationResponse, WeatherData, WeatherResponse } from './weather';
+import { IconCodes, LocationResponse, CurrentWeatherData, WeatherResponse, HourlyWeatherData } from './weather';
 import Icon from 'ngx-editor/lib/icons';
 import { WeatherService } from './weather.service';
+import moment from 'moment';
 
 @Component({
   selector: 'app-weather',
@@ -10,20 +11,25 @@ import { WeatherService } from './weather.service';
 })
 export class WeatherComponent implements OnInit {
   location = '';
-  weatherData?: WeatherData;
+  currentWeatherData?: CurrentWeatherData;
+  hourlyWeatherData?: HourlyWeatherData;
 
-  constructor(private weatherService: WeatherService) {
-  }
+
+  showCurrentWeather = true;
+  showHourlyWeather = false;
+  showDailyWeather = false;
+
+  constructor(private weatherService: WeatherService) {}
 
   ngOnInit(): void {
     this.getGeolocation();
   }
 
-  setWeatherData = (data: WeatherResponse): void => {
-    this.weatherData = {
+  setCurrentWeatherData = (data: WeatherResponse): void => {
+    this.currentWeatherData = {
       location: this.location,
-      sunrise: this.getDateTime(data.current.sunrise),
-      sunset: this.getDateTime(data.current.sunset),
+      sunrise: this.convertTime(this.getDateTime(data.current.sunrise)),
+      sunset: this.convertTime(this.getDateTime(data.current.sunset)),
       temp: this.kelvinToFahrenheit(data.current.temp),
       feelsLike: this.kelvinToFahrenheit(data.current.feels_like),
       humidity: data.current.humidity,
@@ -32,16 +38,27 @@ export class WeatherComponent implements OnInit {
     };
   }
 
+  setHourlyWeatherData = (data: WeatherResponse): void => {
+    this.hourlyWeatherData = { data: [] };
+    data.hourly.forEach(day => {
+      this.hourlyWeatherData?.data.push({
+        time: this.convertTime(this.getDateTime(day.dt), 'ha'),
+        temp: this.kelvinToFahrenheit(day.temp),
+        feelsLike: this.kelvinToFahrenheit(day.feels_like),
+        icon: IconCodes.get(day.weather[0].icon),
+      })
+    });
+  }
+
   getGeolocation = (): void => {
     if (!navigator.geolocation) { alert('Geolocation not supported.'); }
 
     if (Date.now() <= this.weatherService.lastGeoRequestTimestamp.value + 300000) { // 5 mins
       if (this.weatherService.cachedWeatherResponse.value === null) { return; }
-      this.location = this.weatherService.cachedLocation.value;
-      this.setWeatherData(this.weatherService.cachedWeatherResponse.value);
+      this.location = this.weatherService.cachedLocation.value?.location ?? '';
+      this.setCurrentWeatherData(this.weatherService.cachedWeatherResponse.value);
       return;
     }
-
 
     let id: number;
     let target: { latitude: number, longitude: number };
@@ -56,9 +73,9 @@ export class WeatherComponent implements OnInit {
         this.weatherService.cachedWeatherResponse.next(dataResponse);
 
         this.weatherService.getLocation(crd.latitude, crd.longitude).subscribe(locationResponse => {
-          this.weatherService.cachedLocation.next(locationResponse.city);
+          this.weatherService.cachedLocation.next({ location: locationResponse.city, lat: crd.latitude, lon: crd.longitude });
           this.location = locationResponse.city;
-          this.setWeatherData(dataResponse);
+          this.setCurrentWeatherData(dataResponse);
         });
       });
     }
@@ -82,6 +99,10 @@ export class WeatherComponent implements OnInit {
     return Math.round(9 / 5 * (kelvin - 273.15) + 32)
   }
 
+  convertTime = (time: string, format = 'h:mma') => {
+    return moment(time, 'HH:mm').format(format);
+  };
+
   getDateTime = (dt: number) => {
     const date = new Date(dt * 1000); // Multiply by 1000 to convert seconds to milliseconds
 
@@ -93,5 +114,27 @@ export class WeatherComponent implements OnInit {
     const seconds = String(date.getSeconds()).padStart(2, '0');
 
     return `${hours}:${minutes}`
+  };
+
+  getCurrentWeather = () => {
+    this.showCurrentWeather = true;
+    this.showHourlyWeather = false;
+    this.showDailyWeather = false;
+
+    this.setCurrentWeatherData(this.weatherService.cachedWeatherResponse.value!)
+  };
+
+  getHourlyWeather = () => {
+    this.showCurrentWeather = false;
+    this.showHourlyWeather = true;
+    this.showDailyWeather = false;
+
+    this.setHourlyWeatherData(this.weatherService.cachedWeatherResponse.value!)
+  };
+
+  getDailyWeather = () => {
+    this.showCurrentWeather = false;
+    this.showHourlyWeather = false;
+    this.showDailyWeather = true;
   };
 }
