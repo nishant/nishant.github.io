@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { IconCodes, LocationResponse, CurrentWeatherData, WeatherResponse, HourlyWeatherData } from './weather';
-import Icon from 'ngx-editor/lib/icons';
+import { CurrentWeatherData, DailyWeatherData, HourlyWeatherData, IconCodes, WeatherResponse } from './weather';
 import { WeatherService } from './weather.service';
 import moment from 'moment';
 
@@ -13,6 +12,7 @@ export class WeatherComponent implements OnInit {
   location = '';
   currentWeatherData?: CurrentWeatherData;
   hourlyWeatherData?: HourlyWeatherData;
+  dailyWeatherData?: DailyWeatherData;
 
 
   showCurrentWeather = true;
@@ -40,11 +40,25 @@ export class WeatherComponent implements OnInit {
 
   setHourlyWeatherData = (data: WeatherResponse): void => {
     this.hourlyWeatherData = { data: [] };
-    data.hourly.forEach(day => {
+    data.hourly.forEach(hour => {
       this.hourlyWeatherData?.data.push({
-        time: this.convertTime(this.getDateTime(day.dt), 'ha'),
-        temp: this.kelvinToFahrenheit(day.temp),
-        feelsLike: this.kelvinToFahrenheit(day.feels_like),
+        time: this.convertTime(this.getDateTime(hour.dt), 'ha'),
+        temp: this.kelvinToFahrenheit(hour.temp),
+        feelsLike: this.kelvinToFahrenheit(hour.feels_like),
+        icon: IconCodes.get(hour.weather[0].icon),
+      })
+    });
+  }
+
+  setDailyWeatherData = (data: WeatherResponse): void => {
+    this.dailyWeatherData = { data: [] };
+    data.daily.forEach(day => {
+      this.dailyWeatherData?.data.push({
+        day: this.getDateTime(day.dt, true),
+        dayTemp: this.kelvinToFahrenheit(day.temp.day),
+        nightTemp: this.kelvinToFahrenheit(day.temp.night),
+        high: this.kelvinToFahrenheit(day.temp.max),
+        low: this.kelvinToFahrenheit(day.temp.min),
         icon: IconCodes.get(day.weather[0].icon),
       })
     });
@@ -66,7 +80,6 @@ export class WeatherComponent implements OnInit {
 
     const success = (pos: any) => {
       const crd = pos.coords;
-      console.log(crd)
       navigator.geolocation.clearWatch(id);
 
       this.weatherService.getWeatherData(crd.latitude, crd.longitude).subscribe(dataResponse => {
@@ -103,8 +116,8 @@ export class WeatherComponent implements OnInit {
     return moment(time, 'HH:mm').format(format);
   };
 
-  getDateTime = (dt: number) => {
-    const date = new Date(dt * 1000); // Multiply by 1000 to convert seconds to milliseconds
+  getDateTime = (dt: number, dayDate = false) => {
+    const date = new Date(dt * 1000);
 
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
@@ -112,6 +125,13 @@ export class WeatherComponent implements OnInit {
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    if (dayDate) {
+      const day = date.toDateString().split(' ')[0];
+      const split = date.toLocaleDateString().split('/');
+      split.pop();
+      return `${day} ${split.join('/')}`;
+    }
 
     return `${hours}:${minutes}`
   };
@@ -121,7 +141,7 @@ export class WeatherComponent implements OnInit {
     this.showHourlyWeather = false;
     this.showDailyWeather = false;
 
-    this.setCurrentWeatherData(this.weatherService.cachedWeatherResponse.value!)
+    this.setCurrentWeatherData(this.weatherService.cachedWeatherResponse.value!);
   };
 
   getHourlyWeather = () => {
@@ -129,12 +149,15 @@ export class WeatherComponent implements OnInit {
     this.showHourlyWeather = true;
     this.showDailyWeather = false;
 
-    this.setHourlyWeatherData(this.weatherService.cachedWeatherResponse.value!)
+    this.setHourlyWeatherData(this.weatherService.cachedWeatherResponse.value!);
   };
 
   getDailyWeather = () => {
     this.showCurrentWeather = false;
     this.showHourlyWeather = false;
     this.showDailyWeather = true;
+
+
+    this.setDailyWeatherData(this.weatherService.cachedWeatherResponse.value!);
   };
 }

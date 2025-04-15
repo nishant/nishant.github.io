@@ -1,7 +1,5 @@
 #weather-container {
   border-radius: 10px;
-  width: 300px;
-  //height: 320px;
   background: rgb(0,0,0);
   background: linear-gradient(180deg, rgb(23, 23, 25) 0%, rgb(9, 9, 11) 75%, rgb(15, 15, 18) 100%);
   color: white;
@@ -105,4 +103,80 @@
     width: 30px;
   }
 }
+//
+//<td class="daily-day">{{day.day}}</td>
+//<td class="daily-day-temp">{{day.dayTemp}}°F</td>
+//<td class="daily-night-temp">{{day.nightTemp}}°F</td>
+//<td class="daily-high">{{day.high}}°F</td>
+//<td class="daily-low">{{day.low}}°F</td>
+//<span class="daily-icon weather-icon material-symbols-outlined">{{day?.icon}}</span>
 
+#daily-weather {
+  display: flex;
+  justify-content: center;
+
+  .daily-day {
+    width: 75px;
+    text-align: right;
+    padding-left: 8px;
+  }
+
+  .daily-day-temp {
+    width: 48px;
+    text-align: right;
+  }
+
+  .daily-night-temp {
+    width: 48px;
+    text-align: right;
+  }
+
+  .daily-high {
+    width: 48px;
+    text-align: right;
+  }
+
+  .daily-low {
+    width: 48px;
+    text-align: right;
+  }
+
+  .daily-icon {
+    width: 48px;
+  }
+}
+
+.headings {
+  display: flex;
+  color: #828491;
+}
+
+//<th class="date-header">Date</th>
+//<th class="day-header">Day</th>
+//<th class="night-header">Night</th>
+//<th class="high-header">High</th>
+//<th class="low-header">Low</th>
+
+.date-header {
+  width: 92px;
+}
+
+.day-header {
+  width: 40px;
+}
+
+.night-header {
+  width: 56px;
+}
+
+.high-header {
+  width: 40px;
+}
+
+.low-header {
+  width: 56px;
+}
+
+.grey {
+  color: #828491;
+}

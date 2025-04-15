@@ -101,6 +101,17 @@ export interface HourlyWeatherData {
   }>
 }
 
+export interface DailyWeatherData {
+  data: Array<{
+    day: string,
+    dayTemp: number,
+    nightTemp: number,
+    high: number,
+    low: number
+    icon?: string
+  }>
+}
+
 export const IconCodes = new Map<string, string>([
   ['01d', 'clear_day'],
   ['01n', 'clear_night'],

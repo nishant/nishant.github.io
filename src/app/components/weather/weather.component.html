@@ -6,32 +6,43 @@
     </p>
 
     <div *ngIf="showCurrentWeather" id="current-weather">
-      <p class="weather-widget-row">Temperature: {{currentWeatherData?.temp}}°F</p>
-      <p class="weather-widget-row">Feels Like:  {{currentWeatherData?.feelsLike}}°F</p>
-      <p class="weather-widget-row">Description: {{currentWeatherData?.description}}</p>
-      <p class="weather-widget-row">Humidity: {{currentWeatherData?.humidity}}%</p>
-      <p class="weather-widget-row">Sunrise: {{currentWeatherData?.sunrise}}</p>
-      <p class="weather-widget-row">Sunset: {{currentWeatherData?.sunset}}</p>
+      <p class="weather-widget-row"><span class="grey">Temperature:</span> {{currentWeatherData?.temp}}°F</p>
+      <p class="weather-widget-row"><span class="grey">Feels Like:</span> {{currentWeatherData?.feelsLike}}°F</p>
+      <p class="weather-widget-row"><span class="grey">Description:</span> {{currentWeatherData?.description}}</p>
+      <p class="weather-widget-row"><span class="grey">Humidity:</span> {{currentWeatherData?.humidity}}%</p>
+      <p class="weather-widget-row"><span class="grey">Sunrise:</span> {{currentWeatherData?.sunrise}}</p>
+      <p class="weather-widget-row"><span class="grey">Sunset:</span> {{currentWeatherData?.sunset}}</p>
     </div>
 
     <div *ngIf="showHourlyWeather" id="hourly-weather">
       <table>
         <tr *ngFor="let hour of hourlyWeatherData?.data" class="weather-widget-row hourly-row">
-          <td class="hourly-time">{{hour.time}}</td>
+          <td class="hourly-time grey">{{hour.time}}</td>
           <td class="hourly-temp">{{hour.temp}}°F</td>
           <td class="hourly-feels-like">~{{hour.feelsLike}}°F</td>
           <span class="hourly-icon weather-icon material-symbols-outlined">{{hour?.icon}}</span>
         </tr>
       </table>
-
-<!--      <p *ngFor="let hour of hourlyWeatherData?.data" class="weather-widget-row hourly-row">-->
-<!--        {{hour.time}} {{hour.temp}} ~ {{hour.feelsLike}}-->
-<!--        <span class="weather-icon material-symbols-outlined">{{hour?.icon}}</span>-->
-<!--      </p>-->
     </div>
 
     <div *ngIf="showDailyWeather" id="daily-weather">
-      Daily!
+      <table>
+        <tr class="headings">
+          <th class="date-header">Date</th>
+          <th class="day-header">Day</th>
+          <th class="night-header">Night</th>
+          <th class="high-header">High</th>
+          <th class="low-header">Low</th>
+        </tr>
+        <tr *ngFor="let day of dailyWeatherData?.data" class="weather-widget-row hourly-row">
+          <td class="daily-day">{{day.day}}</td>
+          <td class="daily-day-temp">{{day.dayTemp}}°F</td>
+          <td class="daily-night-temp">{{day.nightTemp}}°F</td>
+          <td class="daily-high">{{day.high}}°F</td>
+          <td class="daily-low">{{day.low}}°F</td>
+          <span class="daily-icon weather-icon material-symbols-outlined">{{day?.icon}}</span>
+        </tr>
+      </table>
     </div>
 
     <div id="weather-timing">
