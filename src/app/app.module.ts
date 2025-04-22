@@ -29,6 +29,12 @@ import { MonacoEditorModule, NGX_MONACO_EDITOR_CONFIG, NgxMonacoEditorConfig } f
 import { SettingsComponent } from './components/settings/settings.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import {
+  GoogleLoginProvider,
+  GoogleSigninButtonModule,
+  SocialAuthServiceConfig,
+  SocialLoginModule,
+} from '@abacritt/angularx-social-login';
 
 const monacoConfig: NgxMonacoEditorConfig = {
   defaultOptions: { scrollBeyondLastLine: false },
@@ -70,10 +76,36 @@ const monacoConfig: NgxMonacoEditorConfig = {
     FormsModule,
     MatFormFieldModule,
     MatSelectModule,
+    SocialLoginModule,
+    GoogleSigninButtonModule,
     // use forRoot() in main app module only.
   ],
   providers: [
-    { provide: NGX_MONACO_EDITOR_CONFIG, useValue: monacoConfig }
+    { provide: NGX_MONACO_EDITOR_CONFIG, useValue: monacoConfig },
+    {
+      provide: 'SocialAuthServiceConfig',
+      useValue: {
+        autoLogin: false,
+        lang: 'en',
+        providers: [
+          {
+            id: GoogleLoginProvider.PROVIDER_ID,
+            provider: new GoogleLoginProvider(
+              '397230737513-dk75t2mgh28b1i4v26dkbmv1uc3o8c2m.apps.googleusercontent.com', {
+                scopes: [
+                  'https://www.googleapis.com/auth/gmail.readonly',
+                  'https://www.googleapis.com/auth/calendar.readonly'
+                ],
+                prompt: 'consent'
+              }
+            )
+          },
+        ],
+        onError: (err) => {
+          console.error(err);
+        }
+      } as SocialAuthServiceConfig,
+    }
   ],
   bootstrap: [AppComponent]
 })

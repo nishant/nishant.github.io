@@ -6,6 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { SettingsService } from '../settings/settings.service';
 import { NotesComponent } from '../notes/notes.component';
+import { GoogleService } from '../../services/google.service';
 
 @Component({
   selector: 'app-home',
@@ -30,12 +31,26 @@ export class HomeComponent implements OnInit {
 
   GOOGLE_FAVICON_CACHE_URL = 'https://www.google.com/s2/favicons?domain=';
 
-  constructor(public router: Router, private settingsService: SettingsService) {}
+
+  constructor(
+    public router: Router,
+    private settingsService: SettingsService,
+    private googleService: GoogleService,
+  ) {}
 
   ngOnInit() {
     this.setConfig();
     document.querySelectorAll('*:not(.material-symbols-outlined)').forEach(x => {
       (x as HTMLElement).style.fontFamily = localStorage.getItem('nishant.github.io-font') ?? this.settingsService.font.value + ', monospace'
+    });
+
+    this.googleService.authState.subscribe(async (user) => {
+      console.log('sign in successful', user)
+      await this.googleService.getAccessToken();
+      this.googleService.getGmailMessages()?.subscribe(x => {
+        console.log(x)
+      });
+      this.googleService.getGoogleCalendarData();
     });
   }
 
@@ -104,5 +119,12 @@ export class HomeComponent implements OnInit {
 
   onSearch = () => {
     window.location.replace('https://google.com/search?q=' + (document.getElementById('search') as HTMLInputElement).value)
+  }
+
+  async signOut(): Promise<void> {
+    await this.googleService.signOut().catch((e) => {
+      console.error('Error signing out:', e);
+    });
+    console.log('Signed out successfully');
   }
 }
