@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { links } from './links';
-import { LinkType } from './typings';
+import { Link, LinkType } from './typings';
 
 @Component({
   selector: 'app-jp-list',
@@ -9,7 +9,7 @@ import { LinkType } from './typings';
 })
 export class JpListComponent {
   links = links;
-  getLinksByType = (linkType: LinkType) => {
-    return links.filter(link => link.linkType === linkType)
-  }
+  getLinksByType = (linkType: LinkType): Array<Link> => {
+    return links.filter(link => link.linkType === linkType);
+  };
 }

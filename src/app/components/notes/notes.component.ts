@@ -46,14 +46,14 @@ export class NotesComponent implements OnInit, OnDestroy {
   }
 
   get content(): string {
-    return <string>this.form.get('editorContent')?.value;
+    return <string> this.form.get('editorContent')?.value;
   }
 
   setContent = (): void => {
     const savedContent = localStorage.getItem('nishant.github.io-notes') ?? '';
     this.editor?.setContent(savedContent);
     this.form.get('editorContent')?.setValue(savedContent);
-  }
+  };
 
   saveContent = (): void => localStorage.setItem('nishant.github.io-notes', this.content);
 }

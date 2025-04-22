@@ -7,7 +7,7 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./stocks.component.scss']
 })
 export class StocksComponent {
-  API_KEY = ''
+  API_KEY = '';
 
   constructor(private http: HttpClient) { }
 

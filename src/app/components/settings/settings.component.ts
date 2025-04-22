@@ -34,13 +34,13 @@ export class SettingsComponent implements OnInit {
     });
   }
 
-  onSelect = () => {
+  onSelect = (): void => {
     this.settingService.font.next(this.selectedFont);
     localStorage.setItem('nishant.github.io-font', this.selectedFont);
     document.querySelectorAll('*:not(.material-symbols-outlined)').forEach(x => {
-      (x as HTMLElement).style.fontFamily = this.selectedFont + ', monospace'
+      (x as HTMLElement).style.fontFamily = this.selectedFont + ', monospace';
     });
   };
 
-  prettify = (obj: unknown) => JSON.stringify(obj, null, '\t');
+  prettify = (obj: unknown): string => JSON.stringify(obj, null, '\t');
 }

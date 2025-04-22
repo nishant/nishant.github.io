@@ -8,7 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "deploy": "ng build --output-path docs",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "lintfix": "npm run lint -- --fix"
   },
   "private": true,
   "dependencies": {

@@ -16,13 +16,13 @@ export class NavigatorComponent {
     {text: 'Guides', icon: 'developer_guide'},
     {text: 'Downloads', icon: 'download'},
     {text: 'Tools', icon: 'construction'},
-  ]
+  ];
 
-  scrollToSection = (text: string) => {
+  scrollToSection = (text: string): void => {
     const allSections = document.getElementsByClassName('section-container');
     const section = document.getElementById(text);
     Array.from(allSections).forEach(e => e.classList.remove('highlighted'));
     section?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     section?.classList.add('highlighted');
-  }
+  };
 }

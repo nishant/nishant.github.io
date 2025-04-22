@@ -18,9 +18,9 @@ export class WeatherService {
 
   getWeatherData = (lat: number, lon: number): Observable<WeatherResponse> => {
     return this.http.get<WeatherResponse>(`${this.OPEN_WEATHER_API_BASEURL}/data?lat=${lat}&lon=${lon}`);
-  }
+  };
 
   getLocation = (lat: number, lon: number): Observable<LocationResponse> => {
     return this.http.get<LocationResponse>(`${this.OPEN_WEATHER_API_BASEURL}/location?lat=${lat}&lon=${lon}`);
-  }
+  };
 }

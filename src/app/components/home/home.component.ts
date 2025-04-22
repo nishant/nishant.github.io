@@ -2,7 +2,7 @@ import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core
 import { Router } from '@angular/router';
 import { Config } from '../../config/config';
 import defaultConfigJson from '../../config/config.json';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarRef, TextOnlySnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { SettingsService } from '../settings/settings.service';
 import { NotesComponent } from '../notes/notes.component';
@@ -38,23 +38,23 @@ export class HomeComponent implements OnInit {
     private googleService: GoogleService,
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.setConfig();
     document.querySelectorAll('*:not(.material-symbols-outlined)').forEach(x => {
-      (x as HTMLElement).style.fontFamily = localStorage.getItem('nishant.github.io-font') ?? this.settingsService.font.value + ', monospace'
+      (x as HTMLElement).style.fontFamily = localStorage.getItem('nishant.github.io-font') ?? this.settingsService.font.value + ', monospace';
     });
 
     this.googleService.authState.subscribe(async (user) => {
-      console.log('sign in successful', user)
+      console.log('sign in successful', user);
       await this.googleService.getAccessToken();
       this.googleService.getGmailMessages()?.subscribe(x => {
-        console.log(x)
+        console.log(x);
       });
       this.googleService.getGoogleCalendarData();
     });
   }
 
-  toggleNotes = () => {
+  toggleNotes = (): void => {
     this.isNotesOpen = !this.isNotesOpen;
     if (this.isNotesOpen) {
       this.dialog.open(this.notes!).beforeClosed().subscribe(() => {
@@ -64,12 +64,12 @@ export class HomeComponent implements OnInit {
         } else {
           console.log("User didnt save");
         }
-        this.isNotesOpen = !this.isNotesOpen
+        this.isNotesOpen = !this.isNotesOpen;
       });
     }
-  }
+  };
 
-  toggleWeather = () => {
+  toggleWeather = (): void => {
     this.isWeatherOpen = !this.isWeatherOpen;
     if (this.isWeatherOpen) {
       this.dialog.open(this.weather!).afterClosed().subscribe(() => this.isWeatherOpen = !this.isWeatherOpen);
@@ -77,12 +77,12 @@ export class HomeComponent implements OnInit {
     // this.alert('Weather is coming soon.')
   };
 
-  toggleStocks = () => {
+  toggleStocks = (): void => {
     this.isStocksOpen = !this.isStocksOpen;
-    this.alert('Stocks is coming soon.')
+    this.alert('Stocks is coming soon.');
   };
 
-  toggleSettings = () => {
+  toggleSettings = (): void => {
     this.isSettingsOpen = !this.isSettingsOpen;
     if (this.isSettingsOpen) {
       this.dialog.open(this.settings!).afterClosed().subscribe(() => {
@@ -92,39 +92,39 @@ export class HomeComponent implements OnInit {
         this.setConfig();
         this.saveFont();
         document.querySelectorAll('*:not(.material-symbols-outlined)').forEach(x => {
-          (x as HTMLElement).style.fontFamily = localStorage.getItem('nishant.github.io-font') ?? this.settingsService.font.value + ', monospace'
+          (x as HTMLElement).style.fontFamily = localStorage.getItem('nishant.github.io-font') ?? this.settingsService.font.value + ', monospace';
         });
-        this.isSettingsOpen = !this.isSettingsOpen
+        this.isSettingsOpen = !this.isSettingsOpen;
       });
     }
   };
 
-  alert = (message: string) => this.alertMessage.open(message, 'Dismiss');
+  alert = (message: string): MatSnackBarRef<TextOnlySnackBar> => this.alertMessage.open(message, 'Dismiss');
 
   getFavicon = (url: string): string => this.GOOGLE_FAVICON_CACHE_URL + url;
 
-  saveConfig = (): void => localStorage.setItem('nishant.github.io-config', this.prettify(this.config))
+  saveConfig = (): void => localStorage.setItem('nishant.github.io-config', this.prettify(this.config));
 
   setConfig = (): void => {
     const savedConfig = localStorage.getItem('nishant.github.io-config') ?? this.prettify(defaultConfigJson);
     this.config = JSON.parse(savedConfig);
     this.saveConfig();
-  }
+  };
 
   saveFont = (): void => {
     localStorage.setItem('nishant.github.io-font', this.settingsService.font.value);
-  }
+  };
 
-  prettify = (obj: unknown) => JSON.stringify(obj, null, '\t');
+  prettify = (obj: unknown): string => JSON.stringify(obj, null, '\t');
 
-  onSearch = () => {
-    window.location.replace('https://google.com/search?q=' + (document.getElementById('search') as HTMLInputElement).value)
-  }
+  onSearch = (): void => {
+    window.location.href = 'https://google.com/search?q=' + (document.getElementById('search') as HTMLInputElement).value;
+  };
 
-  async signOut(): Promise<void> {
+   signOut = async (): Promise<void> => {
     await this.googleService.signOut().catch((e) => {
       console.error('Error signing out:', e);
     });
     console.log('Signed out successfully');
-  }
+  };
 }

@@ -36,7 +36,7 @@ export class WeatherComponent implements OnInit {
       description: data.current.weather[0].main,
       icon: IconCodes.get(data.current.weather[0].icon),
     };
-  }
+  };
 
   setHourlyWeatherData = (data: WeatherResponse): void => {
     this.hourlyWeatherData = { data: [] };
@@ -46,9 +46,9 @@ export class WeatherComponent implements OnInit {
         temp: this.kelvinToFahrenheit(hour.temp),
         feelsLike: this.kelvinToFahrenheit(hour.feels_like),
         icon: IconCodes.get(hour.weather[0].icon),
-      })
+      });
     });
-  }
+  };
 
   setDailyWeatherData = (data: WeatherResponse): void => {
     this.dailyWeatherData = { data: [] };
@@ -60,9 +60,9 @@ export class WeatherComponent implements OnInit {
         high: this.kelvinToFahrenheit(day.temp.max),
         low: this.kelvinToFahrenheit(day.temp.min),
         icon: IconCodes.get(day.weather[0].icon),
-      })
+      });
     });
-  }
+  };
 
   getGeolocation = (): void => {
     if (!navigator.geolocation) { alert('Geolocation not supported.'); }
@@ -74,7 +74,7 @@ export class WeatherComponent implements OnInit {
       return;
     }
 
-    const success = (pos: GeolocationPosition) => {
+    const success = (pos: GeolocationPosition): void => {
       const crd = pos.coords;
       navigator.geolocation.clearWatch(id);
 
@@ -87,27 +87,25 @@ export class WeatherComponent implements OnInit {
           this.setCurrentWeatherData(dataResponse);
         });
       });
-    }
+    };
 
-    const error = (err: { code: unknown, message: string }) => {
+    const error = (err: { code: unknown, message: string }): void => {
       console.error(`ERROR ${err.code}: ${err.message}`);
-    }
+    };
 
     const options: PositionOptions = { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 };
     const id = navigator.geolocation.watchPosition(success, error, options);
 
     this.weatherService.lastGeoRequestTimestamp.next(Date.now());
-  }
+  };
 
-  kelvinToFahrenheit = (kelvin: number) => {
-    return Math.round(9 / 5 * (kelvin - 273.15) + 32)
-  }
+  kelvinToFahrenheit = (kelvin: number): number => Math.round(9 / 5 * (kelvin - 273.15) + 32);
 
-  convertTime = (time: string, format = 'h:mma') => {
+  convertTime = (time: string, format = 'h:mma'): string => {
     return moment(time, 'HH:mm').format(format);
   };
 
-  getDateTime = (dt: number, dayDate = false) => {
+  getDateTime = (dt: number, dayDate = false): string => {
     const date = new Date(dt * 1000);
 
     // const year = date.getFullYear();
@@ -124,10 +122,10 @@ export class WeatherComponent implements OnInit {
       return `${day} ${split.join('/')}`;
     }
 
-    return `${hours}:${minutes}`
+    return `${hours}:${minutes}`;
   };
 
-  getCurrentWeather = () => {
+  getCurrentWeather = (): void => {
     this.showCurrentWeather = true;
     this.showHourlyWeather = false;
     this.showDailyWeather = false;
@@ -135,7 +133,7 @@ export class WeatherComponent implements OnInit {
     this.setCurrentWeatherData(this.weatherService.cachedWeatherResponse.value!);
   };
 
-  getHourlyWeather = () => {
+  getHourlyWeather = (): void => {
     this.showCurrentWeather = false;
     this.showHourlyWeather = true;
     this.showDailyWeather = false;
@@ -143,11 +141,10 @@ export class WeatherComponent implements OnInit {
     this.setHourlyWeatherData(this.weatherService.cachedWeatherResponse.value!);
   };
 
-  getDailyWeather = () => {
+  getDailyWeather = (): void => {
     this.showCurrentWeather = false;
     this.showHourlyWeather = false;
     this.showDailyWeather = true;
-
 
     this.setDailyWeatherData(this.weatherService.cachedWeatherResponse.value!);
   };

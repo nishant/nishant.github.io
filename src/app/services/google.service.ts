@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import { GoogleLoginProvider, SocialAuthService } from '@abacritt/angularx-social-login';
+import { GoogleLoginProvider, SocialAuthService, SocialUser } from '@abacritt/angularx-social-login';
 import { HttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GoogleService {
   private accessToken = '';
+
 
   constructor(
     private http: HttpClient,
@@ -23,7 +24,7 @@ export class GoogleService {
     console.log(this.accessToken);
   }
 
-  getGmailMessages = () => {
+  getGmailMessages = (): Observable<unknown> | void => {
     if (!this.accessToken) return;
 
     return this.http.get('https://gmail.googleapis.com/gmail/v1/users/me/messages', {
@@ -45,7 +46,7 @@ export class GoogleService {
       });
   }
 
-  get authState() {
+  get authState(): Observable<SocialUser> {
     return this.authService.authState;
   }
 }

@@ -32,7 +32,7 @@ export class CustomMenuComponent implements OnInit {
       : setBlockType(schema.nodes['save'])(state, dispatch);
   }
 
-  update = (view: EditorView) => {
+  update = (view: EditorView): void => {
     const { state } = view;
     const { schema } = state;
     this.isActive = isNodeActive(state, schema.nodes['save']);
@@ -42,7 +42,7 @@ export class CustomMenuComponent implements OnInit {
   ngOnInit(): void {
     const plugin = new Plugin({
       key: new PluginKey(`custom-menu-save`),
-      view: () => {
+      view: (): { update:  (view: EditorView) => unknown } => {
         return {
           update: this.update,
         };

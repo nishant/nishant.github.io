@@ -14,6 +14,9 @@ module.exports = tseslint.config(
     ],
     processor: angular.processInlineTemplates,
     rules: {
+      semi: ["error", "always"],
+      "keyword-spacing": "error",
+      "@typescript-eslint/explicit-function-return-type": ["error", { "allowTypedFunctionExpressions": true }],
       "@typescript-eslint/array-type": "off",
       "@typescript-eslint/consistent-type-assertions": "off",
       "@angular-eslint/directive-selector": [
