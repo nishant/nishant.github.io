@@ -7,11 +7,27 @@ import { MatDialog } from '@angular/material/dialog';
 import { SettingsService } from '../settings/settings.service';
 import { NotesComponent } from '../notes/notes.component';
 import { GoogleService } from '../../services/google.service';
+import { WeatherComponent } from '../weather/weather.component';
+import { SettingsComponent } from '../settings/settings.component';
+import { GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
+import { NgFor, NgOptimizedImage } from '@angular/common';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'],
+    selector: 'app-home',
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.scss'],
+    standalone: true,
+    imports: [
+        ReactiveFormsModule,
+        FormsModule,
+        NgFor,
+        NgOptimizedImage,
+        GoogleSigninButtonModule,
+        NotesComponent,
+        SettingsComponent,
+        WeatherComponent,
+    ],
 })
 export class HomeComponent implements OnInit {
   isNotesOpen = false;

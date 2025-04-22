@@ -5,11 +5,14 @@ import { EditorView } from 'prosemirror-view';
 import { isNodeActive } from 'ngx-editor/helpers';
 import { Editor } from 'ngx-editor';
 import { NotesService } from '../notes.service';
+import { NgClass } from '@angular/common';
 
 @Component({
-  selector: 'app-custom-menu',
-  templateUrl: './custom-menu.component.html',
-  styleUrls: ['./custom-menu.component.scss']
+    selector: 'app-custom-menu',
+    templateUrl: './custom-menu.component.html',
+    styleUrls: ['./custom-menu.component.scss'],
+    standalone: true,
+    imports: [NgClass]
 })
 export class CustomMenuComponent implements OnInit {
   @Input() editor?: Editor;

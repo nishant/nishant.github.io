@@ -1,13 +1,16 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Editor, Toolbar, Validators } from 'ngx-editor';
-import { FormControl, FormGroup } from '@angular/forms';
+import { Editor, Toolbar, Validators, NgxEditorModule } from 'ngx-editor';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NotesService } from './notes.service';
 import { Subscription } from 'rxjs';
+import { CustomMenuComponent } from './custom-menu/custom-menu.component';
 
 @Component({
-  selector: 'app-notes',
-  templateUrl: './notes.component.html',
-  styleUrls: ['./notes.component.scss']
+    selector: 'app-notes',
+    templateUrl: './notes.component.html',
+    styleUrls: ['./notes.component.scss'],
+    standalone: true,
+    imports: [ReactiveFormsModule, NgxEditorModule, CustomMenuComponent]
 })
 export class NotesComponent implements OnInit, OnDestroy {
   editor: Editor;

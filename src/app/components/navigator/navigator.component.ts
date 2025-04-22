@@ -1,10 +1,13 @@
 import { Component } from '@angular/core';
 import { Category } from '../jp-list/typings';
+import { NgFor } from '@angular/common';
 
 @Component({
-  selector: 'app-navigator',
-  templateUrl: './navigator.component.html',
-  styleUrls: ['./navigator.component.scss']
+    selector: 'app-navigator',
+    templateUrl: './navigator.component.html',
+    styleUrls: ['./navigator.component.scss'],
+    standalone: true,
+    imports: [NgFor]
 })
 export class NavigatorComponent {
   categories: Array<Category> = [

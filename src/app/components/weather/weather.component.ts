@@ -2,11 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CurrentWeatherData, DailyWeatherData, HourlyWeatherData, IconCodes, WeatherResponse } from './weather';
 import { WeatherService } from './weather.service';
 import moment from 'moment';
+import { NgIf, NgFor } from '@angular/common';
 
 @Component({
-  selector: 'app-weather',
-  templateUrl: './weather.component.html',
-  styleUrls: ['./weather.component.scss']
+    selector: 'app-weather',
+    templateUrl: './weather.component.html',
+    styleUrls: ['./weather.component.scss'],
+    standalone: true,
+    imports: [NgIf, NgFor]
 })
 export class WeatherComponent implements OnInit {
   location = '';

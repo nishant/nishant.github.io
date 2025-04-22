@@ -8,8 +8,8 @@ describe('WeatherComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [WeatherComponent]
-    });
+    imports: [WeatherComponent]
+});
     fixture = TestBed.createComponent(WeatherComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
