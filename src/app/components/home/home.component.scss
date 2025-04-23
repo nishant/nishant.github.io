@@ -1,4 +1,3 @@
-// colors
 $placeholder: #888888;
 $mainBG: #373D45;
 $searchIcon: #888888;
@@ -11,11 +10,8 @@ $blockHeader: #F38630;
 $blockLink: white;
 $blockHover: #69D2E7;
 
-//theme
 $blockHeader: #95EDFD;
 $blockHover: #FF92D1;
-
-/* responsive mixin */
 
 $BP_XXL: 1600px;
 $BP_XL: 1200px;
@@ -30,8 +26,6 @@ $BP_XXS: 400px;
     @content;
   }
 }
-
-/* placeholder */
 
 @mixin placeholder {
   ::-webkit-input-placeholder { @content }
@@ -54,7 +48,6 @@ $BP_XXS: 400px;
   margin: 0;
   padding: 0;
   line-height: 1.8;
-  //font-family: "Fira Code", monospace;
   font-weight: 400;
   opacity: 1.0;
 }
@@ -104,6 +97,7 @@ html, body {
       }
     }
   }
+
   ul.search-help {
     transition: all .5s cubic-bezier(0.4, 0.0, 0.2, 1);
     display: inline-block;
@@ -131,6 +125,7 @@ html, body {
           transition: opacity .5s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
       }
+
       &:hover {
         .icon {
           opacity: .2;
@@ -160,18 +155,23 @@ html, body {
     background-color: $blockBG;
     border: 1px solid $blockBorder;
     min-width: 160px;
+
     li {
       list-style: none;
     }
+
     .header {
       color: $blockHeader;
     }
+
     a {
       text-decoration: none;
       cursor: pointer;
+
       &:visited, &:focus, &:link {
         color: $blockLink;
       }
+
       &:hover {
         color: $blockHover;
       }
@@ -189,7 +189,6 @@ html, body {
 #floating-bottom-left {
   position: fixed;
   bottom: 5%;
-  //width: 100%;
   padding: 0;
   background: #2d2c2c;
 }
@@ -230,7 +229,7 @@ html, body {
   display: flex;
   justify-content: center;
   margin-bottom: 72px !important;
-;
+
   @media (max-width: 490px) {
     margin-bottom: 72px !important;
   }

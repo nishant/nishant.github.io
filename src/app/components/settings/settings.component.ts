@@ -6,13 +6,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 
-
 @Component({
-    selector: 'app-settings',
-    templateUrl: './settings.component.html',
-    styleUrls: ['./settings.component.scss'],
-    standalone: true,
-    imports: [MonacoEditorModule, ReactiveFormsModule, FormsModule, MatFormFieldModule, MatSelectModule, MatOptionModule]
+  selector: 'app-settings',
+  templateUrl: './settings.component.html',
+  styleUrls: ['./settings.component.scss'],
+  standalone: true,
+  imports: [MonacoEditorModule, ReactiveFormsModule, FormsModule, MatFormFieldModule, MatSelectModule, MatOptionModule],
 })
 export class SettingsComponent implements OnInit {
   selectedFont = 'Fira Code';
@@ -21,17 +20,15 @@ export class SettingsComponent implements OnInit {
     language: 'json',
     minimap: { enabled: false },
     formatOnPaste: true,
-    formatOnType: true
+    formatOnType: true,
   };
 
   code = localStorage.getItem('nishant.github.io-config') ?? '[]';
 
-  constructor(private settingService: SettingsService) {
-
-  }
+  constructor(private settingService: SettingsService) {}
 
   ngOnInit(): void {
-    this.settingService.onClose.subscribe(x => {
+    this.settingService.onClose.subscribe((x) => {
       this.selectedFont = localStorage.getItem('nishant.github.io-font') ?? 'Fira Code';
 
       if (x === 'closed') {
@@ -44,7 +41,7 @@ export class SettingsComponent implements OnInit {
   onSelect = (): void => {
     this.settingService.font.next(this.selectedFont);
     localStorage.setItem('nishant.github.io-font', this.selectedFont);
-    document.querySelectorAll('*:not(.material-symbols-outlined)').forEach(x => {
+    document.querySelectorAll('*:not(.material-symbols-outlined)').forEach((x) => {
       (x as HTMLElement).style.fontFamily = this.selectedFont + ', monospace';
     });
   };

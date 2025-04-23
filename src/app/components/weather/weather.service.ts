@@ -4,7 +4,7 @@ import { LocationResponse, WeatherResponse, LocationData } from './weather';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WeatherService {
   OPEN_WEATHER_API_BASEURL = 'https://nishant-github-io-api.onrender.com/api/weather';
@@ -14,7 +14,7 @@ export class WeatherService {
   cachedWeatherResponse = new BehaviorSubject<WeatherResponse | null>(null);
   cachedLocation = new BehaviorSubject<LocationData | null>(null);
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getWeatherData = (lat: number, lon: number): Observable<WeatherResponse> => {
     return this.http.get<WeatherResponse>(`${this.OPEN_WEATHER_API_BASEURL}/data?lat=${lat}&lon=${lon}`);

@@ -8,8 +8,8 @@ describe('JpListComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    imports: [JpListComponent]
-});
+      imports: [JpListComponent],
+    });
     fixture = TestBed.createComponent(JpListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

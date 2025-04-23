@@ -5,18 +5,17 @@ import moment from 'moment';
 import { NgIf, NgFor } from '@angular/common';
 
 @Component({
-    selector: 'app-weather',
-    templateUrl: './weather.component.html',
-    styleUrls: ['./weather.component.scss'],
-    standalone: true,
-    imports: [NgIf, NgFor]
+  selector: 'app-weather',
+  templateUrl: './weather.component.html',
+  styleUrls: ['./weather.component.scss'],
+  standalone: true,
+  imports: [NgIf, NgFor],
 })
 export class WeatherComponent implements OnInit {
   location = '';
   currentWeatherData?: CurrentWeatherData;
   hourlyWeatherData?: HourlyWeatherData;
   dailyWeatherData?: DailyWeatherData;
-
 
   showCurrentWeather = true;
   showHourlyWeather = false;
@@ -43,7 +42,7 @@ export class WeatherComponent implements OnInit {
 
   setHourlyWeatherData = (data: WeatherResponse): void => {
     this.hourlyWeatherData = { data: [] };
-    data.hourly.forEach(hour => {
+    data.hourly.forEach((hour) => {
       this.hourlyWeatherData?.data.push({
         time: this.convertTime(this.getDateTime(hour.dt), 'ha'),
         temp: this.kelvinToFahrenheit(hour.temp),
@@ -55,7 +54,7 @@ export class WeatherComponent implements OnInit {
 
   setDailyWeatherData = (data: WeatherResponse): void => {
     this.dailyWeatherData = { data: [] };
-    data.daily.forEach(day => {
+    data.daily.forEach((day) => {
       this.dailyWeatherData?.data.push({
         day: this.getDateTime(day.dt, true),
         dayTemp: this.kelvinToFahrenheit(day.temp.day),
@@ -68,10 +67,15 @@ export class WeatherComponent implements OnInit {
   };
 
   getGeolocation = (): void => {
-    if (!navigator.geolocation) { alert('Geolocation not supported.'); }
+    if (!navigator.geolocation) {
+      alert('Geolocation not supported.');
+    }
 
-    if (Date.now() <= this.weatherService.lastGeoRequestTimestamp.value + 300000) { // 5 mins
-      if (this.weatherService.cachedWeatherResponse.value === null) { return; }
+    if (Date.now() <= this.weatherService.lastGeoRequestTimestamp.value + 300000) {
+      // 5 mins
+      if (this.weatherService.cachedWeatherResponse.value === null) {
+        return;
+      }
       this.location = this.weatherService.cachedLocation.value?.location ?? '';
       this.setCurrentWeatherData(this.weatherService.cachedWeatherResponse.value);
       return;
@@ -81,18 +85,22 @@ export class WeatherComponent implements OnInit {
       const crd = pos.coords;
       navigator.geolocation.clearWatch(id);
 
-      this.weatherService.getWeatherData(crd.latitude, crd.longitude).subscribe(dataResponse => {
+      this.weatherService.getWeatherData(crd.latitude, crd.longitude).subscribe((dataResponse) => {
         this.weatherService.cachedWeatherResponse.next(dataResponse);
 
-        this.weatherService.getLocation(crd.latitude, crd.longitude).subscribe(locationResponse => {
-          this.weatherService.cachedLocation.next({ location: locationResponse.city, lat: crd.latitude, lon: crd.longitude });
+        this.weatherService.getLocation(crd.latitude, crd.longitude).subscribe((locationResponse) => {
+          this.weatherService.cachedLocation.next({
+            location: locationResponse.city,
+            lat: crd.latitude,
+            lon: crd.longitude,
+          });
           this.location = locationResponse.city;
           this.setCurrentWeatherData(dataResponse);
         });
       });
     };
 
-    const error = (err: { code: unknown, message: string }): void => {
+    const error = (err: { code: unknown; message: string }): void => {
       console.error(`ERROR ${err.code}: ${err.message}`);
     };
 
@@ -102,7 +110,7 @@ export class WeatherComponent implements OnInit {
     this.weatherService.lastGeoRequestTimestamp.next(Date.now());
   };
 
-  kelvinToFahrenheit = (kelvin: number): number => Math.round(9 / 5 * (kelvin - 273.15) + 32);
+  kelvinToFahrenheit = (kelvin: number): number => Math.round((9 / 5) * (kelvin - 273.15) + 32);
 
   convertTime = (time: string, format = 'h:mma'): string => {
     return moment(time, 'HH:mm').format(format);

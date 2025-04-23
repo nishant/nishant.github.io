@@ -2,9 +2,8 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import defaultConfigJson from '../../config/config.json';
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SettingsService {
   config = new BehaviorSubject(localStorage.getItem('nishant.github.io-config') ?? JSON.stringify(defaultConfigJson));

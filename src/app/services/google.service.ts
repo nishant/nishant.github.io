@@ -4,16 +4,15 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GoogleService {
   private accessToken = '';
 
-
   constructor(
     private http: HttpClient,
-    private authService: SocialAuthService
-  ) { }
+    private authService: SocialAuthService,
+  ) {}
 
   signOut(): Promise<void> {
     return this.authService.signOut();
@@ -29,8 +28,8 @@ export class GoogleService {
 
     return this.http.get('https://gmail.googleapis.com/gmail/v1/users/me/messages', {
       headers: {
-        Authorization: `Bearer ${this.accessToken}`
-      }
+        Authorization: `Bearer ${this.accessToken}`,
+      },
     });
   };
 

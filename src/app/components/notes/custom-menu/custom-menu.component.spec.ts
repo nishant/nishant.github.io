@@ -8,8 +8,8 @@ describe('CustomMenuComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    imports: [CustomMenuComponent]
-});
+      imports: [CustomMenuComponent],
+    });
     fixture = TestBed.createComponent(CustomMenuComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

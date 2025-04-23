@@ -14,20 +14,20 @@ import { NgFor, NgOptimizedImage } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 @Component({
-    selector: 'app-home',
-    templateUrl: './home.component.html',
-    styleUrls: ['./home.component.scss'],
-    standalone: true,
-    imports: [
-        ReactiveFormsModule,
-        FormsModule,
-        NgFor,
-        NgOptimizedImage,
-        GoogleSigninButtonModule,
-        NotesComponent,
-        SettingsComponent,
-        WeatherComponent,
-    ],
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.scss'],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    FormsModule,
+    NgFor,
+    NgOptimizedImage,
+    GoogleSigninButtonModule,
+    NotesComponent,
+    SettingsComponent,
+    WeatherComponent,
+  ],
 })
 export class HomeComponent implements OnInit {
   isNotesOpen = false;
@@ -47,7 +47,6 @@ export class HomeComponent implements OnInit {
 
   GOOGLE_FAVICON_CACHE_URL = 'https://www.google.com/s2/favicons?domain=';
 
-
   constructor(
     public router: Router,
     private settingsService: SettingsService,
@@ -56,14 +55,15 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.setConfig();
-    document.querySelectorAll('*:not(.material-symbols-outlined)').forEach(x => {
-      (x as HTMLElement).style.fontFamily = localStorage.getItem('nishant.github.io-font') ?? this.settingsService.font.value + ', monospace';
+    document.querySelectorAll('*:not(.material-symbols-outlined)').forEach((x) => {
+      (x as HTMLElement).style.fontFamily =
+        localStorage.getItem('nishant.github.io-font') ?? this.settingsService.font.value + ', monospace';
     });
 
     this.googleService.authState.subscribe(async (user) => {
       console.log('sign in successful', user);
       await this.googleService.getAccessToken();
-      this.googleService.getGmailMessages()?.subscribe(x => {
+      this.googleService.getGmailMessages()?.subscribe((x) => {
         console.log(x);
       });
       this.googleService.getGoogleCalendarData();
@@ -73,22 +73,28 @@ export class HomeComponent implements OnInit {
   toggleNotes = (): void => {
     this.isNotesOpen = !this.isNotesOpen;
     if (this.isNotesOpen) {
-      this.dialog.open(this.notes!).beforeClosed().subscribe(() => {
-        if (confirm("Do you want to save before closing?")) {
-          console.log("User saved");
-          this._notes?.saveContent();
-        } else {
-          console.log("User didnt save");
-        }
-        this.isNotesOpen = !this.isNotesOpen;
-      });
+      this.dialog
+        .open(this.notes!)
+        .beforeClosed()
+        .subscribe(() => {
+          if (confirm('Do you want to save before closing?')) {
+            console.log('User saved');
+            this._notes?.saveContent();
+          } else {
+            console.log('User didnt save');
+          }
+          this.isNotesOpen = !this.isNotesOpen;
+        });
     }
   };
 
   toggleWeather = (): void => {
     this.isWeatherOpen = !this.isWeatherOpen;
     if (this.isWeatherOpen) {
-      this.dialog.open(this.weather!).afterClosed().subscribe(() => this.isWeatherOpen = !this.isWeatherOpen);
+      this.dialog
+        .open(this.weather!)
+        .afterClosed()
+        .subscribe(() => (this.isWeatherOpen = !this.isWeatherOpen));
     }
     // this.alert('Weather is coming soon.')
   };
@@ -101,17 +107,21 @@ export class HomeComponent implements OnInit {
   toggleSettings = (): void => {
     this.isSettingsOpen = !this.isSettingsOpen;
     if (this.isSettingsOpen) {
-      this.dialog.open(this.settings!).afterClosed().subscribe(() => {
-        this.settingsService.onClose.next('closed');
-        this.config = JSON.parse(this.settingsService.config.value);
-        this.saveConfig();
-        this.setConfig();
-        this.saveFont();
-        document.querySelectorAll('*:not(.material-symbols-outlined)').forEach(x => {
-          (x as HTMLElement).style.fontFamily = localStorage.getItem('nishant.github.io-font') ?? this.settingsService.font.value + ', monospace';
+      this.dialog
+        .open(this.settings!)
+        .afterClosed()
+        .subscribe(() => {
+          this.settingsService.onClose.next('closed');
+          this.config = JSON.parse(this.settingsService.config.value);
+          this.saveConfig();
+          this.setConfig();
+          this.saveFont();
+          document.querySelectorAll('*:not(.material-symbols-outlined)').forEach((x) => {
+            (x as HTMLElement).style.fontFamily =
+              localStorage.getItem('nishant.github.io-font') ?? this.settingsService.font.value + ', monospace';
+          });
+          this.isSettingsOpen = !this.isSettingsOpen;
         });
-        this.isSettingsOpen = !this.isSettingsOpen;
-      });
     }
   };
 
@@ -134,10 +144,11 @@ export class HomeComponent implements OnInit {
   prettify = (obj: unknown): string => JSON.stringify(obj, null, '\t');
 
   onSearch = (): void => {
-    window.location.href = 'https://google.com/search?q=' + (document.getElementById('search') as HTMLInputElement).value;
+    window.location.href =
+      'https://google.com/search?q=' + (document.getElementById('search') as HTMLInputElement).value;
   };
 
-   signOut = async (): Promise<void> => {
+  signOut = async (): Promise<void> => {
     await this.googleService.signOut().catch((e) => {
       console.error('Error signing out:', e);
     });

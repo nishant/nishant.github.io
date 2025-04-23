@@ -5,7 +5,7 @@ export interface Link {
 }
 
 export type LinkType =
-  'Streaming'
+  | 'Streaming'
   | 'Schedules'
   | 'Manga'
   | 'Information'

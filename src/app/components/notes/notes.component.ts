@@ -6,11 +6,11 @@ import { Subscription } from 'rxjs';
 import { CustomMenuComponent } from './custom-menu/custom-menu.component';
 
 @Component({
-    selector: 'app-notes',
-    templateUrl: './notes.component.html',
-    styleUrls: ['./notes.component.scss'],
-    standalone: true,
-    imports: [ReactiveFormsModule, NgxEditorModule, CustomMenuComponent]
+  selector: 'app-notes',
+  templateUrl: './notes.component.html',
+  styleUrls: ['./notes.component.scss'],
+  standalone: true,
+  imports: [ReactiveFormsModule, NgxEditorModule, CustomMenuComponent],
 })
 export class NotesComponent implements OnInit, OnDestroy {
   editor: Editor;
@@ -33,8 +33,10 @@ export class NotesComponent implements OnInit, OnDestroy {
 
   constructor(private notesService: NotesService) {
     this.editor = new Editor({ keyboardShortcuts: true });
-    this.action$ = this.notesService.action.subscribe(action => {
-      if (action === 'save') { this.saveContent(); }
+    this.action$ = this.notesService.action.subscribe((action) => {
+      if (action === 'save') {
+        this.saveContent();
+      }
     });
   }
 
@@ -49,7 +51,7 @@ export class NotesComponent implements OnInit, OnDestroy {
   }
 
   get content(): string {
-    return <string> this.form.get('editorContent')?.value;
+    return <string>this.form.get('editorContent')?.value;
   }
 
   setContent = (): void => {

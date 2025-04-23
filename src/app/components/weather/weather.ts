@@ -94,22 +94,22 @@ export interface CurrentWeatherData {
 
 export interface HourlyWeatherData {
   data: Array<{
-    time: string,
-    temp: number,
-    feelsLike: number,
-    icon?: string
-  }>
+    time: string;
+    temp: number;
+    feelsLike: number;
+    icon?: string;
+  }>;
 }
 
 export interface DailyWeatherData {
   data: Array<{
-    day: string,
-    dayTemp: number,
-    nightTemp: number,
-    high: number,
-    low: number
-    icon?: string
-  }>
+    day: string;
+    dayTemp: number;
+    nightTemp: number;
+    high: number;
+    low: number;
+    icon?: string;
+  }>;
 }
 
 export const IconCodes = new Map<string, string>([
@@ -134,15 +134,15 @@ export const IconCodes = new Map<string, string>([
 ]);
 
 export interface LocationResponse {
-  city: string,
-  state: string,
-  country: string,
-  lat: number
-  lon: number
+  city: string;
+  state: string;
+  country: string;
+  lat: number;
+  lon: number;
 }
 
 export interface LocationData {
-  location: string,
-  lat: number,
-  lon: number
+  location: string;
+  lat: number;
+  lon: number;
 }
