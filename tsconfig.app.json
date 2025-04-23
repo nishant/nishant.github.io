@@ -7,7 +7,7 @@
   },
   "files": [
     "src/main.ts",
-    "src/app/components/jp-list/typings.ts"
+    "src/app/components/anime/jp-list/typings.ts"
   ],
   "include": [
     "src/**/*.d.ts"

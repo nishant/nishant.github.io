@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { JpListComponent } from './components/jp-list/jp-list.component';
 import { HomeComponent } from './components/home/home.component';
+import { JpListComponent } from './components/anime/jp-list/jp-list.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },

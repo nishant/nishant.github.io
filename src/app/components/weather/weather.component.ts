@@ -13,6 +13,7 @@ import { NgIf, NgFor } from '@angular/common';
 })
 export class WeatherComponent implements OnInit {
   location = '';
+
   currentWeatherData?: CurrentWeatherData;
   hourlyWeatherData?: HourlyWeatherData;
   dailyWeatherData?: DailyWeatherData;
@@ -71,8 +72,8 @@ export class WeatherComponent implements OnInit {
       alert('Geolocation not supported.');
     }
 
+    // 5 minute cache
     if (Date.now() <= this.weatherService.lastGeoRequestTimestamp.value + 300000) {
-      // 5 mins
       if (this.weatherService.cachedWeatherResponse.value === null) {
         return;
       }
@@ -112,10 +113,12 @@ export class WeatherComponent implements OnInit {
 
   kelvinToFahrenheit = (kelvin: number): number => Math.round((9 / 5) * (kelvin - 273.15) + 32);
 
+  /* converts time from HH:mm to h:mma or other format if specifed */
   convertTime = (time: string, format = 'h:mma'): string => {
     return moment(time, 'HH:mm').format(format);
   };
 
+  /* converts epoch time to HH:mm, optionally gets weekday and date */
   getDateTime = (dt: number, dayDate = false): string => {
     const date = new Date(dt * 1000);
 
@@ -130,10 +133,10 @@ export class WeatherComponent implements OnInit {
       const day = date.toDateString().split(' ')[0];
       const split = date.toLocaleDateString().split('/');
       split.pop();
-      return `${day} ${split.join('/')}`;
+      return `${day} ${split.join('/')}`; // ie. Mon 4/15
     }
 
-    return `${hours}:${minutes}`;
+    return `${hours}:${minutes}`; // HH:mm
   };
 
   getCurrentWeather = (): void => {

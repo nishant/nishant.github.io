@@ -12,11 +12,11 @@ module.exports = tseslint.config(
       prettier: pluginPrettier,
     },
     rules: {
+      "@typescript-eslint/explicit-function-return-type": ["error", { allowTypedFunctionExpressions: true }],
       ...prettier.rules, // disables formatting-related rules
       "prettier/prettier": "error", // enables prettier as a lint rule
       semi: ["error", "always"],
       // "keyword-spacing": "error",
-      "@typescript-eslint/explicit-function-return-type": ["error", { allowTypedFunctionExpressions: true }],
       "@typescript-eslint/array-type": "off",
       "@typescript-eslint/consistent-type-assertions": "off",
       "@angular-eslint/directive-selector": [

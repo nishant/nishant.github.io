@@ -4,6 +4,7 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NotesService } from './notes.service';
 import { Subscription } from 'rxjs';
 import { CustomMenuComponent } from './custom-menu/custom-menu.component';
+import { LOCAL_STORAGE_NOTES_KEY } from '../../constants';
 
 @Component({
   selector: 'app-notes',
@@ -55,10 +56,10 @@ export class NotesComponent implements OnInit, OnDestroy {
   }
 
   setContent = (): void => {
-    const savedContent = localStorage.getItem('nishant.github.io-notes') ?? '';
+    const savedContent = localStorage.getItem(LOCAL_STORAGE_NOTES_KEY) ?? '';
     this.editor?.setContent(savedContent);
     this.form.get('editorContent')?.setValue(savedContent);
   };
 
-  saveContent = (): void => localStorage.setItem('nishant.github.io-notes', this.content);
+  saveContent = (): void => localStorage.setItem(LOCAL_STORAGE_NOTES_KEY, this.content);
 }

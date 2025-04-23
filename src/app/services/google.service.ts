@@ -7,6 +7,9 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class GoogleService {
+  private readonly GMAIL_MESSAGES_ENDPOINT = 'https://gmail.googleapis.com/gmail/v1/users/me/messages';
+  private readonly GOOGLE_CALENDAR_EVENTS_ENDPOINT = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
+
   private accessToken = '';
 
   constructor(
@@ -26,23 +29,19 @@ export class GoogleService {
   getGmailMessages = (): Observable<unknown> | void => {
     if (!this.accessToken) return;
 
-    return this.http.get('https://gmail.googleapis.com/gmail/v1/users/me/messages', {
+    return this.http.get(this.GMAIL_MESSAGES_ENDPOINT, {
       headers: {
         Authorization: `Bearer ${this.accessToken}`,
       },
     });
   };
 
-  getGoogleCalendarData(): void {
+  getGoogleCalendarData(): Observable<unknown> | void {
     if (!this.accessToken) return;
 
-    this.http
-      .get('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-        headers: { Authorization: `Bearer ${this.accessToken}` },
-      })
-      .subscribe((events) => {
-        console.log('events', events);
-      });
+    return this.http.get(this.GOOGLE_CALENDAR_EVENTS_ENDPOINT, {
+      headers: { Authorization: `Bearer ${this.accessToken}` },
+    });
   }
 
   get authState(): Observable<SocialUser> {

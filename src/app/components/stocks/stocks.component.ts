@@ -8,9 +8,5 @@ import { HttpClient } from '@angular/common/http';
   standalone: true,
 })
 export class StocksComponent {
-  API_KEY = '';
-
   constructor(private http: HttpClient) {}
-
-  // getStockData()
 }

@@ -12,6 +12,7 @@ import { SettingsComponent } from '../settings/settings.component';
 import { GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
 import { NgFor, NgOptimizedImage } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { LOCAL_STORAGE_CONFIG_KEY, LOCAL_STORAGE_FONT_KEY } from '../../constants';
 
 @Component({
   selector: 'app-home',
@@ -55,20 +56,16 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.setConfig();
+    this.applyFont();
+    this.getGoogleData();
+  }
+
+  applyFont = (): void => {
     document.querySelectorAll('*:not(.material-symbols-outlined)').forEach((x) => {
       (x as HTMLElement).style.fontFamily =
-        localStorage.getItem('nishant.github.io-font') ?? this.settingsService.font.value + ', monospace';
+        localStorage.getItem(LOCAL_STORAGE_FONT_KEY) ?? this.settingsService.font.value + ', monospace';
     });
-
-    this.googleService.authState.subscribe(async (user) => {
-      console.log('sign in successful', user);
-      await this.googleService.getAccessToken();
-      this.googleService.getGmailMessages()?.subscribe((x) => {
-        console.log(x);
-      });
-      this.googleService.getGoogleCalendarData();
-    });
-  }
+  };
 
   toggleNotes = (): void => {
     this.isNotesOpen = !this.isNotesOpen;
@@ -88,6 +85,19 @@ export class HomeComponent implements OnInit {
     }
   };
 
+  getGoogleData = (): void => {
+    this.googleService.authState.subscribe(async (user) => {
+      console.log('sign in successful', user);
+      await this.googleService.getAccessToken();
+      this.googleService.getGmailMessages()?.subscribe((messages) => {
+        console.log(messages);
+      });
+      this.googleService.getGoogleCalendarData()?.subscribe((events) => {
+        console.log('events', events);
+      });
+    });
+  };
+
   toggleWeather = (): void => {
     this.isWeatherOpen = !this.isWeatherOpen;
     if (this.isWeatherOpen) {
@@ -96,7 +106,6 @@ export class HomeComponent implements OnInit {
         .afterClosed()
         .subscribe(() => (this.isWeatherOpen = !this.isWeatherOpen));
     }
-    // this.alert('Weather is coming soon.')
   };
 
   toggleStocks = (): void => {
@@ -116,10 +125,7 @@ export class HomeComponent implements OnInit {
           this.saveConfig();
           this.setConfig();
           this.saveFont();
-          document.querySelectorAll('*:not(.material-symbols-outlined)').forEach((x) => {
-            (x as HTMLElement).style.fontFamily =
-              localStorage.getItem('nishant.github.io-font') ?? this.settingsService.font.value + ', monospace';
-          });
+          this.applyFont();
           this.isSettingsOpen = !this.isSettingsOpen;
         });
     }
@@ -129,16 +135,16 @@ export class HomeComponent implements OnInit {
 
   getFavicon = (url: string): string => this.GOOGLE_FAVICON_CACHE_URL + url;
 
-  saveConfig = (): void => localStorage.setItem('nishant.github.io-config', this.prettify(this.config));
+  saveConfig = (): void => localStorage.setItem(LOCAL_STORAGE_CONFIG_KEY, this.prettify(this.config));
 
   setConfig = (): void => {
-    const savedConfig = localStorage.getItem('nishant.github.io-config') ?? this.prettify(defaultConfigJson);
+    const savedConfig = localStorage.getItem(LOCAL_STORAGE_CONFIG_KEY) ?? this.prettify(defaultConfigJson);
     this.config = JSON.parse(savedConfig);
     this.saveConfig();
   };
 
   saveFont = (): void => {
-    localStorage.setItem('nishant.github.io-font', this.settingsService.font.value);
+    localStorage.setItem(LOCAL_STORAGE_FONT_KEY, this.settingsService.font.value);
   };
 
   prettify = (obj: unknown): string => JSON.stringify(obj, null, '\t');

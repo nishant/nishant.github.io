@@ -5,6 +5,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
+import { LOCAL_STORAGE_CONFIG_KEY, LOCAL_STORAGE_FONT_KEY } from '../../constants';
 
 @Component({
   selector: 'app-settings',
@@ -23,15 +24,15 @@ export class SettingsComponent implements OnInit {
     formatOnType: true,
   };
 
-  code = localStorage.getItem('nishant.github.io-config') ?? '[]';
+  code = localStorage.getItem(LOCAL_STORAGE_CONFIG_KEY) ?? '[]';
 
   constructor(private settingService: SettingsService) {}
 
   ngOnInit(): void {
-    this.settingService.onClose.subscribe((x) => {
-      this.selectedFont = localStorage.getItem('nishant.github.io-font') ?? 'Fira Code';
+    this.settingService.onClose.subscribe((state) => {
+      this.selectedFont = localStorage.getItem(LOCAL_STORAGE_FONT_KEY) ?? 'Fira Code';
 
-      if (x === 'closed') {
+      if (state === 'closed') {
         this.settingService.config.next(this.code);
         // this.settingService.font.next(this.selectedFont);
       }
@@ -40,11 +41,13 @@ export class SettingsComponent implements OnInit {
 
   onSelect = (): void => {
     this.settingService.font.next(this.selectedFont);
-    localStorage.setItem('nishant.github.io-font', this.selectedFont);
+    localStorage.setItem(LOCAL_STORAGE_FONT_KEY, this.selectedFont);
+    this.applyFont();
+  };
+
+  applyFont = (): void => {
     document.querySelectorAll('*:not(.material-symbols-outlined)').forEach((x) => {
       (x as HTMLElement).style.fontFamily = this.selectedFont + ', monospace';
     });
   };
-
-  prettify = (obj: unknown): string => JSON.stringify(obj, null, '\t');
 }

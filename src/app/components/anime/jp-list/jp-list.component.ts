@@ -13,6 +13,7 @@ import { NavigatorComponent } from '../navigator/navigator.component';
 })
 export class JpListComponent {
   links = links;
+
   getLinksByType = (linkType: LinkType): Array<Link> => {
     return links.filter((link) => link.linkType === linkType);
   };

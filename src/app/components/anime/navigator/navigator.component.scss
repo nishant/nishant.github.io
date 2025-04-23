@@ -4,6 +4,7 @@
   flex-wrap: wrap;
   justify-content: center;
 }
+
 .button-container {
   display: flex;
   flex-direction: column;
@@ -27,7 +28,6 @@
     width: 48px ;
   }
 }
-
 
 .icon-name {
   @media (max-width: 767px) {

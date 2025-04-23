@@ -24,6 +24,7 @@ export class NavigatorComponent {
   scrollToSection = (text: string): void => {
     const allSections = document.getElementsByClassName('section-container');
     const section = document.getElementById(text);
+
     Array.from(allSections).forEach((e) => e.classList.remove('highlighted'));
     section?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     section?.classList.add('highlighted');

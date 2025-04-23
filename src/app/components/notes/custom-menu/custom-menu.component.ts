@@ -16,10 +16,12 @@ import { NgClass } from '@angular/common';
 })
 export class CustomMenuComponent implements OnInit {
   @Input() editor?: Editor;
+
   isActive = false;
   isDisabled = false;
 
   constructor(private notesService: NotesService) {}
+
   onClick(e: MouseEvent): void {
     e.preventDefault();
     const { state, dispatch } = this.editor!.view;
