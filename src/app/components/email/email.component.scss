@@ -1,0 +1,67 @@
+#email-container {
+  padding: 16px;
+  border-radius: 10px;
+  background: rgb(0,0,0);
+  background: linear-gradient(180deg, rgb(23, 23, 25) 0%, rgb(9, 9, 11) 75%, rgb(15, 15, 18) 100%);
+  color: white;
+  //width: 90vw;
+  //height: 90vh;
+}
+
+::ng-deep mat-dialog-container {
+  height: 800px !important;
+}
+
+table {
+ width: 100%;
+}
+.emails {
+  overflow-y: scroll;
+}
+
+.email-row {
+  cursor: pointer;
+
+  &:hover {
+    background: #52555a;
+  }
+}
+
+::ng-deep .cdk-global-overlay-wrapper {
+  overflow: scroll !important;
+}
+
+.sender {
+  width: 25%;
+}
+
+.table-heading {
+  color: #828491;
+}
+
+@media (max-width: 1024px) {
+  .sender {
+    width: 100%;
+    color: #828491;
+  }
+
+  td {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .email-row {
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  .table-heading {
+    display: none;
+  }
+}
+
+.loading {
+  height: 800px;
+  display: flex;
+  align-items: center;
+}

@@ -60,7 +60,9 @@
     padding-bottom: 16px;
   }
 }
-
+::ng-deep mat-dialog-container {
+  height: 100% !important;
+}
 #weather-timing {
   display: flex;
   justify-content: space-evenly;

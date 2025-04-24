@@ -1,0 +1,22 @@
+<div id="email-container">
+  <div class="emails" *ngIf="responses$ | async as messages; else loading">
+    <table>
+      <tr class="table-heading">
+        <th>Sender</th>
+        <th>Subject</th>
+      </tr>
+      <tr *ngFor="let data of messages; let i = index" class="email-row" (click)="openInGmail(data.id)">
+        <td class="sender">{{ data.sender }}</td>
+        <td class="subject">{{ data.subject}}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+
+
+<ng-template #loading>
+  <div class="loading">
+    <p>Fetching emails...</p>
+  </div>
+</ng-template>

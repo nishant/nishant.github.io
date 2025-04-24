@@ -228,11 +228,6 @@ html, body {
 #apps-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 72px !important;
-
-  @media (max-width: 490px) {
-    margin-bottom: 72px !important;
-  }
 }
 
 mat-dialog-container {
@@ -241,4 +236,13 @@ mat-dialog-container {
 
 ::ng-deep .mat-mdc-dialog-surface {
   background: transparent !important;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+}
+
+asl-google-signin-button {
+  margin-bottom: 72px !important;
 }

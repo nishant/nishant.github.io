@@ -13,6 +13,7 @@ import { GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
 import { NgFor, NgOptimizedImage } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { LOCAL_STORAGE_CONFIG_KEY, LOCAL_STORAGE_FONT_KEY } from '../../constants';
+import { EmailComponent } from '../email/email.component';
 
 @Component({
   selector: 'app-home',
@@ -28,12 +29,14 @@ import { LOCAL_STORAGE_CONFIG_KEY, LOCAL_STORAGE_FONT_KEY } from '../../constant
     NotesComponent,
     SettingsComponent,
     WeatherComponent,
+    EmailComponent,
   ],
 })
 export class HomeComponent implements OnInit {
   isNotesOpen = false;
   isWeatherOpen = false;
   isStocksOpen = false;
+  isEmailOpen = false;
   isSettingsOpen = false;
 
   config?: Config;
@@ -45,6 +48,7 @@ export class HomeComponent implements OnInit {
   @ViewChild(NotesComponent) _notes?: NotesComponent;
   @ViewChild('settings', { static: true }) settings?: TemplateRef<unknown>;
   @ViewChild('weather', { static: true }) weather?: TemplateRef<unknown>;
+  @ViewChild('email', { static: true }) email?: TemplateRef<unknown>;
 
   GOOGLE_FAVICON_CACHE_URL = 'https://www.google.com/s2/favicons?domain=';
 
@@ -89,9 +93,6 @@ export class HomeComponent implements OnInit {
     this.googleService.authState.subscribe(async (user) => {
       console.log('sign in successful', user);
       await this.googleService.getAccessToken();
-      this.googleService.getGmailMessages()?.subscribe((messages) => {
-        console.log(messages);
-      });
       this.googleService.getGoogleCalendarData()?.subscribe((events) => {
         console.log('events', events);
       });
@@ -111,6 +112,16 @@ export class HomeComponent implements OnInit {
   toggleStocks = (): void => {
     this.isStocksOpen = !this.isStocksOpen;
     this.alert('Stocks is coming soon.');
+  };
+
+  toggleEmail = (): void => {
+    this.isEmailOpen = !this.isEmailOpen;
+    if (this.isEmailOpen) {
+      this.dialog
+        .open(this.email!)
+        .afterClosed()
+        .subscribe(() => (this.isEmailOpen = !this.isEmailOpen));
+    }
   };
 
   toggleSettings = (): void => {

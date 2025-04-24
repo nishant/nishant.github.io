@@ -29,14 +29,26 @@
     <div title="Stocks" class="button" (click)="toggleStocks()" >
       <span class="material-symbols-outlined">query_stats</span>
     </div>
+    <div title="Email" class="button" (click)="toggleEmail()" >
+      <span class="material-symbols-outlined">email</span>
+    </div>
     <div title="Settings" class="button" (click)="toggleSettings()" >
       <span class="material-symbols-outlined">settings</span>
     </div>
   </div>
 </div>
 
-<asl-google-signin-button type='icon' size='medium'></asl-google-signin-button>
-<button (click)="signOut()">Sign out</button>
+<div class="center">
+  <asl-google-signin-button
+    type="standard"
+    size="medium"
+    theme="filled_black"
+    width="200"
+  >
+  </asl-google-signin-button>
+</div>
+
+<!--<button (click)="signOut()">Sign out</button>-->
 
 <ng-template #notes>
   <app-notes />
@@ -48,6 +60,10 @@
 
 <ng-template #weather>
   <app-weather />
+</ng-template>
+
+<ng-template #email>
+  <app-email />
 </ng-template>
 
 <!-- TODO: stocks here -->
