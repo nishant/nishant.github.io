@@ -92,11 +92,14 @@ export class HomeComponent implements OnInit {
   getGoogleData = (): void => {
     this.googleService.authState.subscribe(async (user) => {
       console.log('sign in successful', user);
-      (<HTMLDivElement>document.getElementById('login-btn')).style.display = 'none';
       await this.googleService.getAccessToken();
-      this.googleService.getGoogleCalendarData()?.subscribe((events) => {
-        console.log('events', events);
-      });
+      if (user) {
+        (<HTMLDivElement>document.getElementById('login-btn')).style.display = 'none';
+        (<HTMLDivElement>document.getElementById('apps-container')).style.marginBottom = '64px';
+      }
+      // this.googleService.getGoogleCalendarData()?.subscribe((events) => {
+      //   console.log('events', events);
+      // });
     });
   };
 
