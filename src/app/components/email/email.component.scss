@@ -23,7 +23,7 @@ table {
   cursor: pointer;
 
   &:hover {
-    background: #52555a;
+    background: #828491;
   }
 }
 
@@ -63,5 +63,7 @@ table {
 .loading {
   height: 800px;
   display: flex;
+  width: 320px;
+  justify-content: center;
   align-items: center;
 }

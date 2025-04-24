@@ -29,3 +29,7 @@
   max-height: 75vh !important;
   overflow: scroll;
 }
+
+::ng-deep mat-dialog-container {
+  height: 100% !important;
+}
