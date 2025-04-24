@@ -58,7 +58,7 @@ bootstrapApplication(AppComponent, {
     {
       provide: 'SocialAuthServiceConfig',
       useValue: {
-        autoLogin: false,
+        autoLogin: true,
         lang: 'en',
         providers: [
           {
@@ -70,7 +70,7 @@ bootstrapApplication(AppComponent, {
                   'https://www.googleapis.com/auth/gmail.readonly',
                   'https://www.googleapis.com/auth/calendar.readonly',
                 ],
-                prompt: 'consent',
+                prompt: 'none',
               },
             ),
           },
