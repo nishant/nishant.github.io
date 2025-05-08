@@ -58,7 +58,7 @@ bootstrapApplication(AppComponent, {
     {
       provide: 'SocialAuthServiceConfig',
       useValue: {
-        autoLogin: true,
+        autoLogin: false,
         lang: 'en',
         providers: [
           {
