@@ -17,7 +17,7 @@ const STATIC_DIR = path.resolve(process.env.STATIC_DIR || path.join(__dirname, '
 const allowedOrigins = new Set([
   'http://localhost:4200', // ng serve
   'https://nishant.github.io', // GitHub Pages copy of the same bundle
-  'https://startpage.nish.software',
+  'https://start.nish.software',
   'https://nish.software',
 ]);
 

@@ -1,4 +1,4 @@
-# Push to master = deploy startpage.nish.software. `check` runs on GitHub's runners;
+# Push to master = deploy start.nish.software. `check` runs on GitHub's runners;
 # `deploy` runs on the self-hosted runner installed on the hosting PC (labels:
 # self-hosted, windows, startpage), which pulls into C:\Apps\startpage, builds
 # server/ and restarts the Startpage scheduled task. GitHub Pages (nishant.github.io)

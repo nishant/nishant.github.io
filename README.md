@@ -29,7 +29,7 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 ## Hosting on nish.software
 
-The same bundle GitHub Pages serves from `docs/` also runs as **https://startpage.nish.software**,
+The same bundle GitHub Pages serves from `docs/` also runs as **https://start.nish.software**,
 served by the small Express server in [`server/`](./server) together with the weather API it used
 to get from Render. One Node process, port 8800, fronted by Caddy and the Cloudflare tunnel from
 [nishant/hosting](https://github.com/nishant/hosting).
@@ -66,4 +66,4 @@ proxy sends `/api` to it.
    `Register-ScheduledTask -Xml (Get-Content C:\Apps\startpage\scripts\Startpage.task.xml -Raw) -TaskName Startpage -Force`
    (`tasks.ps1 start` also registers it if missing).
 4. Google sign-in only works on origins listed in the OAuth client (Google Cloud Console →
-   Credentials → the web client → Authorized JavaScript origins): add `https://startpage.nish.software`.
+   Credentials → the web client → Authorized JavaScript origins): add `https://start.nish.software`.
