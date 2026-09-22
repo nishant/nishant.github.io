@@ -1,0 +1,54 @@
+# Push to master = deploy start.nish.software. `check` runs on GitHub's runners;
+# `deploy` runs on the self-hosted runner installed on the hosting PC (labels:
+# self-hosted, windows, startpage), which pulls into C:\Apps\startpage, builds
+# server/ and restarts the Startpage scheduled task. GitHub Pages (nishant.github.io)
+# keeps serving the committed docs/ folder independently of this workflow.
+name: deploy
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Angular 16 supports Node 16/18; the committed docs/ bundle is what deploys,
+      # this build only proves the source still compiles.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+      - run: npm ci
+      - run: npx ng build --configuration production --output-path /tmp/ng-check
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci
+        working-directory: server
+      - run: npm run typecheck
+        working-directory: server
+
+  deploy:
+    needs: check
+    runs-on: [self-hosted, windows, startpage]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # git refuses to fetch from a shallow clone ("shallow roots")
+      # The live checkout fetches from this job's workspace rather than from GitHub, the
+      # same way the private repos deploy (the runner runs as SYSTEM).
+      # Explicit shell line: a self-hosted runner inherits the machine's execution
+      # policy (Restricted for SYSTEM on a Windows client), which blocks the default
+      # `shell: powershell` wrapper. Bypass applies to this process only.
+      - name: Deploy to the live checkout
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -File {0}
+        run: .\scripts\deploy.ps1 -Target C:\Apps\startpage -FetchFrom "$env:GITHUB_WORKSPACE"
