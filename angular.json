@@ -29,7 +29,7 @@
               {
                 "glob": "**/*",
                 "input": "node_modules/monaco-editor/min/vs",
-                "output": "assets/monaco-editor/min/vs"
+                "output": "assets/monaco/min/vs"
               },
               "src/favicon.ico",
               "src/assets"
@@ -71,6 +71,9 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          },
           "configurations": {
             "production": {
               "browserTarget": "nishant.github.io:build:production"

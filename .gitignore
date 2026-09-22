@@ -39,3 +39,6 @@ Thumbs.db
 
 # Assets for local env
 src/assets/monaco
+
+# Server runtime
+/logs
