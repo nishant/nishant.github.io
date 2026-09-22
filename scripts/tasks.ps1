@@ -21,11 +21,15 @@ function Stop-Task {
   # and the supervisor exits on seeing that (supervise.mjs). Belt and braces: kill any
   # SYSTEM-owned supervisor or child still around, then wait for the task to leave the
   # Running state - Start-ScheduledTask is silently ignored while it is Running
-  # (MultipleInstancesPolicy=IgnoreNew). A developer's own `npm start` is never
-  # touched: it is not SYSTEM-owned.
+  # (MultipleInstancesPolicy=IgnoreNew). Only processes started from this app's live
+  # checkout are touched: job-apps runs its own supervise.mjs as SYSTEM on the same PC,
+  # and a broader match (just the script name) once took its site down. The task XML
+  # therefore passes the supervisor's path in full so it is visible on the command line.
+  # A developer's own `npm start` is never touched: it is not SYSTEM-owned.
   Start-Sleep -Seconds 1
+  $live = [regex]::Escape($root)
   Get-CimInstance Win32_Process -Filter "Name='node.exe'" | Where-Object {
-    $_.CommandLine -and $_.CommandLine -match 'supervise\.mjs|startpage' -and
+    $_.CommandLine -and $_.CommandLine -match $live -and
       ((Invoke-CimMethod -InputObject $_ -MethodName GetOwner).User -eq 'SYSTEM')
   } | ForEach-Object {
     Write-Host "killing straggler node.exe $($_.ProcessId)"
@@ -40,11 +44,8 @@ function Stop-Task {
 }
 
 function Start-Task {
-  $task = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
-  if (-not $task) {
-    Write-Host "$TaskName is not registered - registering from scripts\$TaskName.task.xml"
-    Register-ScheduledTask -Xml (Get-Content (Join-Path $PSScriptRoot "$TaskName.task.xml") -Raw) -TaskName $TaskName -Force | Out-Null
-  }
+  # Always (re)register from the XML so a changed definition deploys with the code.
+  Register-ScheduledTask -Xml (Get-Content (Join-Path $PSScriptRoot "$TaskName.task.xml") -Raw) -TaskName $TaskName -Force | Out-Null
   Start-ScheduledTask -TaskName $TaskName
   Write-Host "started $TaskName"
 }
