@@ -1,31 +1,11 @@
 #app-container {
-  background: #1c1c1c !important;
+  background: var(--nish-bg);
 }
 
 .site-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding: 8px 16px 0;
-}
-
-.nish-pill-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  box-sizing: border-box;
-  font-family: Roboto, sans-serif;
-  font-size: 14px;
-  line-height: 1;
-  color: var(--text-muted);
-  text-decoration: none;
-  min-height: 44px;
-  padding: 4px 12px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  white-space: nowrap;
-
-  &:hover {
-    color: var(--text);
-    border-color: var(--border-strong);
-  }
 }

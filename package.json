@@ -4,8 +4,10 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "prebuild": "node scripts/sync-theme-init.mjs",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
+    "predeploy": "node scripts/sync-theme-init.mjs",
     "deploy": "ng build --output-path docs",
     "test": "ng test",
     "lint": "ng lint",
@@ -24,6 +26,7 @@
     "@angular/platform-browser": "^16.2.0",
     "@angular/platform-browser-dynamic": "^16.2.0",
     "@angular/router": "^16.2.0",
+    "@nish/ui": "https://codeload.github.com/nishant/ui/tar.gz/refs/tags/v0.3.0",
     "moment": "^2.30.1",
     "monaco-editor": "^0.38.0",
     "ngx-editor": "^16.0.1",

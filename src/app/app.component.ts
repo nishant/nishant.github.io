@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { FooterComponent } from './components/footer/footer.component';
 import { RouterOutlet } from '@angular/router';
+import { mountThemeToggle } from '@nish/ui/theme';
 
 @Component({
   selector: 'app-root',
@@ -9,4 +10,16 @@ import { RouterOutlet } from '@angular/router';
   standalone: true,
   imports: [RouterOutlet, FooterComponent],
 })
-export class AppComponent {}
+export class AppComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('themeToggle', { static: true }) themeToggle?: ElementRef<HTMLButtonElement>;
+
+  private unmountThemeToggle?: () => void;
+
+  ngAfterViewInit(): void {
+    if (this.themeToggle) this.unmountThemeToggle = mountThemeToggle(this.themeToggle.nativeElement);
+  }
+
+  ngOnDestroy(): void {
+    this.unmountThemeToggle?.();
+  }
+}
