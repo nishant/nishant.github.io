@@ -1,5 +1,7 @@
-/* ngx-editor ships a white-only look with hex colors; these put it on the theme roles. */
-::ng-deep .NgxEditor {
+/* ngx-editor ships a white-only look with hex colors; these put it on the theme roles.
+   Its styles are unencapsulated and load after ours, so the overrides are scoped under
+   .content to outrank them. */
+.content ::ng-deep .NgxEditor {
   border-radius: 0 !important;
   background: var(--nish-surface);
   color: var(--nish-hi);
@@ -9,47 +11,47 @@
   padding: 32px;
 }
 
-::ng-deep .NgxEditor__MenuBar {
+.content ::ng-deep .NgxEditor__MenuBar {
   border: 1px solid var(--nish-line-strong);
   border-bottom: 1px solid var(--nish-line);
   background-color: var(--nish-elevated);
   color: var(--nish-hi);
 }
 
-::ng-deep .NgxEditor__Content {
+.content ::ng-deep .NgxEditor__Content {
   border: 1px solid var(--nish-line-strong);
 }
 
-::ng-deep .NgxEditor__MenuItem:hover,
-::ng-deep .NgxEditor__Dropdown:hover,
-::ng-deep .NgxEditor__Dropdown .NgxEditor__Dropdown--Item:hover {
+.content ::ng-deep .NgxEditor__MenuItem:hover,
+.content ::ng-deep .NgxEditor__Dropdown:hover,
+.content ::ng-deep .NgxEditor__Dropdown .NgxEditor__Dropdown--Item:hover {
   background-color: var(--nish-overlay);
 }
 
-::ng-deep .NgxEditor__MenuItem.NgxEditor__MenuItem--Active,
-::ng-deep .NgxEditor__MenuItem .NgxEditor__MenuItem--Active,
-::ng-deep .NgxEditor__Dropdown .NgxEditor__Dropdown--Selected,
-::ng-deep .NgxEditor__Dropdown .NgxEditor__Dropdown--Open {
+.content ::ng-deep .NgxEditor__MenuItem.NgxEditor__MenuItem--Active,
+.content ::ng-deep .NgxEditor__MenuItem .NgxEditor__MenuItem--Active,
+.content ::ng-deep .NgxEditor__Dropdown .NgxEditor__Dropdown--Selected,
+.content ::ng-deep .NgxEditor__Dropdown .NgxEditor__Dropdown--Open {
   background-color: var(--nish-accent-soft);
   color: var(--nish-accent);
 }
 
-::ng-deep .NgxEditor__Dropdown .NgxEditor__Dropdown--DropdownMenu,
-::ng-deep .NgxEditor__Popup {
+.content ::ng-deep .NgxEditor__Dropdown .NgxEditor__Dropdown--DropdownMenu,
+.content ::ng-deep .NgxEditor__Popup {
   background-color: var(--nish-elevated);
   color: var(--nish-hi);
   box-shadow: var(--nish-shadow-pop);
 }
 
-::ng-deep .NgxEditor__Seperator {
+.content ::ng-deep .NgxEditor__Seperator {
   border-left-color: var(--nish-line);
 }
 
-::ng-deep .NgxEditor__Placeholder:before {
+.content ::ng-deep .NgxEditor__Placeholder:before {
   color: var(--nish-ghost);
 }
 
-::ng-deep .NgxEditor__MenuBar .material-symbols-outlined {
+.content ::ng-deep .NgxEditor__MenuBar .material-symbols-outlined {
   color: inherit;
   padding-top: 3px;
 }
@@ -66,4 +68,12 @@
 
 ::ng-deep mat-dialog-container {
   height: 100% !important;
+}
+
+/* ngx-editor removes the outline from its menu items and content; give them the shared ring. */
+.content ::ng-deep .NgxEditor__MenuItem:focus-visible,
+.content ::ng-deep .NgxEditor__Dropdown:focus-visible,
+.content ::ng-deep .NgxEditor__Content:focus-visible {
+  outline: var(--nish-focus-width) solid var(--nish-focus);
+  outline-offset: calc(-1 * var(--nish-focus-width));
 }

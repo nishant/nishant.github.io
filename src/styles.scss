@@ -23,3 +23,9 @@ body {
   border-radius: var(--nish-radius-sm);
   box-shadow: 0 0 0 2px var(--nish-accent);
 }
+
+/* Google's sign-in button is a light iframe. When the page's color-scheme is dark the
+   browser paints a mismatched iframe opaque white; this keeps it transparent. */
+asl-google-signin-button iframe {
+  color-scheme: light;
+}
