@@ -1,7 +1,7 @@
 <div class="navigator-container">
   <div *ngFor="let category of categories">
-    <button class="button-container" (click)="scrollToSection(category.text)">
-      <span class="icon-asset material-symbols-outlined">
+    <button type="button" class="button-container" (click)="scrollToSection(category.text)">
+      <span class="icon-asset material-symbols-outlined" aria-hidden="true">
         <span>{{ category.icon }}</span>
       </span>
       <span class="icon-name mat-caption">{{ category.text }}</span>

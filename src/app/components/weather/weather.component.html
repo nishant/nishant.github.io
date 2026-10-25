@@ -46,15 +46,15 @@
     </div>
 
     <div id="weather-timing">
-      <div title="Current" class="button" (click)="getCurrentWeather()" >
-        <span class="material-symbols-outlined">notifications</span>
-      </div>
-      <div title="Hourly" class="button" (click)="getHourlyWeather()" >
-        <span class="material-symbols-outlined">schedule</span>
-      </div>
-      <div title="Daily" class="button" (click)="getDailyWeather()" >
-        <span class="material-symbols-outlined">date_range</span>
-      </div>
+      <button type="button" class="nish-icon-btn" title="Current" aria-label="Current" (click)="getCurrentWeather()">
+        <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+      </button>
+      <button type="button" class="nish-icon-btn" title="Hourly" aria-label="Hourly" (click)="getHourlyWeather()">
+        <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+      </button>
+      <button type="button" class="nish-icon-btn" title="Daily" aria-label="Daily" (click)="getDailyWeather()">
+        <span class="material-symbols-outlined" aria-hidden="true">date_range</span>
+      </button>
     </div>
   </div>
 </div>
