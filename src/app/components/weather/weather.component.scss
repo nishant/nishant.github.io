@@ -1,8 +1,7 @@
 #weather-container {
   border-radius: 10px;
-  background: rgb(0,0,0);
-  background: linear-gradient(180deg, rgb(23, 23, 25) 0%, rgb(9, 9, 11) 75%, rgb(15, 15, 18) 100%);
-  color: white;
+  background: var(--nish-elevated);
+  color: var(--nish-hi);
 }
 
 .weather-widget-row {
@@ -14,7 +13,7 @@
 .weather-icon {
   display: flex;
   justify-content: center;
-  color: white;
+  color: var(--nish-hi);
   font-variation-settings:
     'FILL' 1,
     'wght' 400,
@@ -23,7 +22,7 @@
 }
 
 .icon {
-  filter: drop-shadow( 1px 1px 5px rgb(104, 175, 197));
+  filter: drop-shadow(1px 1px 5px var(--nish-sky));
   animation-name: iconMovement;
   animation-iteration-count: infinite;
   animation-duration: 10s;
@@ -46,7 +45,7 @@
 }
 
 .wrapper {
-  border: 2px solid #9c9c9c;
+  border: 2px solid var(--nish-line-strong);
   border-radius: 4px;
   justify-content: center;
   display: flex;
@@ -67,10 +66,6 @@
   display: flex;
   justify-content: space-evenly;
   margin-top: 24px;
-
-  button, span {
-    cursor: pointer;
-  }
 }
 
 .hourly-row {
@@ -143,7 +138,7 @@
 
 .headings {
   display: flex;
-  color: #828491;
+  color: var(--nish-hi3);
 }
 
 .date-header {
@@ -166,10 +161,11 @@
   width: 56px;
 }
 
-.grey {
-  color: #828491;
+span {
+  color: var(--nish-hi);
 }
 
-span {
-  color: white;
+.grey,
+span.grey {
+  color: var(--nish-hi3);
 }

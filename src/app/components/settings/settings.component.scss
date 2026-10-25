@@ -8,10 +8,9 @@
 }
 
 ngx-monaco-editor {
-  background: #1e1e1e;
+  background: var(--nish-surface);
 }
 
 mat-form-field {
-  background: #1e1e1e !important;
   width: 100%;
 }

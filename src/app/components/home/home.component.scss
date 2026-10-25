@@ -1,17 +1,14 @@
-$placeholder: #888888;
-$mainBG: #373D45;
-$searchIcon: #888888;
-$searchIconActive: white;
-$searchText: white;
-$searchLine: white;
-$blockBG: rgba(0,0,0,0.2);
-$blockBorder: #222222;
-$blockHeader: #F38630;
-$blockLink: white;
-$blockHover: #69D2E7;
-
-$blockHeader: #95EDFD;
-$blockHover: #FF92D1;
+// Colors are @nish/ui roles so the page follows the dark/light theme.
+$placeholder: var(--nish-ghost);
+$searchIcon: var(--nish-hi3);
+$searchIconActive: var(--nish-hi);
+$searchText: var(--nish-hi);
+$searchLine: var(--nish-hi);
+$blockBG: var(--nish-surface);
+$blockBorder: var(--nish-line);
+$blockHeader: var(--nish-sky);
+$blockLink: var(--nish-hi);
+$blockHover: var(--nish-accent);
 
 $BP_XXL: 1600px;
 $BP_XL: 1200px;
@@ -50,10 +47,6 @@ $BP_XXS: 400px;
   line-height: 1.8;
   font-weight: 400;
   opacity: 1.0;
-}
-
-html, body {
-  background-color: $mainBG;
 }
 
 .search-block {
@@ -183,42 +176,28 @@ html, body {
 }
 
 .page-container {
-  background: #1c1c1c;;
+  background: var(--nish-bg);
 }
 
 #floating-bottom-left {
   position: fixed;
   bottom: 5%;
   padding: 0;
-  background: #2d2c2c;
+  background: var(--nish-surface);
 }
 
-.button {
-  cursor: pointer;
-  padding: 12px;
+/* The app launchers: shared icon buttons (nish-components.css), sized to keep the old 48px tiles. */
+.app-button {
+  width: 48px;
+  height: 48px;
   margin: 8px;
+  color: var(--nish-hi);
 }
 
-.material-symbols-outlined {
-  color: white;
-  font-variation-settings:
-   'FILL' 0,
-   'wght' 400,
-   'GRAD' 0,
-   'opsz' 24
-}
-
-.icon-button {
-  background: none;
-  border: 0;
-  cursor: pointer;
+.link-icon {
   display: flex;
   align-items: center;
   padding: 0 4px 0 0;
-
-  &.icon {
-    padding: 0;
-  }
 }
 
 .links {

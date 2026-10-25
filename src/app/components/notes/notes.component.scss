@@ -1,5 +1,8 @@
-::ng-deep  .NgxEditor {
+/* ngx-editor ships a white-only look with hex colors; these put it on the theme roles. */
+::ng-deep .NgxEditor {
   border-radius: 0 !important;
+  background: var(--nish-surface);
+  color: var(--nish-hi);
 }
 
 .container {
@@ -7,16 +10,47 @@
 }
 
 ::ng-deep .NgxEditor__MenuBar {
-  border: 2px solid black;
-  border-bottom: 1px solid black;
+  border: 1px solid var(--nish-line-strong);
+  border-bottom: 1px solid var(--nish-line);
+  background-color: var(--nish-elevated);
+  color: var(--nish-hi);
 }
 
 ::ng-deep .NgxEditor__Content {
-  border: 1px solid black;
+  border: 1px solid var(--nish-line-strong);
 }
 
-::ng-deep .material-symbols-outlined {
-  color: black;
+::ng-deep .NgxEditor__MenuItem:hover,
+::ng-deep .NgxEditor__Dropdown:hover,
+::ng-deep .NgxEditor__Dropdown .NgxEditor__Dropdown--Item:hover {
+  background-color: var(--nish-overlay);
+}
+
+::ng-deep .NgxEditor__MenuItem.NgxEditor__MenuItem--Active,
+::ng-deep .NgxEditor__MenuItem .NgxEditor__MenuItem--Active,
+::ng-deep .NgxEditor__Dropdown .NgxEditor__Dropdown--Selected,
+::ng-deep .NgxEditor__Dropdown .NgxEditor__Dropdown--Open {
+  background-color: var(--nish-accent-soft);
+  color: var(--nish-accent);
+}
+
+::ng-deep .NgxEditor__Dropdown .NgxEditor__Dropdown--DropdownMenu,
+::ng-deep .NgxEditor__Popup {
+  background-color: var(--nish-elevated);
+  color: var(--nish-hi);
+  box-shadow: var(--nish-shadow-pop);
+}
+
+::ng-deep .NgxEditor__Seperator {
+  border-left-color: var(--nish-line);
+}
+
+::ng-deep .NgxEditor__Placeholder:before {
+  color: var(--nish-ghost);
+}
+
+::ng-deep .NgxEditor__MenuBar .material-symbols-outlined {
+  color: inherit;
   padding-top: 3px;
 }
 
