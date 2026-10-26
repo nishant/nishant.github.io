@@ -2,7 +2,7 @@ import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core
 import { Router } from '@angular/router';
 import { Config } from '../../config/config';
 import defaultConfigJson from '../../config/config.json';
-import { MatSnackBar, MatSnackBarRef, TextOnlySnackBar } from '@angular/material/snack-bar';
+import { showToast } from '@nish/ui/theme';
 import { MatDialog } from '@angular/material/dialog';
 import { SettingsService } from '../settings/settings.service';
 import { NotesComponent } from '../notes/notes.component';
@@ -41,7 +41,6 @@ export class HomeComponent implements OnInit {
 
   config?: Config;
 
-  alertMessage = inject(MatSnackBar);
   dialog = inject(MatDialog);
 
   @ViewChild('notes', { static: true }) notes?: TemplateRef<unknown>;
@@ -146,7 +145,7 @@ export class HomeComponent implements OnInit {
     }
   };
 
-  alert = (message: string): MatSnackBarRef<TextOnlySnackBar> => this.alertMessage.open(message, 'Dismiss');
+  alert = (message: string): (() => void) => showToast(message, { tone: 'info' });
 
   getFavicon = (url: string): string => this.GOOGLE_FAVICON_CACHE_URL + url;
 
