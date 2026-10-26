@@ -2,10 +2,11 @@ import { Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core
 import { Router } from '@angular/router';
 import { Config } from '../../config/config';
 import defaultConfigJson from '../../config/config.json';
-import { showToast } from '@nish/ui/theme';
+import { confirmDialog, showToast } from '@nish/ui/theme';
 import { MatDialog } from '@angular/material/dialog';
 import { SettingsService } from '../settings/settings.service';
 import { NotesComponent } from '../notes/notes.component';
+import { NotesService } from '../notes/notes.service';
 import { GoogleService } from '../../services/google.service';
 import { WeatherComponent } from '../weather/weather.component';
 import { SettingsComponent } from '../settings/settings.component';
@@ -14,6 +15,7 @@ import { NgFor, NgOptimizedImage } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { LOCAL_STORAGE_CONFIG_KEY, LOCAL_STORAGE_FONT_KEY } from '../../constants';
 import { EmailComponent } from '../email/email.component';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -42,9 +44,9 @@ export class HomeComponent implements OnInit {
   config?: Config;
 
   dialog = inject(MatDialog);
+  notesService = inject(NotesService);
 
   @ViewChild('notes', { static: true }) notes?: TemplateRef<unknown>;
-  @ViewChild(NotesComponent) _notes?: NotesComponent;
   @ViewChild('settings', { static: true }) settings?: TemplateRef<unknown>;
   @ViewChild('weather', { static: true }) weather?: TemplateRef<unknown>;
   @ViewChild('email', { static: true }) email?: TemplateRef<unknown>;
@@ -70,22 +72,35 @@ export class HomeComponent implements OnInit {
     });
   };
 
+  /** Notes ask whether to save before they close. The dialog cannot close by itself
+   *  (disableClose): a backdrop click or Escape awaits the question first, saves while the
+   *  editor is still mounted, then closes. Same outcomes as the old window.confirm: Save and
+   *  close, or close without saving. */
   toggleNotes = (): void => {
-    this.isNotesOpen = !this.isNotesOpen;
-    if (this.isNotesOpen) {
-      this.dialog
-        .open(this.notes!)
-        .beforeClosed()
-        .subscribe(() => {
-          if (confirm('Do you want to save before closing?')) {
-            console.log('User saved');
-            this._notes?.saveContent();
-          } else {
-            console.log('User didnt save');
-          }
-          this.isNotesOpen = !this.isNotesOpen;
-        });
-    }
+    if (this.isNotesOpen) return;
+    this.isNotesOpen = true;
+    const ref = this.dialog.open(this.notes!, { disableClose: true });
+    let asking = false;
+    const requestClose = async (): Promise<void> => {
+      if (asking) return;
+      asking = true;
+      const save = await confirmDialog({
+        title: 'Do you want to save before closing?',
+        confirmLabel: 'Save',
+        cancelLabel: 'Close without saving',
+      });
+      if (save) this.notesService.action.next('save');
+      ref.close();
+    };
+    ref.backdropClick().subscribe(() => void requestClose());
+    ref
+      .keydownEvents()
+      .pipe(filter((e) => e.key === 'Escape'))
+      .subscribe((e) => {
+        e.preventDefault();
+        void requestClose();
+      });
+    ref.afterClosed().subscribe(() => (this.isNotesOpen = false));
   };
 
   getGoogleData = (): void => {
