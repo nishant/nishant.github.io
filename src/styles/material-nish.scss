@@ -3,7 +3,7 @@
  * The prebuilt indigo-pink theme still supplies layout, typography and the color
  * tokens of every component we do not use. This file loads after it and points the
  * color tokens of the components the startpage uses (card, list, divider, dialog,
- * snack bar, form field, select, option, text button) at --nish-* roles, so they
+ * form field, select, option, text button) at --nish-* roles, so they
  * follow the dark/light theme. Selectors mirror the prebuilt ones so that, coming
  * later in the cascade, they win without !important.
  */
@@ -75,12 +75,6 @@ html {
   --mdc-dialog-container-color: var(--nish-elevated);
   --mdc-dialog-subhead-color: var(--nish-hi);
   --mdc-dialog-supporting-text-color: var(--nish-hi2);
-}
-
-.mat-mdc-snack-bar-container {
-  --mdc-snackbar-container-color: var(--nish-invert-bg);
-  --mdc-snackbar-supporting-text-color: var(--nish-invert-text);
-  --mat-snack-bar-button-color: var(--nish-invert-text);
 }
 
 .mat-mdc-button.mat-unthemed {

@@ -12,7 +12,6 @@ import { MatLineModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app/app-routing.module';
@@ -41,7 +40,6 @@ bootstrapApplication(AppComponent, {
       BrowserModule,
       AppRoutingModule,
       MatDividerModule,
-      MatSnackBarModule,
       MatDialogModule,
       MatListModule,
       MatIconModule,

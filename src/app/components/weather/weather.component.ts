@@ -3,6 +3,7 @@ import { CurrentWeatherData, DailyWeatherData, HourlyWeatherData, IconCodes, Wea
 import { WeatherService } from './weather.service';
 import moment from 'moment';
 import { NgIf, NgFor } from '@angular/common';
+import { showToast } from '@nish/ui/theme';
 
 @Component({
   selector: 'app-weather',
@@ -69,7 +70,7 @@ export class WeatherComponent implements OnInit {
 
   getGeolocation = (): void => {
     if (!navigator.geolocation) {
-      alert('Geolocation not supported.');
+      showToast('Geolocation not supported.', { tone: 'warn' });
     }
 
     // 5 minute cache
