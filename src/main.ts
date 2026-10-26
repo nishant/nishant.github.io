@@ -24,6 +24,11 @@ import {
   GoogleSigninButtonModule,
 } from '@abacritt/angularx-social-login';
 import { NGX_MONACO_EDITOR_CONFIG, NgxMonacoEditorConfig, MonacoEditorModule } from 'ngx-monaco-editor-v2';
+import { initTheme } from '@nish/ui/theme';
+
+// theme-init.js (inlined in index.html) painted the saved theme; this keeps it in sync
+// across tabs, subdomains and system changes.
+initTheme();
 
 const monacoConfig: NgxMonacoEditorConfig = {
   defaultOptions: { scrollBeyondLastLine: false },

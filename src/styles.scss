@@ -1,19 +1,16 @@
 @import 'https://fonts.googleapis.com/icon?family=Material+Icons';
 
-/* Theme tokens (the site is dark-only) */
-:root {
-  --text: #ffffff;
-  --text-muted: #b0b0b0;
-  --border: rgba(255, 255, 255, 0.2);
-  --border-strong: rgba(255, 255, 255, 0.5);
-}
+/* Colors come from @nish/ui roles (nish.css, loaded before this file in angular.json).
+   The page follows the shared dark/light theme. */
 
-body { margin: 0;
-  background: #323237
+body {
+  margin: 0;
+  background: var(--nish-bg);
+  color: var(--nish-hi);
 }
 
 .material-symbols-outlined {
-  color: white;
+  color: inherit;
   font-variation-settings:
     'FILL' 0,
     'wght' 400,
@@ -21,6 +18,14 @@ body { margin: 0;
     'opsz' 24
 }
 
+/* The jp page's section the navigator jumped to. */
 .highlighted {
-  border: 2px solid white;
+  border-radius: var(--nish-radius-sm);
+  box-shadow: 0 0 0 2px var(--nish-accent);
+}
+
+/* Google's sign-in button is a light iframe. When the page's color-scheme is dark the
+   browser paints a mismatched iframe opaque white; this keeps it transparent. */
+asl-google-signin-button iframe {
+  color-scheme: light;
 }

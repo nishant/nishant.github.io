@@ -11,30 +11,30 @@
     <ul *ngFor="let section of config?.sections" class="block">
       <li class="header">{{ section.header }}</li>
       <li *ngFor="let link of section.links" class="links">
-        <button class="icon-button">
+        <span class="link-icon">
           <img class="icon" [ngSrc]="getFavicon(link.url)" width="16" height="16" alt=""/>
-        </button>
+        </span>
         <a href="{{link.url}}">{{ link.text }}</a>
       </li>
     </ul>
   </div>
 
   <div id="apps-container">
-    <div title="Notes" class="button" (click)="toggleNotes()" >
-      <span class="material-symbols-outlined">description</span>
-    </div>
-    <div title="Weather" class="button" (click)="toggleWeather()" >
-      <span class="material-symbols-outlined">partly_cloudy_day</span>
-    </div>
-    <div title="Stocks" class="button" (click)="toggleStocks()" >
-      <span class="material-symbols-outlined">query_stats</span>
-    </div>
-    <div title="Email" class="button" (click)="toggleEmail()" >
-      <span class="material-symbols-outlined">email</span>
-    </div>
-    <div title="Settings" class="button" (click)="toggleSettings()" >
-      <span class="material-symbols-outlined">settings</span>
-    </div>
+    <button type="button" class="nish-icon-btn app-button" title="Notes" aria-label="Notes" (click)="toggleNotes()">
+      <span class="material-symbols-outlined" aria-hidden="true">description</span>
+    </button>
+    <button type="button" class="nish-icon-btn app-button" title="Weather" aria-label="Weather" (click)="toggleWeather()">
+      <span class="material-symbols-outlined" aria-hidden="true">partly_cloudy_day</span>
+    </button>
+    <button type="button" class="nish-icon-btn app-button" title="Stocks" aria-label="Stocks" (click)="toggleStocks()">
+      <span class="material-symbols-outlined" aria-hidden="true">query_stats</span>
+    </button>
+    <button type="button" class="nish-icon-btn app-button" title="Email" aria-label="Email" (click)="toggleEmail()">
+      <span class="material-symbols-outlined" aria-hidden="true">email</span>
+    </button>
+    <button type="button" class="nish-icon-btn app-button" title="Settings" aria-label="Settings" (click)="toggleSettings()">
+      <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+    </button>
   </div>
 </div>
 

@@ -1,12 +1,13 @@
 .footer {
   position: fixed;
   bottom: 0;
-  background-color: #131313;
+  background-color: var(--nish-surface);
+  border-top: 1px solid var(--nish-line);
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: lightgrey;
+  color: var(--nish-hi2);
   padding: 4px;
   height: 12px;
 }
@@ -24,5 +25,9 @@
 
 .view-source {
   text-decoration: none;
-  color: lightgrey;
+  color: var(--nish-hi2);
+
+  &:hover {
+    color: var(--nish-hi);
+  }
 }

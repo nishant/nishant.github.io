@@ -1,11 +1,9 @@
 #email-container {
   padding: 16px;
   border-radius: 10px;
-  background: rgb(0,0,0);
-  background: linear-gradient(180deg, rgb(23, 23, 25) 0%, rgb(9, 9, 11) 75%, rgb(15, 15, 18) 100%);
-  color: white;
-  //width: 90vw;
-  //height: 90vh;
+  border: 1px solid var(--nish-line);
+  background: var(--nish-elevated);
+  color: var(--nish-hi);
 }
 
 ::ng-deep mat-dialog-container {
@@ -23,7 +21,7 @@ table {
   cursor: pointer;
 
   &:hover {
-    background: #828491;
+    background: var(--nish-overlay);
   }
 }
 
@@ -36,13 +34,13 @@ table {
 }
 
 .table-heading {
-  color: #828491;
+  color: var(--nish-hi3);
 }
 
 @media (max-width: 1024px) {
   .sender {
     width: 100%;
-    color: #828491;
+    color: var(--nish-hi2);
   }
 
   td {

@@ -1,6 +1,6 @@
 <div class="section-container" [id]="heading">
   <mat-card class="heading">
-    <span class="material-symbols-outlined">
+    <span class="material-symbols-outlined" aria-hidden="true">
       {{ icon }}
     </span>
     <mat-card-content>{{ heading }}</mat-card-content>
@@ -11,9 +11,9 @@
     <a *ngFor="let link of links; let idx = index" [href]="link.link" target="_blank" class="link">
       <mat-list-item>
         {{idx + 1}}.
-        <button class="icon-button">
+        <span class="link-icon">
           <img class="icon" [ngSrc]="getFavicon(link.link)" width="16" height="16" alt=""/>
-        </button>
+        </span>
         <span class="link-text">{{ link.text }}</span>
       </mat-list-item>
     </a>

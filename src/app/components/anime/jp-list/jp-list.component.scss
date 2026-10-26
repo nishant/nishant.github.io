@@ -5,11 +5,11 @@
   left: 0;
   padding: 12px;
   height: 100%;
-  background: #1c1c1c;
+  background: var(--nish-bg);
 }
 
 .title {
-  color: white;
+  color: var(--nish-hi);
   text-align: center;
   margin: 0;
   padding-top: 28px;
