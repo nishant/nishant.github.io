@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en" data-nish-themes="dark light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="description" content="Nish's start page" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="favicon.ico" sizes="any" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <title>Start</title>
+    <script>
+      // Applies the saved font before first paint (mirrors src/lib/font.ts).
+      (function () {
+        try {
+          var f = localStorage.getItem('nishant.github.io-font') || 'Fira Code';
+          var mono = f === 'Fira Code' || f.indexOf('Courier') === 0;
+          document.documentElement.style.setProperty(
+            '--app-font',
+            "'" + f + "', " + (mono ? 'ui-monospace, monospace' : 'system-ui, sans-serif'),
+          );
+          var href =
+            f === 'Fira Code'
+              ? 'https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&display=swap'
+              : f === 'Roboto'
+                ? 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap'
+                : '';
+          if (href) {
+            var l = document.createElement('link');
+            l.rel = 'stylesheet';
+            l.href = href;
+            l.setAttribute('data-app-font', f);
+            document.head.appendChild(l);
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
