@@ -14,7 +14,7 @@ import {
   toast,
 } from '@nish/ui';
 import { money } from '@nish/ui/format';
-import { ArrowLeft, ChartCandlestick, ExternalLink, Lock, RefreshCw, WifiOff } from 'lucide-react';
+import { ArrowLeft, ChartCandlestick, ExternalLink, Lock, RefreshCw, ShieldAlert, WifiOff } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SymbolDetail } from './SymbolDetail';
 import {
@@ -23,6 +23,8 @@ import {
   formatChange,
   getOverview,
   getTradingUrl,
+  localNetworkAccess,
+  type LocalNetworkState,
   type Overview,
   type Snapshot,
 } from './trading';
@@ -122,6 +124,19 @@ function WatchlistModal({ onClose }: { onClose: () => void }) {
   const { data, error, loading, refresh } = useOverview();
   const [tradingUrl, setTradingUrl] = useState(FALLBACK_URL);
   const [selected, setSelected] = useState<string | null>(null);
+  const [lna, setLna] = useState<LocalNetworkState>('unsupported');
+
+  const unreachable = error instanceof TradingUnreachableError;
+  useEffect(() => {
+    if (!unreachable) return;
+    let live = true;
+    void localNetworkAccess().then((s) => {
+      if (live) setLna(s);
+    });
+    return () => {
+      live = false;
+    };
+  }, [unreachable, error]);
 
   useEffect(() => {
     let live = true;
@@ -212,14 +227,31 @@ function WatchlistModal({ onClose }: { onClose: () => void }) {
       />
     );
   } else if (error instanceof TradingUnreachableError) {
-    body = (
-      <EmptyState
-        icon={<WifiOff size={28} aria-hidden="true" />}
-        title="Can't reach Trading"
-        detail="Trading is only available on Tailscale. Connect to your tailnet and try again."
-        action={retry}
-      />
-    );
+    // Trading resolves to a Tailscale address, which Chrome treats as a local network: a public
+    // page needs the site's "Local network access" permission before it can reach it.
+    body =
+      lna === 'denied' ? (
+        <EmptyState
+          icon={<ShieldAlert size={28} aria-hidden="true" />}
+          title="Chrome is blocking Trading"
+          detail="Trading is on your tailnet, which Chrome treats as a local network. Allow Local network access for start.nish.software in the site settings (the icon left of the address), then try again."
+          action={retry}
+        />
+      ) : lna === 'prompt' ? (
+        <EmptyState
+          icon={<ShieldAlert size={28} aria-hidden="true" />}
+          title="Allow local network access"
+          detail="Chrome asks before this page can reach Trading on your tailnet. Tap Try again and choose Allow."
+          action={retry}
+        />
+      ) : (
+        <EmptyState
+          icon={<WifiOff size={28} aria-hidden="true" />}
+          title="Can't reach Trading"
+          detail="Trading is only available on Tailscale. Connect to your tailnet and try again."
+          action={retry}
+        />
+      );
   } else if (error) {
     body = <ErrorState message={error.message} onRetry={refresh} retrying={loading} />;
   } else {
