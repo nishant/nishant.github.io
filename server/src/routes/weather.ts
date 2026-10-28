@@ -87,11 +87,13 @@ router.get('/data', async (req: Request, res: Response) => {
       },
     });
     const data = response.data ?? {};
-    // One Call omits sections it cannot produce; the frontend only needs a few entries.
+    // One Call omits sections it cannot produce; the frontend needs a day of hours and a week of days.
     const payload = {
       current: data.current ?? null,
-      hourly: Array.isArray(data.hourly) ? data.hourly.slice(0, 5) : [],
-      daily: Array.isArray(data.daily) ? data.daily.slice(0, 3) : [],
+      hourly: Array.isArray(data.hourly) ? data.hourly.slice(0, 24) : [],
+      daily: Array.isArray(data.daily) ? data.daily.slice(0, 7) : [],
+      timezone: typeof data.timezone === 'string' ? data.timezone : null,
+      timezone_offset: typeof data.timezone_offset === 'number' ? data.timezone_offset : 0,
     };
     setCached(key, payload, DATA_TTL_MS);
     res.setHeader('X-Cache', 'MISS');

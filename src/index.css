@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@import '@nish/ui/tailwind.css';
+
+body {
+  font-family: var(--app-font, 'Fira Code', ui-monospace, monospace);
+}

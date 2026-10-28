@@ -2,7 +2,7 @@
 
 Read `README.md` first ("Hosting on nish.software" covers the server and deploy). Hosting
 conventions live in `nishant/hosting` (`CLAUDE.md`, `docs/OPERATIONS.md`); they win if this file
-disagrees. A push to `master` deploys; frontend changes need `npm run deploy` to rebuild `docs/`.
+disagrees. A push to `master` deploys; `npm run build` rebuilds `docs/`; commit it.
 
 - Target device: Samsung Galaxy Z Fold 7 (cover screen ~360-390 CSS px, unfolded a near-square
   ~840px). Every page must look right, with no horizontal page scroll, at 360px (not just
@@ -17,7 +17,7 @@ live when you're done… Do not hold up development waiting for an answer from m
 
 - Claude sessions build, commit, push, open and merge PRs, release and deploy on their own judgment,
   without asking Nish. Work is done only when it is merged, the `deploy` run is green and
-  https://start.nish.software serves the new build (and `npm run deploy` rebuilt `docs/` for
+  https://start.nish.software serves the new build (and `npm run build` rebuilt `docs/` for
   frontend changes).
 - Pick sensible defaults instead of asking. Stop for Nish only when critically necessary:
   credentials or account signups, or anything destructive to production data.

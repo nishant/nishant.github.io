@@ -1,0 +1,134 @@
+{
+  "current": {
+    "dt": 1792000000,
+    "sunrise": 1791980000,
+    "sunset": 1792020000,
+    "temp": 293.15,
+    "feels_like": 292.15,
+    "humidity": 55,
+    "uvi": 6.34,
+    "wind_speed": 5.5,
+    "wind_deg": 180,
+    "weather": [
+      {
+        "id": 500,
+        "main": "Rain",
+        "description": "light rain",
+        "icon": "10d"
+      }
+    ]
+  },
+  "hourly": [
+    {
+      "dt": 1792003600,
+      "temp": 293.15,
+      "feels_like": 293.15,
+      "pop": 0,
+      "weather": [
+        {
+          "id": 800,
+          "main": "x",
+          "description": "x",
+          "icon": "02d"
+        }
+      ]
+    },
+    {
+      "dt": 1792007200,
+      "temp": 294.15,
+      "feels_like": 294.15,
+      "pop": 0.1,
+      "weather": [
+        {
+          "id": 800,
+          "main": "x",
+          "description": "x",
+          "icon": "10d"
+        }
+      ]
+    },
+    {
+      "dt": 1792010800,
+      "temp": 295.15,
+      "feels_like": 295.15,
+      "pop": 0.35,
+      "weather": [
+        {
+          "id": 800,
+          "main": "x",
+          "description": "x",
+          "icon": "10d"
+        }
+      ]
+    },
+    {
+      "dt": 1792014400,
+      "temp": 288.15,
+      "feels_like": 288.15,
+      "pop": 0.8,
+      "weather": [
+        {
+          "id": 800,
+          "main": "x",
+          "description": "x",
+          "icon": "01n"
+        }
+      ]
+    }
+  ],
+  "daily": [
+    {
+      "dt": 1792000000,
+      "temp": {
+        "day": 286.65,
+        "min": 273.15,
+        "max": 300.15
+      },
+      "pop": 0.6,
+      "weather": [
+        {
+          "id": 500,
+          "main": "Rain",
+          "description": "light rain",
+          "icon": "10d"
+        }
+      ]
+    },
+    {
+      "dt": 1792086400,
+      "temp": {
+        "day": 280.15,
+        "min": 270.15,
+        "max": 290.15
+      },
+      "pop": 0.1,
+      "weather": [
+        {
+          "id": 500,
+          "main": "Rain",
+          "description": "light rain",
+          "icon": "01d"
+        }
+      ]
+    },
+    {
+      "dt": 1792172800,
+      "temp": {
+        "day": 292.65,
+        "min": 280.15,
+        "max": 305.15
+      },
+      "pop": 0.2,
+      "weather": [
+        {
+          "id": 500,
+          "main": "Rain",
+          "description": "light rain",
+          "icon": "11d"
+        }
+      ]
+    }
+  ],
+  "timezone": "America/Chicago",
+  "timezone_offset": -18000
+}

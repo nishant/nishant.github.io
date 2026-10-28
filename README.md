@@ -1,31 +1,45 @@
-# github.io
-My github.io site hosted @ https://nishant.github.io
+# Start page
+Nish's start page at https://start.nish.software (and https://nishant.github.io): search, a grid of
+link sections, a clock and weather chip, and sheets for Notes, Weather, Mail, the trading Watchlist
+and Settings. `#/jp` is the Anime + Manga page.
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.1.
+Stack: React 19, Vite, Tailwind 4, [`@nish/ui`](https://github.com/nishant/ui), lucide-react.
+Tiptap (Notes) and CodeMirror (Settings, Raw JSON) are lazy chunks, as is each sheet.
 
-## Development server
+## Develop
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+```bash
+cd server && cp .env.example .env && npm ci && npm run build && npm start   # API on :8800
+npm install && npm run dev                                                    # http://localhost:4200, /api proxied
+```
 
-## Code scaffolding
+- `npm run check` is the gate: typecheck, vitest, then the build.
+- `npm run build` writes the production bundle to `docs/` (emptying it first). Commit the result:
+  GitHub Pages and the server both serve that folder.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Saved data
 
-## Build
+Everything lives in the browser's localStorage. The formats are unchanged from the Angular version.
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+| Key | Holds |
+|---|---|
+| `nishant.github.io-config` | JSON `{ "sections": [{ "header", "links": [{ "text", "url" }] }] }`, tab-indented |
+| `nishant.github.io-notes` | The Notes HTML string |
+| `nishant.github.io-font` | The font family name, e.g. `Fira Code` |
+| `nishant.github.io-google-access-token` | `{ "accessToken", "timestamp" }`, valid 55 minutes |
 
-## Running unit tests
+## Gmail
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Read-only inbox via Google sign-in in the browser. One-time setup: in Google Cloud Console create an
+OAuth client of type Web application, add `https://start.nish.software` as an Authorized JavaScript
+origin, put the client id in `C:\Apps\startpage\server\.env` as `GOOGLE_CLIENT_ID`, and restart the
+`Startpage` task. Until then the Mail sheet says it is not set up.
 
-## Running end-to-end tests
+## Watchlist
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+The Watchlist sheet calls `https://trading.nish.software` (override with `TRADING_URL`) straight from
+the browser with your Trading session cookie. It needs Tailscale and a Trading sign-in; otherwise the
+sheet says so.
 
 ## Hosting on nish.software
 
@@ -36,9 +50,9 @@ to get from Render. One Node process, port 8800, fronted by Caddy and the Cloudf
 
 | Path | What |
 |---|---|
-| `server/src/index.ts` | Express: serves `docs/` and mounts `/api/weather`; `/health` for the deploy |
+| `server/src/index.ts` | Express: serves `docs/`, mounts `/api/weather`, `/api/config` (Gmail client id, Trading URL); `/health` for the deploy |
 | `server/src/routes/weather.ts` | OpenWeatherMap One Call 3.0 + reverse geocode, cached, key from `server/.env` |
-| `proxy.conf.json` | `ng serve` forwards `/api` to `localhost:8800` so dev works against the local server |
+| `vite.config.ts` | `npm run dev` proxies `/api` to `localhost:8800` so dev works against the local server |
 | `scripts/deploy.ps1` | Run by the self-hosted runner on push to `master`: pull into `C:\Apps\startpage`, build `server/`, restart the task |
 | `scripts/tasks.ps1`, `scripts/Startpage.task.xml`, `scripts/supervise.mjs` | The `Startpage` scheduled task (SYSTEM, at boot) and its log-teeing supervisor (`logs\app.log`) |
 
@@ -51,13 +65,13 @@ npm ci && npm run build && npm start
 # http://localhost:8800/#/home  (serves ../docs)  -  http://localhost:8800/health
 ```
 
-For frontend work keep that server running and use `npm start` (ng serve) at the repo root; the
-proxy sends `/api` to it.
+For frontend work keep that server running and use `npm run dev` at the repo root; the proxy sends
+`/api` to it.
 
 ### Deploying
 
-1. Frontend changes: `npm run deploy` (writes `docs/`), commit the result. GitHub Pages and the
-   server both serve that committed folder; the deploy never rebuilds Angular on the PC.
+1. Frontend changes: `npm run build` (writes `docs/`), commit the result. GitHub Pages and the
+   server both serve that committed folder; the deploy never builds the frontend on the PC.
 2. Push to `master`. The `deploy` workflow checks the build on GitHub, then the runner on the
    hosting PC (`C:\actions-runner-startpage`, labels `self-hosted, windows, startpage`) runs
    `scripts\deploy.ps1`.
@@ -65,5 +79,5 @@ proxy sends `/api` to it.
    from `.env.example`, and register the task:
    `Register-ScheduledTask -Xml (Get-Content C:\Apps\startpage\scripts\Startpage.task.xml -Raw) -TaskName Startpage -Force`
    (`tasks.ps1 start` also registers it if missing).
-4. Google sign-in only works on origins listed in the OAuth client (Google Cloud Console →
+4. Gmail sign-in only works on origins listed in the OAuth client (Google Cloud Console →
    Credentials → the web client → Authorized JavaScript origins): add `https://start.nish.software`.

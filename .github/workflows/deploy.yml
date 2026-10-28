@@ -19,19 +19,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Angular 16 supports Node 16/18; the committed docs/ bundle is what deploys,
-      # this build only proves the source still compiles.
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: npm
-      - run: npm ci
-      - run: npx ng build --configuration production --output-path /tmp/ng-check
+      # The committed docs/ bundle is what deploys; this job proves the source still
+      # typechecks, passes its tests and builds (to a temp dir, so docs/ is untouched).
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: server/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npx vite build --outDir /tmp/start-check
       - run: npm ci
         working-directory: server
       - run: npm run typecheck

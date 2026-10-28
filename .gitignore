@@ -1,10 +1,7 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
-
 # Compiled output
 /dist
 /tmp
-/out-tsc
-/bazel-out
+*.tsbuildinfo
 
 # Node
 /node_modules
@@ -13,32 +10,11 @@ yarn-error.log
 
 # IDEs and editors
 .idea/
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-
-# Visual Studio Code
 .vscode
-
-
-# Miscellaneous
-/.angular/cache
-.sass-cache/
-/connect.lock
-/coverage
-/libpeerconnection.log
-testem.log
-/typings
 
 # System files
 .DS_Store
 Thumbs.db
-
-# Assets for local env
-src/assets/monaco
 
 # Server runtime
 /logs
