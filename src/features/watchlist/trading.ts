@@ -142,3 +142,16 @@ export function formatChange(dayChangePct: number): { text: string; tone: Change
   if (!Number.isFinite(dayChangePct) || Math.abs(dayChangePct) < 0.05) return { text, tone: 'neutral' };
   return { text, tone: dayChangePct > 0 ? 'ok' : 'loss' };
 }
+
+export type LocalNetworkState = 'granted' | 'prompt' | 'denied' | 'unsupported';
+
+/** Chrome's "Local network access" permission for this page. Trading resolves to a Tailscale
+ *  address, which Chrome treats as local, so a public page needs it to reach Trading. */
+export async function localNetworkAccess(): Promise<LocalNetworkState> {
+  try {
+    const status = await navigator.permissions.query({ name: 'local-network-access' as PermissionName });
+    return status.state;
+  } catch {
+    return 'unsupported';
+  }
+}
