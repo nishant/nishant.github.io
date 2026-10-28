@@ -11,7 +11,7 @@ import weatherRouter, { weatherConfigured } from './routes/weather';
 
 const PORT = Number(process.env.PORT) || 8800;
 const HOST = process.env.HOST || '127.0.0.1';
-// The committed Angular build (`npm run deploy` at the repo root writes ../docs).
+// The committed Vite build (`npm run build` at the repo root writes ../docs).
 const STATIC_DIR = path.resolve(process.env.STATIC_DIR || path.join(__dirname, '..', '..', 'docs'));
 
 const allowedOrigins = new Set([
@@ -42,6 +42,15 @@ app.get('/health', (_req: Request, res: Response) => {
   res.json({ ok: true, weatherConfigured: weatherConfigured(), staticDir: STATIC_DIR });
 });
 
+// Public values the browser needs (the Google client id is public by design).
+app.get('/api/config', (_req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'no-cache');
+  res.json({
+    googleClientId: process.env.GOOGLE_CLIENT_ID || null,
+    tradingUrl: process.env.TRADING_URL || 'https://trading.nish.software',
+  });
+});
+
 app.use('/api/weather', weatherRouter);
 
 // Anything under /api that is not a known route is a 404, never the SPA shell.
@@ -57,9 +66,10 @@ if (hasBundle) {
     express.static(STATIC_DIR, {
       index: 'index.html',
       setHeaders: (res, filePath) => {
-        // Angular emits content-hashed js/css; everything else (index.html, favicon,
-        // assets/) must revalidate so a deploy shows up on the next load.
-        if (/\.[0-9a-f]{16}\.(js|css)$/.test(filePath)) {
+        // Vite emits content-hashed files under assets/ (name-<hash>.js|css|...); those
+        // never change. Everything else (index.html, manifest, icons) must revalidate
+        // so a deploy shows up on the next load.
+        if (/[\\/]assets[\\/].+-[A-Za-z0-9_-]{8,}\.(js|css|woff2|png|svg)$/.test(filePath)) {
           res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
         } else {
           res.setHeader('Cache-Control', 'no-cache');

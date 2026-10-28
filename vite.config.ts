@@ -21,6 +21,7 @@ function nishThemeInit(): Plugin {
 export default defineConfig({
   base: './',
   plugins: [nishThemeInit(), react(), tailwindcss()],
+  resolve: { dedupe: ['react', 'react-dom'] },
   build: { outDir: 'docs', emptyOutDir: true },
   server: { port: 4200, proxy: { '/api': 'http://localhost:8800' } },
   test: { environment: 'jsdom' },
