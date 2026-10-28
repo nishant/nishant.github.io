@@ -34,8 +34,6 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
   const [focusLink, setFocusLink] = useState<{ section: number; link: number; nonce: number } | null>(null);
 
   const rawError = raw?.error ?? null;
-  // A refused close must not start the DS exit animation or swipe, so those gestures are off meanwhile.
-  const canClose = decideClose({ draft, saved: config, rawError }).action === 'close';
   const dirty = rawError !== null || isDirty(draft, config);
 
   /** Edits from the Links tab; the Raw JSON text is then re-derived from the draft. */
@@ -71,49 +69,21 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
     toast.success('Saved');
   };
 
-  // Back handling lives here, not in Modal: Modal gives up its history entry before onClose runs, so a
-  // refused close would leave nothing to catch the next Back. This entry is re-pushed after a refusal.
-  const ownsEntry = useRef(false);
   const closeToast = useRef<number | null>(null);
-  const requestCloseRef = useRef<(fromBack: boolean) => void>(() => {});
-
-  useEffect(() => {
-    const push = () => {
-      const prev = (history.state as object | null) ?? {};
-      history.pushState({ ...prev, nishLayer: 'settings' }, '');
-      ownsEntry.current = true;
-    };
-    const timer = window.setTimeout(push, 0);
-    const onPop = () => {
-      // Popping a nested dialog's entry lands back on ours; that is not a Back out of Settings.
-      if ((history.state as { nishLayer?: string } | null)?.nishLayer === 'settings') return;
-      if (!ownsEntry.current) return;
-      ownsEntry.current = false;
-      requestCloseRef.current(true);
-    };
-    window.addEventListener('popstate', onPop);
-    return () => {
-      window.clearTimeout(timer);
-      window.removeEventListener('popstate', onPop);
+  useEffect(
+    () => () => {
       if (closeToast.current !== null) dismissToast(closeToast.current);
-      if (ownsEntry.current && (history.state as { nishLayer?: string } | null)?.nishLayer === 'settings') {
-        ownsEntry.current = false;
-        history.back();
-      }
-    };
-  }, []);
+    },
+    [],
+  );
 
-  const requestClose = (fromBack = false) => {
+  /** Modal asks this before every close (X, Escape, scrim, swipe, Android back): a valid draft is
+   *  applied and the sheet closes; otherwise it stays open, with no exit animation, and says why. */
+  const canClose = (): boolean => {
     const decision = decideClose({ draft, saved: config, rawError });
     if (decision.action === 'close') {
       if (decision.save) setConfig(decision.save);
-      onClose();
-      return;
-    }
-    if (fromBack) {
-      const prev = (history.state as object | null) ?? {};
-      history.pushState({ ...prev, nishLayer: 'settings' }, '');
-      ownsEntry.current = true;
+      return true;
     }
     if (decision.reason === 'raw-json') {
       setTab('json');
@@ -129,18 +99,16 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
         action: { label: 'Discard', onClick: onClose },
       });
     }
+    return false;
   };
-
-  requestCloseRef.current = requestClose;
 
   return (
     <Modal
       title="Settings"
       size="xl"
       sheetHeight="full"
-      closeOnBack={false}
-      dismissible={canClose}
-      onClose={() => requestClose()}
+      canClose={canClose}
+      onClose={onClose}
       footer={
         <div className="flex w-full items-center justify-between gap-3">
           <p className={dirty ? 'text-sm text-th-warn' : 'text-sm text-th-hi3'} role="status">

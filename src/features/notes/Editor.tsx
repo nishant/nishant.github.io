@@ -66,7 +66,8 @@ const CONTENT_CLASS = cn(
   '[&_blockquote]:my-2 [&_blockquote]:border-l-4 [&_blockquote]:border-th-line-strong [&_blockquote]:pl-3 [&_blockquote]:text-th-hi2',
   '[&_code]:rounded [&_code]:bg-th-ghost [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.9em]',
   '[&_img]:my-2 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-md [&_img.ProseMirror-selectednode]:outline-2 [&_img.ProseMirror-selectednode]:outline-th-accent',
-  '[&_mark]:rounded-sm [&_mark]:px-0.5 [&_mark]:text-inherit',
+  // Old ngx-editor highlights are opaque pastel hex colours: keep dark text on them in either theme.
+  '[&_mark]:rounded-sm [&_mark]:px-0.5 [&_mark]:text-inherit [&_mark[style*="#"]]:text-[#111]!',
   '[&_p.is-editor-empty:first-child::before]:pointer-events-none [&_p.is-editor-empty:first-child::before]:float-left [&_p.is-editor-empty:first-child::before]:h-0',
   '[&_p.is-editor-empty:first-child::before]:text-th-hi3 [&_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)]',
 );
@@ -102,7 +103,7 @@ export default function Editor({ initialHtml, onChange, onReady, fine }: EditorP
   if (!editor) return <div className="min-h-[40dvh]" aria-busy="true" />;
 
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="flex flex-col max-sm:min-h-[calc(100dvh-15rem)] sm:min-h-full">
       <Toolbar
         editor={editor}
         fine={fine}

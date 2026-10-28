@@ -66,14 +66,14 @@ function Shell() {
   useDocumentTitle(route === 'jp' ? 'Anime + Manga' : undefined, { app: 'Start' });
 
   const nav = (
-    <>
+    <div className="flex gap-5">
       <a href="#/home" className={cn(tabClass({ active: route === 'home' }))} aria-current={route === 'home' ? 'page' : undefined}>
         Home
       </a>
       <a href="#/jp" className={cn(tabClass({ active: route === 'jp' }))} aria-current={route === 'jp' ? 'page' : undefined}>
         Anime
       </a>
-    </>
+    </div>
   );
 
   return (
