@@ -39,13 +39,20 @@
   // (registered) theme has no baked color: theme.ts sets it once its CSS is live.
   if (BG[theme]) {
     try {
-      var meta = document.querySelector('meta[name="theme-color"]');
+      var meta = document.querySelector('meta[name="theme-color"][data-nish]');
       if (!meta) {
         meta = document.createElement('meta');
         meta.setAttribute('name', 'theme-color');
+        meta.setAttribute('data-nish', '');
         (document.head || root).appendChild(meta);
       }
       meta.setAttribute('content', BG[theme]);
+      // A static theme-color an app ships would win over ours (the first one is used).
+      // Drop those, but keep the ones scoped by a media attribute.
+      var metas = document.querySelectorAll('meta[name="theme-color"]');
+      for (var i = 0; i < metas.length; i++) {
+        if (metas[i] !== meta && !metas[i].hasAttribute('media') && metas[i].parentNode) metas[i].parentNode.removeChild(metas[i]);
+      }
     } catch (e) {}
   }
 })();
