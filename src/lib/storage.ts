@@ -204,7 +204,7 @@ function write(key: string, value: string): void {
   }
 }
 
-export function loadConfig(): { config: Config; warning?: string } {
+export function loadConfig(): { config: Config; warning?: string; rawInvalid?: string } {
   const raw = read(KEYS.config);
   if (raw === null) {
     try {
@@ -216,7 +216,7 @@ export function loadConfig(): { config: Config; warning?: string } {
   }
   const parsed = parseConfig(raw);
   if (parsed.ok) return { config: parsed.config };
-  return { config: DEFAULT_CONFIG, warning: CONFIG_WARNING };
+  return { config: DEFAULT_CONFIG, warning: CONFIG_WARNING, rawInvalid: raw };
 }
 
 export function saveConfig(c: Config): void {

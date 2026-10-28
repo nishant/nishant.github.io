@@ -160,6 +160,7 @@ export async function requestToken(clientId: string, prompt: '' | 'consent'): Pr
 /** Clears the cache and revokes the token with Google. */
 export async function revokeToken(token: string): Promise<void> {
   clearCachedToken();
+  await loadGis().catch(() => undefined);
   const api = oauth2();
   if (!api) return;
   await new Promise<void>((resolve) => api.revoke(token, () => resolve()));

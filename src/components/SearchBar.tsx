@@ -1,4 +1,4 @@
-import { Favicon, Kbd, ListRow, SearchInput, StickyBar } from '@nish/ui';
+import { Favicon, Kbd, ListRow, SearchInput, StickyBar, cn } from '@nish/ui';
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import type { Config } from '../lib/storage';
 import { hostOf, isSafeUrl } from './LinkGrid';
@@ -66,6 +66,8 @@ export function SearchBar({ config, onNavigate }: SearchBarProps) {
   const [highlight, setHighlight] = useState(-1);
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [stuck, setStuck] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const listId = useId();
   const optionId = (i: number) => `${listId}-${i}`;
@@ -80,11 +82,20 @@ export function SearchBar({ config, onNavigate }: SearchBarProps) {
     const onKey = (e: globalThis.KeyboardEvent) => {
       if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
       if (isTyping(document.activeElement)) return;
+      if (document.querySelector('[data-nish-layer]')) return;
       e.preventDefault();
       inputRef.current?.focus();
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
+  // The bar stays transparent (so the hero gradient shows through) until it sticks.
+  useEffect(() => {
+    const onScroll = () => setStuck((sentinelRef.current?.getBoundingClientRect().top ?? 0) < 0);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => () => clearTimeout(closeTimer.current), []);
@@ -108,69 +119,72 @@ export function SearchBar({ config, onNavigate }: SearchBarProps) {
   };
 
   return (
-    <StickyBar top="0px" className="z-20 py-2">
-      <div className="relative">
-        <SearchInput
-          ref={inputRef}
-          value={query}
-          onChange={(v) => {
-            setQuery(v);
-            setHighlight(-1);
-          }}
-          onKeyDown={onKeyDown}
-          onFocus={() => {
-            clearTimeout(closeTimer.current);
-            setFocused(true);
-          }}
-          onBlur={() => {
-            clearTimeout(closeTimer.current);
-            closeTimer.current = setTimeout(() => setFocused(false), 120);
-          }}
-          autoFocus={fine}
-          placeholder="Search Google"
-          aria-label="Search Google or your links"
-          role="combobox"
-          aria-autocomplete="list"
-          aria-expanded={open}
-          aria-controls={listId}
-          aria-activedescendant={open && highlight >= 0 ? optionId(highlight) : undefined}
-          inputClassName="min-h-12 text-base"
-        />
-        {query === '' ? (
-          <Kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 md:pointer-fine:inline-flex">
-            /
-          </Kbd>
-        ) : null}
-        {open ? (
-          <ul
-            id={listId}
-            role="listbox"
-            aria-label="Matching links"
-            onMouseDown={(e) => e.preventDefault()}
-            className="absolute inset-x-0 top-full z-30 mt-1 overflow-hidden rounded-lg border border-th-line bg-th-elevated py-1 shadow-pop"
-          >
-            {matches.map((m, i) => (
-              <li key={`${i}-${m.url}`} id={optionId(i)} role="option" aria-selected={i === highlight}>
-                <ListRow
-                  as="div"
-                  dense
-                  chevron={false}
-                  active={i === highlight}
-                  onClick={() => go(m.url)}
-                  icon={<Favicon url={m.url} label={m.text} size={20} />}
-                  title={
-                    <>
-                      {m.text}
-                      {m.host ? <span className="ml-2 text-th-hi3">{m.host}</span> : null}
-                    </>
-                  }
-                  meta={<span className="text-xs text-th-hi3">{m.section}</span>}
-                />
-              </li>
-            ))}
-          </ul>
-        ) : null}
-      </div>
-    </StickyBar>
+    <>
+      <div ref={sentinelRef} aria-hidden className="-mb-4 h-0" />
+      <StickyBar top="0px" className={cn('z-20 py-2', !stuck && 'bg-transparent')}>
+        <div className="relative">
+          <SearchInput
+            ref={inputRef}
+            value={query}
+            onChange={(v) => {
+              setQuery(v);
+              setHighlight(-1);
+            }}
+            onKeyDown={onKeyDown}
+            onFocus={() => {
+              clearTimeout(closeTimer.current);
+              setFocused(true);
+            }}
+            onBlur={() => {
+              clearTimeout(closeTimer.current);
+              closeTimer.current = setTimeout(() => setFocused(false), 120);
+            }}
+            autoFocus={fine}
+            placeholder="Search Google"
+            aria-label="Search Google or your links"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={open}
+            aria-controls={listId}
+            aria-activedescendant={open && highlight >= 0 ? optionId(highlight) : undefined}
+            inputClassName="min-h-12 text-base"
+          />
+          {query === '' ? (
+            <Kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 md:pointer-fine:inline-flex">
+              /
+            </Kbd>
+          ) : null}
+          {open ? (
+            <ul
+              id={listId}
+              role="listbox"
+              aria-label="Matching links"
+              onMouseDown={(e) => e.preventDefault()}
+              className="absolute inset-x-0 top-full z-30 mt-1 overflow-hidden rounded-lg border border-th-line bg-th-elevated py-1 shadow-pop"
+            >
+              {matches.map((m, i) => (
+                <li key={`${i}-${m.url}`} id={optionId(i)} role="option" aria-selected={i === highlight}>
+                  <ListRow
+                    as="div"
+                    dense
+                    chevron={false}
+                    active={i === highlight}
+                    onClick={() => go(m.url)}
+                    icon={<Favicon url={m.url} label={m.text} size={20} />}
+                    title={
+                      <>
+                        {m.text}
+                        {m.host ? <span className="ml-2 text-th-hi3">{m.host}</span> : null}
+                      </>
+                    }
+                    meta={<span className="text-xs text-th-hi3">{m.section}</span>}
+                  />
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      </StickyBar>
+    </>
   );
 }

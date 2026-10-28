@@ -1,7 +1,7 @@
-import { Button, Modal, TabPanel, Tabs, toast } from '@nish/ui';
-import { useState } from 'react';
+import { Button, Modal, TabPanel, Tabs, dismissToast, toast } from '@nish/ui';
+import { useEffect, useRef, useState } from 'react';
 import { useConfig } from '../../lib/config-context';
-import type { Config } from '../../lib/storage';
+import { parseConfig, type Config } from '../../lib/storage';
 import { AppearanceTab } from './AppearanceTab';
 import { JsonTab, type RawState } from './JsonTab';
 import { LinksEditor } from './LinksEditor';
@@ -22,10 +22,15 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
 }
 
 function SettingsBody({ onClose }: { onClose: () => void }) {
-  const { config, setConfig } = useConfig();
+  const { config, setConfig, rawInvalid } = useConfig();
   const [draft, setDraft] = useState<Config>(config);
-  const [tab, setTab] = useState<TabId>('links');
-  const [raw, setRaw] = useState<RawState | null>(null);
+  const [tab, setTab] = useState<TabId>(rawInvalid !== undefined ? 'json' : 'links');
+  // A saved config that failed to parse is shown as-is so the user can repair it.
+  const [raw, setRaw] = useState<RawState | null>(() => {
+    if (rawInvalid === undefined) return null;
+    const parsed = parseConfig(rawInvalid);
+    return { text: rawInvalid, error: parsed.ok ? null : parsed.error };
+  });
   const [focusLink, setFocusLink] = useState<{ section: number; link: number; nonce: number } | null>(null);
 
   const rawError = raw?.error ?? null;
@@ -55,35 +60,75 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
     toast.success('Saved');
   };
 
-  const requestClose = () => {
+  // Back handling lives here, not in Modal: Modal gives up its history entry before onClose runs, so a
+  // refused close would leave nothing to catch the next Back. This entry is re-pushed after a refusal.
+  const ownsEntry = useRef(false);
+  const closeToast = useRef<number | null>(null);
+  const requestCloseRef = useRef<(fromBack: boolean) => void>(() => {});
+
+  useEffect(() => {
+    const push = () => {
+      const prev = (history.state as object | null) ?? {};
+      history.pushState({ ...prev, nishLayer: 'settings' }, '');
+      ownsEntry.current = true;
+    };
+    const timer = window.setTimeout(push, 0);
+    const onPop = () => {
+      // Popping a nested dialog's entry lands back on ours; that is not a Back out of Settings.
+      if ((history.state as { nishLayer?: string } | null)?.nishLayer === 'settings') return;
+      if (!ownsEntry.current) return;
+      ownsEntry.current = false;
+      requestCloseRef.current(true);
+    };
+    window.addEventListener('popstate', onPop);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('popstate', onPop);
+      if (closeToast.current !== null) dismissToast(closeToast.current);
+      if (ownsEntry.current && (history.state as { nishLayer?: string } | null)?.nishLayer === 'settings') {
+        ownsEntry.current = false;
+        history.back();
+      }
+    };
+  }, []);
+
+  const requestClose = (fromBack = false) => {
     const decision = decideClose({ draft, saved: config, rawError });
     if (decision.action === 'close') {
       if (decision.save) setConfig(decision.save);
       onClose();
       return;
     }
+    if (fromBack) {
+      const prev = (history.state as object | null) ?? {};
+      history.pushState({ ...prev, nishLayer: 'settings' }, '');
+      ownsEntry.current = true;
+    }
     if (decision.reason === 'raw-json') {
       setTab('json');
-      toast.error('Fix the JSON before closing, or discard your edits', {
+      closeToast.current = toast.error('Fix the JSON before closing, or discard your edits', {
         id: 'settings-close',
         duration: 'sticky',
         action: { label: 'Discard', onClick: onClose },
       });
     } else {
       showUrlProblem(decision.section, decision.link);
-      toast.error('Enter a full address, like https://example.com', {
+      closeToast.current = toast.error('Enter a full address, like https://example.com', {
         id: 'settings-close',
         action: { label: 'Discard', onClick: onClose },
       });
     }
   };
 
+  requestCloseRef.current = requestClose;
+
   return (
     <Modal
       title="Settings"
       size="xl"
       sheetHeight="full"
-      onClose={requestClose}
+      closeOnBack={false}
+      onClose={() => requestClose()}
       footer={
         <div className="flex w-full items-center justify-between gap-3">
           <p className={dirty ? 'text-sm text-th-warn' : 'text-sm text-th-hi3'} role="status">

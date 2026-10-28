@@ -92,7 +92,7 @@ export function finalizeConfig(config: Config): Config {
       ...sec,
       header: sec.header.trim(),
       links: sec.links
-        .map((l) => ({ ...l, text: l.text.trim(), url: l.url.trim() }))
+        .map((l) => ({ ...l, text: l.text.trim(), url: normalizeUrl(l.url) }))
         .filter((l) => l.text !== '' && l.url !== ''),
     })),
   };
@@ -106,7 +106,7 @@ export function isDirty(draft: Config, saved: Config): boolean {
 export function firstInvalidUrl(draft: Config): { section: number; link: number } | null {
   for (const [s, sec] of draft.sections.entries()) {
     for (const [l, link] of sec.links.entries()) {
-      if (link.text.trim() !== '' && urlError(link.url)) return { section: s, link: l };
+      if (link.text.trim() !== '' && urlError(normalizeUrl(link.url))) return { section: s, link: l };
     }
   }
   return null;

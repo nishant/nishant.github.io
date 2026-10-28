@@ -4,9 +4,14 @@ import type { Config, Section } from '../lib/storage';
 
 /** Only http, https and mailto links are rendered as anchors; anything else is plain text. */
 export function isSafeUrl(url: string): boolean {
-  const m = /^\s*([a-z][a-z0-9+.-]*):/i.exec(url);
-  if (!m) return true; // no scheme: a bare address, resolved by the browser
-  return ['http', 'https', 'mailto'].includes(m[1]!.toLowerCase());
+  // Mirror the WHATWG URL parser: drop tabs/newlines anywhere, and leading C0 controls and spaces.
+  // eslint-disable-next-line no-control-regex
+  const clean = url.replace(/[\t\n\r]/g, '').replace(/^[\u0000- ]+/, '');
+  try {
+    return ['http:', 'https:', 'mailto:'].includes(new URL(clean, 'https://x.invalid/').protocol);
+  } catch {
+    return false;
+  }
 }
 
 /** The host to show next to a link ("github.com"), or '' when the address has none. */

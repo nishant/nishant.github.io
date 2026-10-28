@@ -18,6 +18,7 @@ import {
   clearCachedToken,
   getValidToken,
   listInbox,
+  loadGis,
   requestToken,
   revokeToken,
   type MailMessage,
@@ -74,6 +75,7 @@ function MailBody({ onClose }: { onClose: () => void }) {
   const [loadingMore, setLoadingMore] = useState(false);
   const run = useRef(0);
   const mounted = useRef(true);
+  const needConsent = useRef(false);
 
   useEffect(() => {
     mounted.current = true;
@@ -114,6 +116,8 @@ function MailBody({ onClose }: { onClose: () => void }) {
         setView({ kind: 'not-configured' });
         return;
       }
+      // Load the GIS script now so the Connect click can open its popup straight away.
+      void loadGis().catch(() => {});
       const cached = getValidToken();
       if (cached) void load(cached);
       else setView({ kind: 'signed-out', expired: false });
@@ -128,12 +132,16 @@ function MailBody({ onClose }: { onClose: () => void }) {
     if (!clientId) return;
     setBusy(true);
     try {
+      // A second popup opened after an await would be blocked, so a failed silent
+      // attempt asks for consent on the next click instead of chaining it.
+      const prompt = needConsent.current ? 'consent' : '';
       let tok: string;
       try {
-        tok = await requestToken(clientId, '');
+        tok = await requestToken(clientId, prompt);
+        needConsent.current = false;
       } catch (e) {
-        if (e instanceof AuthError) tok = await requestToken(clientId, 'consent');
-        else throw e;
+        if (e instanceof AuthError && prompt === '') needConsent.current = true;
+        throw e;
       }
       if (!mounted.current) return;
       await load(tok);

@@ -1,5 +1,5 @@
 import type { Editor } from '@tiptap/react';
-import { Button, DropdownMenu, IconButton, Input, MenuItem, Popover, ScrollRow, Tooltip, cn } from '@nish/ui';
+import { Button, DropdownMenu, IconButton, Input, MenuItem, Popover, Tooltip, cn } from '@nish/ui';
 import {
   AlignCenter,
   AlignJustify,
@@ -196,7 +196,7 @@ export function Toolbar({ editor, fine, className }: { editor: Editor; fine: boo
 
   return (
     <div className={cn('shrink-0', className)}>
-      <ScrollRow label="Formatting" className="gap-0.5 px-2 py-1">
+      <div role="toolbar" aria-label="Formatting" className="flex items-center gap-0.5 overflow-x-auto px-2 py-1">
         <Tool label="Bold" fine={fine} icon={<Bold size={18} />} active={editor.isActive('bold')} onClick={() => run().toggleBold().run()} />
         <Tool label="Italic" fine={fine} icon={<Italic size={18} />} active={editor.isActive('italic')} onClick={() => run().toggleItalic().run()} />
         <Tool label="Underline" fine={fine} icon={<Underline size={18} />} active={editor.isActive('underline')} onClick={() => run().toggleUnderline().run()} />
@@ -268,7 +268,7 @@ export function Toolbar({ editor, fine, className }: { editor: Editor; fine: boo
             Justify
           </MenuItem>
         </DropdownMenu>
-      </ScrollRow>
+      </div>
 
       {panel === 'link' && (
         <UrlPopover

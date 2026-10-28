@@ -12,13 +12,13 @@ const NAV_ITEMS = CATEGORIES.map((c) => {
   };
 });
 
-/** The Anime + Manga page (#/jp): a scroll-spy chip nav over a responsive grid of link sections. */
+/** The Anime + Manga page (#/jp): a scroll-spy chip nav over a single column of link sections (one distinct top per section, so the spy is unambiguous). */
 export function Anime() {
   return (
     <PageContainer size="wide">
       <h1 className="mb-3 text-2xl font-semibold text-th-hi">Anime + Manga</h1>
       <SectionNav items={NAV_ITEMS} updateHash={false} label="Anime categories" className="mb-4" />
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4">
         {CATEGORIES.map((c) => {
           const Icon = c.icon;
           const items = links.filter((l) => l.linkType === c.type);

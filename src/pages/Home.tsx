@@ -19,8 +19,8 @@ export function Home({ onOpen, openSheet }: { onOpen: (id: AppId) => void; openS
       <div className="nish-pad-bottom-inset mx-auto flex w-full max-w-[72rem] flex-col gap-4 px-[var(--nish-page-gutter)] pt-3">
         <Clock trailing={<WeatherChip onOpen={() => onOpen('weather')} />} />
         <SearchBar config={config} />
-        <LinkGrid config={config} onOpenSettings={() => onOpen('settings')} />
         <AppDock onOpen={onOpen} openSheet={openSheet} />
+        <LinkGrid config={config} onOpenSettings={() => onOpen('settings')} />
         <Footer />
       </div>
     </div>

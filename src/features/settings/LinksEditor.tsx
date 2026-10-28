@@ -1,4 +1,4 @@
-import { Button, Card, ConfirmDialog, Favicon, Field, IconButton, Input, toast } from '@nish/ui';
+import { Button, Card, ConfirmDialog, Favicon, Field, IconButton, Input, dismissToast, toast } from '@nish/ui';
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { Config, LinkItem } from '../../lib/storage';
@@ -49,13 +49,35 @@ export function LinksEditor({ draft, update, focusLink }: LinksEditorProps) {
     el?.scrollIntoView({ block: 'center' });
   }, [focusLink]);
 
+  // An Undo toast must not outlive the editor: dismiss it when the Links tab or the sheet goes away.
+  const undoToast = useRef<number | null>(null);
+  useEffect(
+    () => () => {
+      if (undoToast.current !== null) dismissToast(undoToast.current);
+    },
+    [],
+  );
+
   const removeLinkWithUndo = (s: number, l: number) => {
     const link = draft.sections[s]?.links[l];
     if (!link) return;
-    update((c) => removeLink(c, s, l));
-    toast('Link removed', {
+    // Remember the section as it is after the removal, so Undo finds it even if sections moved since.
+    let afterRemoval: Config['sections'][number] | undefined;
+    update((c) => {
+      const next = removeLink(c, s, l);
+      afterRemoval = next.sections[s];
+      return next;
+    });
+    undoToast.current = toast('Link removed', {
       id: 'settings-undo',
-      action: { label: 'Undo', onClick: () => update((c) => restoreLink(c, s, l, link)) },
+      action: {
+        label: 'Undo',
+        onClick: () =>
+          update((c) => {
+            const idx = afterRemoval ? c.sections.indexOf(afterRemoval) : -1;
+            return idx < 0 ? c : restoreLink(c, idx, l, link);
+          }),
+      },
     });
   };
 

@@ -15,15 +15,19 @@ export interface JsonEditorProps {
   label?: string;
 }
 
+/** Touch devices get 16px so the browser does not zoom the page on focus. */
+const coarsePointer = () => typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+
 /** Colors come from the --nish-* tokens, so light and dark follow the theme without a reconfigure. */
-const theme = EditorView.theme({
+const makeTheme = () =>
+  EditorView.theme({
   '&': {
     height: 'min(60dvh, 32rem)',
     color: 'var(--nish-hi)',
     backgroundColor: 'var(--nish-surface)',
     border: '1px solid var(--nish-line)',
     borderRadius: 'var(--nish-radius-md, 8px)',
-    fontSize: '13px',
+    fontSize: coarsePointer() ? '16px' : '13px',
   },
   '&.cm-focused': { outline: '2px solid var(--nish-focus)', outlineOffset: '2px' },
   '.cm-scroller': { fontFamily: 'var(--app-font, ui-monospace, monospace)', lineHeight: '1.5', overflow: 'auto' },
@@ -46,9 +50,6 @@ const theme = EditorView.theme({
   },
   '.cm-diagnostic-error': { borderLeftColor: 'var(--nish-loss)' },
   '.cm-lint-marker-error': { content: 'none' },
-  '@media (pointer: coarse)': {
-    '&': { fontSize: '16px' },
-  },
 });
 
 /** CodeMirror 6 JSON editor (lazy-loaded by JsonTab). */
@@ -79,7 +80,7 @@ export default function JsonEditor({ value, onChange, label = 'Raw JSON' }: Json
           lintGutter(),
           keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
           EditorView.contentAttributes.of({ 'aria-label': label, autocapitalize: 'off', spellcheck: 'false' }),
-          theme,
+          makeTheme(),
           EditorView.updateListener.of((u) => {
             if (u.docChanged) onChangeRef.current(u.state.doc.toString());
           }),

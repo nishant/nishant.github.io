@@ -133,6 +133,21 @@ function WatchlistModal({ onClose }: { onClose: () => void }) {
     };
   }, []);
 
+  // The detail view gets its own history entry, so Back returns to the list, not out of the sheet.
+  const inDetail = selected !== null;
+  useEffect(() => {
+    if (!inDetail) return;
+    history.pushState({ ...(history.state as object | null), watchlistDetail: true }, '');
+    const onPop = () => setSelected(null);
+    window.addEventListener('popstate', onPop);
+    return () => {
+      window.removeEventListener('popstate', onPop);
+      if ((history.state as { watchlistDetail?: boolean } | null)?.watchlistDetail) history.back();
+    };
+  }, [inDetail]);
+  const backToList = () => history.back();
+  const closeSheet = () => (inDetail ? backToList() : onClose());
+
   const trading = tradingUrl.replace(/\/+$/, '');
   const snapshot = selected ? (data?.snapshots.find((s) => s.symbol === selected) ?? null) : null;
 
@@ -205,7 +220,7 @@ function WatchlistModal({ onClose }: { onClose: () => void }) {
   const subtitle = (
     <div className="flex items-center gap-1">
       {selected && (
-        <IconButton label="Back to list" size="sm" onClick={() => setSelected(null)}>
+        <IconButton label="Back to list" size="sm" onClick={backToList}>
           <ArrowLeft size={16} aria-hidden="true" />
         </IconButton>
       )}
@@ -227,7 +242,7 @@ function WatchlistModal({ onClose }: { onClose: () => void }) {
         href={trading}
         target="_blank"
         rel="noopener noreferrer"
-        className={linkClass({ tone: 'muted', className: 'inline-flex items-center gap-1 whitespace-nowrap text-sm' })}
+        className={buttonClass({ variant: 'ghost', size: 'sm', className: 'whitespace-nowrap' })}
       >
         Open Trading
         <ExternalLink size={14} aria-hidden="true" />
@@ -236,7 +251,7 @@ function WatchlistModal({ onClose }: { onClose: () => void }) {
   );
 
   return (
-    <Modal title={snapshot ? snapshot.symbol : 'Watchlist'} subtitle={subtitle} size="lg" sheetHeight="tall" onClose={onClose}>
+    <Modal title={snapshot ? snapshot.symbol : 'Watchlist'} subtitle={subtitle} size="lg" sheetHeight="tall" onClose={closeSheet}>
       {body}
     </Modal>
   );

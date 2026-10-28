@@ -23,6 +23,34 @@ export interface EditorProps {
   fine: boolean;
 }
 
+/** Reads ngx-editor's `<span style="background-color:...">` highlights as well as `<mark>`. */
+export const HighlightCompat = Highlight.extend({
+  parseHTML() {
+    return [
+      { tag: 'mark' },
+      {
+        tag: 'span',
+        priority: 101,
+        getAttrs: (el) => ((el as HTMLElement).style.backgroundColor ? null : false),
+      },
+    ];
+  },
+});
+
+/** Inline images (as ngx-editor stored them, inside a paragraph) that keep their width. */
+export const ImageCompat = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: null,
+        parseHTML: (el: HTMLElement) => el.getAttribute('width'),
+        renderHTML: (attrs: Record<string, unknown>) => (attrs.width ? { width: attrs.width } : {}),
+      },
+    };
+  },
+});
+
 const CONTENT_CLASS = cn(
   'min-h-[40dvh] px-4 py-3 text-base leading-relaxed text-th-hi outline-none sm:min-h-[50dvh]',
   '[&_p]:my-2 [&_h1]:mt-4 [&_h1]:mb-2 [&_h1]:text-3xl [&_h1]:font-semibold [&_h2]:mt-4 [&_h2]:mb-2 [&_h2]:text-2xl [&_h2]:font-semibold',
@@ -46,11 +74,11 @@ export default function Editor({ initialHtml, onChange, onReady, fine }: EditorP
       StarterKit.configure({ heading: { levels: [1, 2, 3, 4, 5, 6] } }),
       Underline,
       Link.configure({ openOnClick: false, autolink: true, protocols: ['http', 'https', 'mailto'] }),
-      Image.configure({ allowBase64: true }),
+      ImageCompat.configure({ inline: true, allowBase64: true }),
       TextAlign.configure({ types: ['paragraph', 'heading'] }),
       TextStyle,
       Color,
-      Highlight.configure({ multicolor: true }),
+      HighlightCompat.configure({ multicolor: true }),
       Placeholder.configure({ placeholder: 'Write something…' }),
     ],
     content: initialHtml,
@@ -64,7 +92,6 @@ export default function Editor({ initialHtml, onChange, onReady, fine }: EditorP
   useEffect(() => {
     onReady(editor);
     return () => onReady(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor]);
 
   if (!editor) return <div className="min-h-[40dvh]" aria-busy="true" />;
@@ -76,7 +103,7 @@ export default function Editor({ initialHtml, onChange, onReady, fine }: EditorP
         fine={fine}
         className={cn(
           'sticky z-10 bg-th-surface border-th-line',
-          'max-sm:order-last max-sm:bottom-0 max-sm:border-t',
+          'max-sm:order-last max-sm:bottom-[-1.25rem] max-sm:-mb-5 max-sm:border-t',
           'sm:top-0 sm:border-b',
         )}
       />

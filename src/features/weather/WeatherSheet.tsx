@@ -37,9 +37,7 @@ export function WeatherSheet({ open, onClose }: { open: boolean; onClose: () => 
           </>
         ) : state.status === 'loading' ? (
           'Loading the forecast…'
-        ) : (
-          'Weather'
-        )}
+        ) : null}
       </span>
       <IconButton label="Refresh weather" onClick={refresh} disabled={busy}>
         {busy ? <Spinner size="sm" /> : <RefreshCw size={16} aria-hidden="true" />}

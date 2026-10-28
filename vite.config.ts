@@ -1,5 +1,5 @@
 /// <reference types="vitest/config" />
-import { readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
@@ -17,12 +17,26 @@ function nishThemeInit(): Plugin {
   };
 }
 
+/** Empties docs/ before a build but keeps docs/specs, which holds hand-written specs. */
+function cleanDocsKeepSpecs(): Plugin {
+  return {
+    name: 'clean-docs-keep-specs',
+    apply: 'build',
+    buildStart() {
+      if (!existsSync('docs')) return;
+      for (const name of readdirSync('docs')) {
+        if (name !== 'specs') rmSync(`docs/${name}`, { recursive: true, force: true });
+      }
+    },
+  };
+}
+
 // The build is committed in docs/: the deploy and GitHub Pages both serve it.
 export default defineConfig({
   base: './',
-  plugins: [nishThemeInit(), react(), tailwindcss()],
+  plugins: [cleanDocsKeepSpecs(), nishThemeInit(), react(), tailwindcss()],
   resolve: { dedupe: ['react', 'react-dom'] },
-  build: { outDir: 'docs', emptyOutDir: true },
+  build: { outDir: 'docs', emptyOutDir: false },
   server: { port: 4200, proxy: { '/api': 'http://localhost:8800' } },
   test: { environment: 'jsdom' },
 });

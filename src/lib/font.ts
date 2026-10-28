@@ -46,9 +46,20 @@ export function applyStoredFont(): void {
   applyFont(loadFont());
 }
 
+let probe: CanvasRenderingContext2D | null | undefined;
+const SAMPLE = 'mmmmmmmmmmlliWWQ@#0123 The quick brown fox';
+
+/** True when the family is installed (or loaded): its text measures differently from the bare fallbacks. */
 export function fontAvailable(family: string): boolean {
   try {
-    return document.fonts.check(`16px "${family}"`);
+    if (probe === undefined) probe = document.createElement('canvas').getContext('2d');
+    const ctx = probe;
+    if (!ctx) return true;
+    const width = (stack: string): number => {
+      ctx.font = `72px ${stack}`;
+      return ctx.measureText(SAMPLE).width;
+    };
+    return ['monospace', 'serif'].some((base) => width(`"${family}", ${base}`) !== width(base));
   } catch {
     return false;
   }
