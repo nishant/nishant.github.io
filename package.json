@@ -15,7 +15,7 @@
   "dependencies": {
     "@codemirror/lang-json": "^6.0.1",
     "@codemirror/lint": "^6.8.5",
-    "@nish/ui": "https://codeload.github.com/nishant/ui/tar.gz/refs/tags/v0.6.1",
+    "@nish/ui": "file:../ui-snapshot",
     "@tiptap/extension-color": "^2.26.1",
     "@tiptap/extension-highlight": "^2.26.1",
     "@tiptap/extension-image": "^2.26.1",
