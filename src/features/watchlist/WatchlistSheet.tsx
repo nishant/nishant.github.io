@@ -137,16 +137,29 @@ function WatchlistModal({ onClose }: { onClose: () => void }) {
   const inDetail = selected !== null;
   useEffect(() => {
     if (!inDetail) return;
-    history.pushState({ ...(history.state as object | null), watchlistDetail: true }, '');
+    let pushed = false;
+    // Deferred so StrictMode's mount/cleanup/mount does not push, queue a back(), then push again.
+    const t = window.setTimeout(() => {
+      history.pushState({ ...(history.state as object | null), watchlistDetail: true }, '');
+      pushed = true;
+    }, 0);
     const onPop = () => setSelected(null);
+    // Escape steps back to the list; capture phase on window runs before the design system's document listener.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.stopPropagation();
+      setSelected(null);
+    };
     window.addEventListener('popstate', onPop);
+    window.addEventListener('keydown', onKey, true);
     return () => {
+      window.clearTimeout(t);
       window.removeEventListener('popstate', onPop);
-      if ((history.state as { watchlistDetail?: boolean } | null)?.watchlistDetail) history.back();
+      window.removeEventListener('keydown', onKey, true);
+      if (pushed && (history.state as { watchlistDetail?: boolean } | null)?.watchlistDetail) history.back();
     };
   }, [inDetail]);
-  const backToList = () => history.back();
-  const closeSheet = () => (inDetail ? backToList() : onClose());
+  const backToList = () => setSelected(null);
 
   const trading = tradingUrl.replace(/\/+$/, '');
   const snapshot = selected ? (data?.snapshots.find((s) => s.symbol === selected) ?? null) : null;
@@ -251,7 +264,7 @@ function WatchlistModal({ onClose }: { onClose: () => void }) {
   );
 
   return (
-    <Modal title={snapshot ? snapshot.symbol : 'Watchlist'} subtitle={subtitle} size="lg" sheetHeight="tall" onClose={closeSheet}>
+    <Modal title={snapshot ? snapshot.symbol : 'Watchlist'} subtitle={subtitle} size="lg" sheetHeight="tall" onClose={onClose}>
       {body}
     </Modal>
   );

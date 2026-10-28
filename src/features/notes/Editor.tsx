@@ -31,7 +31,12 @@ export const HighlightCompat = Highlight.extend({
       {
         tag: 'span',
         priority: 101,
-        getAttrs: (el) => ((el as HTMLElement).style.backgroundColor ? null : false),
+        // Not consuming, so TextStyle/Color still parse the same span.
+        consuming: false,
+        getAttrs: (el) => {
+          const bg = (el as HTMLElement).style.backgroundColor;
+          return bg && bg !== 'transparent' && !/rgba\(0,\s*0,\s*0,\s*0\)/.test(bg) ? null : false;
+        },
       },
     ];
   },

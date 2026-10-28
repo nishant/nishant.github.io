@@ -51,6 +51,8 @@ export function LinksEditor({ draft, update, focusLink }: LinksEditorProps) {
 
   // An Undo toast must not outlive the editor: dismiss it when the Links tab or the sheet goes away.
   const undoToast = useRef<number | null>(null);
+  const latestDraft = useRef(draft);
+  latestDraft.current = draft;
   useEffect(
     () => () => {
       if (undoToast.current !== null) dismissToast(undoToast.current);
@@ -62,21 +64,24 @@ export function LinksEditor({ draft, update, focusLink }: LinksEditorProps) {
     const link = draft.sections[s]?.links[l];
     if (!link) return;
     // Remember the section as it is after the removal, so Undo finds it even if sections moved since.
-    let afterRemoval: Config['sections'][number] | undefined;
-    update((c) => {
-      const next = removeLink(c, s, l);
-      afterRemoval = next.sections[s];
-      return next;
-    });
+    const next = removeLink(draft, s, l);
+    const afterRemoval = next.sections[s];
+    update(() => next);
     undoToast.current = toast('Link removed', {
       id: 'settings-undo',
       action: {
         label: 'Undo',
-        onClick: () =>
-          update((c) => {
-            const idx = afterRemoval ? c.sections.indexOf(afterRemoval) : -1;
-            return idx < 0 ? c : restoreLink(c, idx, l, link);
-          }),
+        onClick: () => {
+          const c = latestDraft.current;
+          let idx = afterRemoval ? c.sections.indexOf(afterRemoval) : -1;
+          // The section was edited since: fall back to its position if it still looks like the same one.
+          if (idx < 0 && afterRemoval && c.sections[s]?.links.length === afterRemoval.links.length) idx = s;
+          if (idx < 0) {
+            toast.error('Could not undo: the section changed');
+            return;
+          }
+          update((cur) => restoreLink(cur, Math.min(idx, cur.sections.length - 1), l, link));
+        },
       },
     });
   };

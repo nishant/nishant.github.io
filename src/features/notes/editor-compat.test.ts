@@ -16,18 +16,28 @@ describe('isSafeUrl', () => {
 
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
+import Color from '@tiptap/extension-color';
 import TextStyle from '@tiptap/extension-text-style';
 import { HighlightCompat, ImageCompat } from './Editor';
 
 describe('ngx-editor round trip', () => {
   const load = (html: string): string =>
     new Editor({
-      extensions: [StarterKit, TextStyle, HighlightCompat.configure({ multicolor: true }), ImageCompat.configure({ inline: true, allowBase64: true })],
+      extensions: [StarterKit, TextStyle, Color, HighlightCompat.configure({ multicolor: true }), ImageCompat.configure({ inline: true, allowBase64: true })],
       content: html,
     }).getHTML();
 
   it('keeps background-color spans', () => {
     expect(load('<p><span style="background-color:#fef2c0;">hi</span></p>')).toMatch(/background-color|fef2c0|254, 242, 192/i);
+  });
+  it('keeps text color on a span that also has a background', () => {
+    const out = load('<p><span style="color:#ff0000;background-color:#fef2c0">hi</span></p>');
+    expect(out).toMatch(/<mark/);
+    expect(out).toMatch(/color: ?(#ff0000|rgb\(255, 0, 0\))/i);
+  });
+  it('ignores transparent backgrounds from pasted spans', () => {
+    const out = load('<p><span style="background-color:transparent;color:#000000">hi</span></p>');
+    expect(out).not.toMatch(/<mark/);
   });
   it('keeps inline image width inside its paragraph', () => {
     const out = load('<p>a <img src="data:image/png;base64,AAAA" width="120"> b</p>');

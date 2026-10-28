@@ -34,10 +34,21 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
   const [focusLink, setFocusLink] = useState<{ section: number; link: number; nonce: number } | null>(null);
 
   const rawError = raw?.error ?? null;
+  // A refused close must not start the DS exit animation or swipe, so those gestures are off meanwhile.
+  const canClose = decideClose({ draft, saved: config, rawError }).action === 'close';
   const dirty = rawError !== null || isDirty(draft, config);
 
   /** Edits from the Links tab; the Raw JSON text is then re-derived from the draft. */
   const updateDraft = (fn: (c: Config) => Config) => {
+    // Broken saved text is still the only copy of the user's config; a structured edit must not replace it.
+    if (rawError !== null) {
+      setTab('json');
+      closeToast.current = toast.error('Fix the Raw JSON first, or discard it', {
+        id: 'settings-close',
+        action: { label: 'Discard', onClick: onClose },
+      });
+      return;
+    }
     setDraft((d) => fn(d));
     setRaw(null);
   };
@@ -128,6 +139,7 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
       size="xl"
       sheetHeight="full"
       closeOnBack={false}
+      dismissible={canClose}
       onClose={() => requestClose()}
       footer={
         <div className="flex w-full items-center justify-between gap-3">
