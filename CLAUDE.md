@@ -8,6 +8,9 @@ disagrees. A push to `master` deploys; `npm run build` rebuilds `docs/`; commit 
   ~840px). Every page must look right, with no horizontal page scroll, at 360px (not just
   375/390), ~840px and desktop, in light and dark, with 44px touch targets. Check in a browser
   at those widths before calling UI work done.
+- Every page must be reachable on the phone through a visible UI element (bottom bar, More
+  sheet, menu, or a link on another page), never only by typing its URL: no desktop-only nav
+  entries, and no page that tells a phone user to open it on a desktop.
 - `npm run build` empties `docs/` (Vite `emptyOutDir`), so nothing else can live there: specs go
   in `docs/` only until the next build. Merging master into a branch conflicts on the hashed files
   in `docs/assets`; delete them and rebuild rather than resolving file by file.
