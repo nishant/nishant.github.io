@@ -11,6 +11,7 @@ disagrees. A push to `master` deploys; `npm run build` rebuilds `docs/`; commit 
 - `npm run build` empties `docs/` (Vite `emptyOutDir`), so nothing else can live there: specs go
   in `docs/` only until the next build. Merging master into a branch conflicts on the hashed files
   in `docs/assets`; delete them and rebuild rather than resolving file by file.
+- This repo is **public** (GitHub Pages). Never commit or put in a PR body an app password, the hosting password pattern, or a spec that names them; such specs go in a private repo (the inbox spec lives in nishant/inbox for that reason).
 - Lockfile: `npm install` under npm 10 crashes on jsdom's optional `canvas` peer
   (`reading 'edgesOut'`). Install with npm 11, then confirm `npx npm@10 ci` (CI's npm) works.
 - The Watchlist calls trading.nish.software from the browser. It resolves to a Tailscale address,
