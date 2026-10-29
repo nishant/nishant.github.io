@@ -38,5 +38,5 @@ export default defineConfig({
   resolve: { dedupe: ['react', 'react-dom'] },
   build: { outDir: 'docs', emptyOutDir: false },
   server: { port: 4200, proxy: { '/api': 'http://localhost:8800' } },
-  test: { environment: 'jsdom' },
+  test: { environment: 'jsdom', exclude: ['**/node_modules/**', 'server/**'] },
 });

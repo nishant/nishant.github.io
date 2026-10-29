@@ -289,7 +289,7 @@ function MailBody({ onClose }: { onClose: () => void }) {
 
   return (
     <Modal
-      title="Inbox"
+      title="Mail"
       onClose={onClose}
       size="lg"
       sheetHeight="tall"

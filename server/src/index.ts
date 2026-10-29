@@ -8,6 +8,7 @@ import fs from 'node:fs';
 dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 import weatherRouter, { weatherConfigured } from './routes/weather';
+import { inboxRouter } from './routes/inbox';
 
 const PORT = Number(process.env.PORT) || 8800;
 const HOST = process.env.HOST || '127.0.0.1';
@@ -52,6 +53,9 @@ app.get('/api/config', (_req: Request, res: Response) => {
 });
 
 app.use('/api/weather', weatherRouter);
+
+// The inbox service (127.0.0.1:8805) has its own login; this only relays /api/inbox/* to it.
+app.use('/api/inbox', inboxRouter());
 
 // Anything under /api that is not a known route is a 404, never the SPA shell.
 app.use('/api', (_req: Request, res: Response) => {

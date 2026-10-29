@@ -1,10 +1,11 @@
-import { AppHeader, Modal, Spinner, Toaster, cn, tabClass, useDocumentTitle } from '@nish/ui';
+import { AppHeader, Badge, Modal, Spinner, Toaster, cn, tabClass, useDocumentTitle } from '@nish/ui';
 import { Suspense, lazy, useCallback, useState, type ComponentType } from 'react';
 import { ConfigProvider } from './lib/config-context';
 import { useHashRoute } from './lib/route';
 import type { AppId } from './lib/api';
 import { Anime } from './pages/Anime';
 import { Home } from './pages/Home';
+import { InboxPage, useInboxCounts } from './pages/Inbox';
 
 interface SheetProps {
   open: boolean;
@@ -63,7 +64,18 @@ function Shell() {
   const route = useHashRoute();
   const [sheet, setSheet] = useState<AppId | null>(null);
   const closeSheet = useCallback(() => setSheet(null), []);
-  useDocumentTitle(route === 'jp' ? 'Anime + Manga' : undefined, { app: 'Start' });
+  const inbox = useInboxCounts();
+  const openCount = inbox.counts?.open ?? 0;
+  useDocumentTitle(
+    route === 'jp'
+      ? 'Anime + Manga'
+      : route === 'inbox'
+        ? openCount > 0
+          ? `Inbox (${openCount})`
+          : 'Inbox'
+        : undefined,
+    { app: 'Start' },
+  );
 
   const nav = (
     <div className="flex gap-5">
@@ -73,20 +85,39 @@ function Shell() {
       <a href="#/jp" className={cn(tabClass({ active: route === 'jp' }))} aria-current={route === 'jp' ? 'page' : undefined}>
         Anime
       </a>
+      <a
+        href="#/inbox"
+        className={cn(tabClass({ active: route === 'inbox' }), 'flex-row items-center gap-1.5')}
+        aria-current={route === 'inbox' ? 'page' : undefined}
+      >
+        Inbox
+        {openCount > 0 ? (
+          <Badge size="xs" tone={(inbox.counts?.urgent ?? 0) > 0 ? 'loss' : 'accent'}>
+            {openCount}
+            <span className="sr-only"> open</span>
+          </Badge>
+        ) : null}
+      </a>
     </div>
   );
 
   return (
     <>
       <AppHeader name="Start" sticky={route === 'jp'} nav={nav} navLabel="Start" />
-      {route === 'jp' ? <Anime /> : <Home onOpen={setSheet} openSheet={sheet} />}
+      {route === 'jp' ? (
+        <Anime />
+      ) : route === 'inbox' ? (
+        <InboxPage onCounts={inbox.setCounts} />
+      ) : (
+        <Home onOpen={setSheet} openSheet={sheet} />
+      )}
       <Sheets sheet={sheet} onClose={closeSheet} />
       <Toaster />
     </>
   );
 }
 
-/** The start page app: config, header, the two routes, the sheets and the toasts. */
+/** The start page app: config, header, the routes, the sheets and the toasts. */
 export function App() {
   return (
     <ConfigProvider>
