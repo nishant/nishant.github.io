@@ -12,7 +12,7 @@ import {
   toast,
   type InboxSettings,
 } from '@nish/ui';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { currentSubscription, pushSupport, registerSubscription, turnOff, turnOn, type PushSupport } from './push';
 
 export interface NotificationSettingsProps {
@@ -20,6 +20,9 @@ export interface NotificationSettingsProps {
   onClose: () => void;
   sources: Array<{ id: string; open: number }>;
 }
+
+/** Time fields fire on every keystroke; wait for a pause so a half-typed time is never saved. */
+const TYPING_DELAY_MS = 800;
 
 const ZONES = ['America/Chicago', 'America/New_York', 'America/Denver', 'America/Los_Angeles', 'UTC'];
 
@@ -47,7 +50,8 @@ async function call<T>(path: string, init?: RequestInit): Promise<{ ok: true; da
   }
 }
 
-/** The "Notifications" modal: push on this device, quiet hours, digest, timezone and muted sources. */
+/** The "Notifications" modal: push on this device, quiet hours, digest, timezone and muted sources.
+ *  Every change saves on its own; there is no Save button to forget. */
 export function NotificationSettings({ open, onClose, sources }: NotificationSettingsProps) {
   if (!open) return null;
   return <SettingsModal onClose={onClose} sources={sources} />;
@@ -56,16 +60,47 @@ export function NotificationSettings({ open, onClose, sources }: NotificationSet
 function SettingsModal({ onClose, sources }: Omit<NotificationSettingsProps, 'open'>) {
   const [settings, setSettings] = useState<InboxSettings | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
   const [support, setSupport] = useState<PushSupport>(() => pushSupport());
   const [subscribed, setSubscribed] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  // The last settings the server accepted, to fall back to when a save fails.
+  const saved = useRef<InboxSettings | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pending = useRef<InboxSettings | null>(null);
+  const seq = useRef(0);
+
+  const persist = useCallback(async (next: InboxSettings) => {
+    const mine = ++seq.current;
+    const res = await call<InboxSettings>('/settings', { method: 'PUT', body: JSON.stringify(next) });
+    // A newer change is already on its way; its answer is the one that counts.
+    if (mine !== seq.current) return;
+    if (res.ok) {
+      saved.current = next;
+      toast.success('Saved', { id: 'inbox-settings' });
+    } else {
+      toast.error(res.error, { id: 'inbox-settings' });
+      if (saved.current) setSettings(saved.current);
+    }
+  }, []);
+
+  // Closing the modal mid-typing still saves what was typed.
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+      if (pending.current) void persist(pending.current);
+    },
+    [persist],
+  );
+
   const load = useCallback(async () => {
     setLoadError(null);
     const res = await call<InboxSettings>('/settings');
-    if (res.ok) setSettings({ ...INBOX_DEFAULT_SETTINGS, ...res.data });
-    else setLoadError(res.error);
+    if (res.ok) {
+      const loaded = { ...INBOX_DEFAULT_SETTINGS, ...res.data };
+      saved.current = loaded;
+      setSettings(loaded);
+    } else setLoadError(res.error);
   }, []);
 
   useEffect(() => {
@@ -117,20 +152,18 @@ function SettingsModal({ onClose, sources }: Omit<NotificationSettingsProps, 'op
     else toast.success('Test sent');
   };
 
-  const save = async () => {
+  const patch = (change: Partial<InboxSettings>, delay = 0) => {
     if (!settings) return;
-    setSaving(true);
-    const res = await call<InboxSettings>('/settings', { method: 'PUT', body: JSON.stringify(settings) });
-    setSaving(false);
-    if (res.ok) {
-      toast.success('Saved');
-      onClose();
-    } else {
-      toast.error(res.error);
-    }
+    const next = { ...settings, ...change };
+    setSettings(next);
+    if (timer.current) clearTimeout(timer.current);
+    pending.current = next;
+    timer.current = setTimeout(() => {
+      timer.current = null;
+      pending.current = null;
+      void persist(next);
+    }, delay);
   };
-
-  const patch = (change: Partial<InboxSettings>) => setSettings((s) => (s ? { ...s, ...change } : s));
 
   // Muted sources that have no items right now still get a checkbox, so they can be turned back on.
   const sourceIds = [...sources.map((s) => s.id)];
@@ -144,13 +177,9 @@ function SettingsModal({ onClose, sources }: Omit<NotificationSettingsProps, 'op
       size="md"
       onClose={onClose}
       footer={
-        <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={save} loading={saving} disabled={!settings}>
-            Save
-          </Button>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs text-th-hi3">Changes save as you make them.</p>
+          <Button onClick={onClose}>Done</Button>
         </div>
       }
     >
@@ -212,7 +241,7 @@ function SettingsModal({ onClose, sources }: Omit<NotificationSettingsProps, 'op
                       id="inbox-quiet-start"
                       type="time"
                       value={settings.quietHours.start}
-                      onChange={(e) => patch({ quietHours: { ...settings.quietHours, start: e.target.value } })}
+                      onChange={(e) => patch({ quietHours: { ...settings.quietHours, start: e.target.value } }, TYPING_DELAY_MS)}
                     />
                   </Field>
                   <Field label="To" htmlFor="inbox-quiet-end">
@@ -220,7 +249,7 @@ function SettingsModal({ onClose, sources }: Omit<NotificationSettingsProps, 'op
                       id="inbox-quiet-end"
                       type="time"
                       value={settings.quietHours.end}
-                      onChange={(e) => patch({ quietHours: { ...settings.quietHours, end: e.target.value } })}
+                      onChange={(e) => patch({ quietHours: { ...settings.quietHours, end: e.target.value } }, TYPING_DELAY_MS)}
                     />
                   </Field>
                 </div>
@@ -240,7 +269,7 @@ function SettingsModal({ onClose, sources }: Omit<NotificationSettingsProps, 'op
                     id="inbox-digest-time"
                     type="time"
                     value={settings.digest.time}
-                    onChange={(e) => patch({ digest: { ...settings.digest, time: e.target.value } })}
+                    onChange={(e) => patch({ digest: { ...settings.digest, time: e.target.value } }, TYPING_DELAY_MS)}
                   />
                 </Field>
               )}
