@@ -69,7 +69,7 @@ export function WeatherSheet({ open, onClose }: { open: boolean; onClose: () => 
 
 function Forecast({ view, tab, onTab }: { view: WeatherView; tab: Tab; onTab: (t: Tab) => void }) {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 pt-3">
       <div className="flex items-center gap-3">
         <WeatherIcon name={view.icon} size={48} className="shrink-0 text-th-accent" />
         <div className="min-w-0 flex-1">
