@@ -1,22 +1,16 @@
 # Checks every pull request. `check` mirrors the check job in deploy.yml: keep them in step.
-# `fold` renders the PR and its base branch, diffs the pages and posts the result on the PR
-# (nishant/ui docs/fold-check.md). It runs only for @nish/ui bumps, Dependabot and PRs
-# labeled `fold`.
+# The Fold check (nishant/ui docs/fold-check.md) is its own workflow, fold.yml.
 name: PR
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
 
-permissions: { contents: read, pull-requests: write }
+permissions: { contents: read }
 
-concurrency:
-  group: pr-${{ github.event.pull_request.number }}-${{ github.event.action == 'labeled' && 'label' || 'push' }}
-  cancel-in-progress: true
+concurrency: { group: "pr-${{ github.event.pull_request.number }}", cancel-in-progress: true }
 
 jobs:
   check:
-    if: github.event.action != 'labeled'
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
@@ -36,9 +30,3 @@ jobs:
         working-directory: server
       - run: npm run typecheck
         working-directory: server
-
-  fold:
-    if: (github.event.action != 'labeled' || github.event.label.name == 'fold') && (startsWith(github.head_ref, 'ui/') || github.actor == 'dependabot[bot]' || contains(github.event.pull_request.labels.*.name, 'fold'))
-    uses: nishant/ui/.github/workflows/fold-check.yml@master
-    with:
-      node-version: '22'
