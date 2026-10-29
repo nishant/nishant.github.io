@@ -1,0 +1,32 @@
+# Checks every pull request. `check` mirrors the check job in deploy.yml: keep them in step.
+# The Fold check (nishant/ui docs/fold-check.md) is its own workflow, fold.yml.
+name: PR
+
+on:
+  pull_request:
+
+permissions: { contents: read }
+
+concurrency: { group: "pr-${{ github.event.pull_request.number }}", cancel-in-progress: true }
+
+jobs:
+  check:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            server/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npx vite build --outDir /tmp/start-check
+      - run: npm ci
+        working-directory: server
+      - run: npm run typecheck
+        working-directory: server

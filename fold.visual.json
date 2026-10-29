@@ -1,0 +1,25 @@
+{
+  "name": "startpage",
+  "pages": [
+    {
+      "name": "home",
+      "url": "http://127.0.0.1:{port}/#/home",
+      "waitFor": "header",
+      "mask": ["p > .tabular-nums", "button[aria-label^=\"Weather,\"]"]
+    }
+  ],
+  "viewports": ["phone-small", "fold", "desktop"],
+  "themes": ["light", "dark"],
+  "setTheme": "try{localStorage.setItem('nish-theme','{theme}')}catch(e){}",
+  "ignoreConsole": [
+    "Failed to load resource",
+    "net::ERR_",
+    "Local Network Access",
+    "private network",
+    "CORS",
+    "fonts.googleapis.com",
+    "/api/",
+    "trading.nish.software"
+  ],
+  "fullPage": true
+}
