@@ -11,11 +11,13 @@ on:
 permissions: { contents: read, pull-requests: write }
 
 concurrency:
-  group: pr-${{ github.event.pull_request.number }}
+  group: pr-${{ github.event.pull_request.number }}-${{ github.event.action == 'labeled' && 'label' || 'push' }}
   cancel-in-progress: true
 
 jobs:
   check:
+    if: github.event.action != 'labeled'
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,6 +25,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            server/package-lock.json
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
@@ -33,7 +38,7 @@ jobs:
         working-directory: server
 
   fold:
-    if: startsWith(github.head_ref, 'ui/') || github.actor == 'dependabot[bot]' || contains(github.event.pull_request.labels.*.name, 'fold')
+    if: (github.event.action != 'labeled' || github.event.label.name == 'fold') && (startsWith(github.head_ref, 'ui/') || github.actor == 'dependabot[bot]' || contains(github.event.pull_request.labels.*.name, 'fold'))
     uses: nishant/ui/.github/workflows/fold-check.yml@master
     with:
       node-version: '22'

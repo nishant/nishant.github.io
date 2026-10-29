@@ -5,7 +5,7 @@
       "name": "home",
       "url": "http://127.0.0.1:{port}/#/home",
       "waitFor": "header",
-      "mask": [".tabular-nums", "button[aria-label^=\"Weather,\"]"]
+      "mask": ["p > .tabular-nums", "button[aria-label^=\"Weather,\"]"]
     }
   ],
   "viewports": ["phone-small", "fold", "desktop"],
