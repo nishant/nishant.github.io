@@ -18,3 +18,6 @@ Thumbs.db
 
 # Server runtime
 /logs
+
+# Fold check build
+/.fold-dist

@@ -10,7 +10,8 @@
     "test": "vitest run",
     "check": "npm run typecheck && npm test && npm run build",
     "deploy": "npm run build",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "fold:serve": "node scripts/fold-serve.mjs"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.4",
