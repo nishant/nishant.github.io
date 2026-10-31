@@ -134,6 +134,103 @@ export async function getBars(symbol: string, range: BarRange, o?: FetchOptions)
   );
 }
 
+/** One watchlist symbol in trading's `GET /api/watchlist/summary` (copied from its shared
+ *  `WatchlistSymbolSummary`). */
+export interface WatchlistSymbolSummary {
+  symbol: string;
+  /** Highest composite score (0..100) in the newest finished scan; null when there is none, never 0. */
+  topPickScore: number | null;
+  /** That candidate's strategy (`long_call`, `long_put`, `csp`, `covered_call`); null with the score. */
+  topPickStrategy: string | null;
+  /** At least one taken (real-money) pick on the symbol is open. */
+  hasOpenPosition: boolean;
+  openPositionCount: number;
+}
+
+export interface WatchlistSummaryData {
+  symbols: WatchlistSymbolSummary[];
+  scanRunId: number | null;
+  scannedAt: string | null;
+  updatedAt: string;
+}
+
+/** What a watchlist row shows beside its symbol. */
+export interface SymbolBadges {
+  /** The top pick's score, rounded for the badge; null means no badge. */
+  score: number | null;
+  /** The unrounded score, for the tooltip and the row's label. */
+  scoreExact: number | null;
+  /** "Long Call"; null with the score. */
+  strategy: string | null;
+  /** Open taken positions on the symbol; 0 means no marker. */
+  openCount: number;
+}
+
+const STRATEGY_LABELS: Record<string, string> = {
+  long_call: 'Long Call',
+  long_put: 'Long Put',
+  csp: 'Cash-Secured Put',
+  covered_call: 'Covered Call',
+};
+
+/** "Long Call" for `long_call`; an unknown id is title-cased so a new strategy still reads. */
+export function strategyLabel(id: string): string {
+  const known = STRATEGY_LABELS[id];
+  if (known) return known;
+  return id
+    .split(/[_\s-]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+/** Badges by symbol from a summary body. Anything malformed yields no badges rather than a wrong
+ *  one: a missing or non-numeric score is no badge (never a 0), and a bad body is an empty map. */
+export function summaryBadges(data: unknown): Map<string, SymbolBadges> {
+  const out = new Map<string, SymbolBadges>();
+  const symbols = (data as { symbols?: unknown } | null)?.symbols;
+  if (!Array.isArray(symbols)) return out;
+  for (const raw of symbols as unknown[]) {
+    if (!raw || typeof raw !== 'object') continue;
+    const r = raw as Partial<Record<keyof WatchlistSymbolSummary, unknown>>;
+    if (typeof r.symbol !== 'string' || !r.symbol) continue;
+    const exact = typeof r.topPickScore === 'number' && Number.isFinite(r.topPickScore) ? r.topPickScore : null;
+    const strategy =
+      exact !== null && typeof r.topPickStrategy === 'string' && r.topPickStrategy
+        ? strategyLabel(r.topPickStrategy)
+        : null;
+    const count =
+      typeof r.openPositionCount === 'number' && Number.isFinite(r.openPositionCount)
+        ? Math.max(0, Math.floor(r.openPositionCount))
+        : 0;
+    const openCount = r.hasOpenPosition === true ? Math.max(1, count) : 0;
+    if (exact === null && openCount === 0) continue;
+    out.set(r.symbol, { score: exact === null ? null : Math.round(exact), scoreExact: exact, strategy, openCount });
+  }
+  return out;
+}
+
+/** Per-symbol badges from `GET /api/watchlist/summary`. Never rejects: any failure (a 404 from an
+ *  older Trading, 401, CORS, network, timeout) resolves null, so the sheet works as it did before
+ *  the route existed and a failed reload can keep the badges it has. Cookie auth only: this public
+ *  page never holds a token. */
+export async function getWatchlistBadges(o?: FetchOptions): Promise<Map<string, SymbolBadges> | null> {
+  try {
+    return summaryBadges(await fetchTrading<unknown>(await getTradingUrl(), '/api/watchlist/summary', o));
+  } catch {
+    return null;
+  }
+}
+
+/** "Top pick 82.4 (Long Call). 1 open position." for a row's label; empty without badges. */
+export function badgesLabel(b: SymbolBadges | undefined): string {
+  if (!b) return '';
+  const parts: string[] = [];
+  if (b.scoreExact !== null) parts.push(`Top pick ${b.scoreExact}${b.strategy ? ` (${b.strategy})` : ''}.`);
+  if (b.openCount > 0) parts.push(`${b.openCount} open position${b.openCount === 1 ? '' : 's'}.`);
+  return parts.join(' ');
+}
+
 export type ChangeTone = 'ok' | 'loss' | 'neutral';
 
 /** "+1.2%" or "−0.4%" for a day change that is already a percent, with its badge tone. A change that rounds to 0.0% is neutral. */

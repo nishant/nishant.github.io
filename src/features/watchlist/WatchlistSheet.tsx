@@ -8,13 +8,14 @@ import {
   RangeBar,
   RelativeTime,
   SkeletonRows,
+  Tooltip,
   buttonClass,
   cn,
   linkClass,
   toast,
 } from '@nish/ui';
 import { money } from '@nish/ui/format';
-import { ArrowLeft, ChartCandlestick, ExternalLink, Lock, RefreshCw, ShieldAlert, WifiOff } from 'lucide-react';
+import { ArrowLeft, Briefcase, ChartCandlestick, ExternalLink, Lock, RefreshCw, ShieldAlert, Star, WifiOff } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SymbolDetail } from './SymbolDetail';
 import {
@@ -23,10 +24,13 @@ import {
   formatChange,
   getOverview,
   getTradingUrl,
+  badgesLabel,
+  getWatchlistBadges,
   localNetworkAccess,
   type LocalNetworkState,
   type Overview,
   type Snapshot,
+  type SymbolBadges,
 } from './trading';
 
 const POLL_MS = 30_000;
@@ -82,15 +86,59 @@ function useOverview(): OverviewState & { refresh: () => void } {
   return { ...state, refresh: () => load(true) };
 }
 
-function SymbolRow({ s, onSelect }: { s: Snapshot; onSelect: () => void }) {
+/** Trading's per-symbol pick scores and open positions, loaded once when the sheet opens (and on a
+ *  manual refresh), alongside the first overview request. It never errors: a Trading without the
+ *  route, or any failure, leaves the map empty and the rows without badges. */
+function useSummaryBadges(): { badges: Map<string, SymbolBadges>; reload: () => void } {
+  const [badges, setBadges] = useState<Map<string, SymbolBadges>>(() => new Map());
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    const c = new AbortController();
+    void getWatchlistBadges({ signal: c.signal }).then((b) => {
+      // null is a failure: keep whatever is shown (nothing, on the first load).
+      if (!c.signal.aborted && b) setBadges(b);
+    });
+    return () => c.abort();
+  }, [attempt]);
+  return { badges, reload: () => setAttempt((n) => n + 1) };
+}
+
+function RowBadges({ b }: { b: SymbolBadges }) {
+  return (
+    <span className="flex items-center gap-1" aria-hidden="true">
+      {b.score !== null && (
+        <Tooltip
+          focusable={false}
+          tip={`Top pick ${b.scoreExact}${b.strategy ? `: ${b.strategy}` : ''} (newest scan)`}
+        >
+          <Badge size="xs" tone="accent" className="gap-0.5 tabular-nums">
+            <Star size={10} aria-hidden="true" className="fill-current" />
+            {b.score}
+          </Badge>
+        </Tooltip>
+      )}
+      {b.openCount > 0 && (
+        <Tooltip focusable={false} tip={`${b.openCount} open position${b.openCount === 1 ? '' : 's'}`}>
+          <Badge size="xs" tone="info" className="gap-0.5 tabular-nums">
+            <Briefcase size={10} aria-hidden="true" />
+            {b.openCount > 1 ? `${b.openCount} Open` : 'Open'}
+          </Badge>
+        </Tooltip>
+      )}
+    </span>
+  );
+}
+
+function SymbolRow({ s, badges, onSelect }: { s: Snapshot; badges?: SymbolBadges; onSelect: () => void }) {
   const change = formatChange(s.dayChangePct);
   const hasRange = Number.isFinite(s.dayLow) && Number.isFinite(s.dayHigh) && s.dayHigh > s.dayLow;
+  const extra = badgesLabel(badges);
   return (
     <li className="border-b border-th-line last:border-b-0">
       <button
         type="button"
         onClick={onSelect}
-        aria-label={`${s.symbol}, ${money(s.price)}, ${change.text}. Show chart`}
+        aria-label={`${s.symbol}, ${money(s.price)}, ${change.text}.${extra ? ` ${extra}` : ''} Show chart`}
         className={cn(
           'flex w-full flex-col justify-center gap-1 px-4 py-2 text-left outline-none',
           'min-h-[52px] hover:bg-th-hover focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-th-accent',
@@ -98,7 +146,10 @@ function SymbolRow({ s, onSelect }: { s: Snapshot; onSelect: () => void }) {
       >
         <span className="flex items-center justify-between gap-3">
           <span className="min-w-0">
-            <span className="block font-mono font-semibold text-th-hi">{s.symbol}</span>
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <span className="font-mono font-semibold text-th-hi">{s.symbol}</span>
+              {badges && <RowBadges b={badges} />}
+            </span>
             <span className="hidden text-xs tabular-nums text-th-hi3 min-[400px]:block">
               {`${money(s.dayLow)} – ${money(s.dayHigh)}`}
             </span>
@@ -121,7 +172,12 @@ function SymbolRow({ s, onSelect }: { s: Snapshot; onSelect: () => void }) {
 }
 
 function WatchlistModal({ onClose }: { onClose: () => void }) {
-  const { data, error, loading, refresh } = useOverview();
+  const { data, error, loading, refresh: refreshOverview } = useOverview();
+  const { badges, reload: reloadBadges } = useSummaryBadges();
+  const refresh = () => {
+    refreshOverview();
+    reloadBadges();
+  };
   const [tradingUrl, setTradingUrl] = useState(FALLBACK_URL);
   const [selected, setSelected] = useState<string | null>(null);
   const [lna, setLna] = useState<LocalNetworkState>('unsupported');
@@ -208,7 +264,7 @@ function WatchlistModal({ onClose }: { onClose: () => void }) {
       ) : (
         <ul>
           {data.snapshots.map((s) => (
-            <SymbolRow key={s.symbol} s={s} onSelect={() => setSelected(s.symbol)} />
+            <SymbolRow key={s.symbol} s={s} badges={badges.get(s.symbol)} onSelect={() => setSelected(s.symbol)} />
           ))}
         </ul>
       );
