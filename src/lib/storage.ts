@@ -26,14 +26,18 @@ export const DEFAULT_CONFIG: Config = defaultConfig as Config;
 
 const WRITE_ERROR = 'Could not save: storage is full or blocked';
 export const CONFIG_WARNING =
-  'Your saved links could not be read, so the defaults are showing. Open Settings → Raw JSON to fix them.';
+  'Your saved links could not be read, so the defaults are showing. Open Settings → JSON to fix them.';
+
+/** Schemes whose body can be just digits (tel:911), so `scheme:123` is not read as host:port. */
+const NUMBER_SCHEMES = new Set(['tel', 'sms', 'fax', 'callto', 'sip', 'sips', 'mms']);
 
 /** Adds https:// when the text has no scheme (as on blur); empty stays empty. */
 export function normalizeUrl(url: string): string {
   const t = url.trim();
   if (!t) return '';
-  // host:port (localhost:3000, example.com:8080/x) is not a scheme.
-  if (/^(?:localhost|[a-z0-9-]+(?:\.[a-z0-9-]+)+):\d+(?:[/?#]|$)/i.test(t)) return `https://${t}`;
+  // host:port (localhost:3000, nas:5000, example.com:8080/x) is not a scheme, but tel:911 is.
+  const hostPort = /^([a-z0-9-]+(?:\.[a-z0-9-]+)*):\d{1,5}(?:[/?#]|$)/i.exec(t);
+  if (hostPort && !NUMBER_SCHEMES.has(hostPort[1]!.toLowerCase())) return `https://${t}`;
   if (/^[a-z][a-z0-9+.-]*:/i.test(t)) return t;
   return `https://${t.replace(/^\/\//, '')}`;
 }

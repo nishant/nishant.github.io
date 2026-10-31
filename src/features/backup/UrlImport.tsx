@@ -1,14 +1,24 @@
 import { toast } from '@nish/ui';
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState, type ComponentProps, type ComponentType } from 'react';
+import type { ImportDialog as ImportDialogType } from './ImportDialog';
 import { decodeShare, shareParam, type SettingsBundle } from '../../lib/backup';
-
-const ImportDialog = lazy(() => import('./ImportDialog').then((m) => ({ default: m.ImportDialog })));
 
 const BROKEN = 'That share link is broken or incomplete.';
 
 function strip(): void {
   window.history.replaceState(null, '', '#/home');
 }
+
+// A chunk that fails to load (offline, or an old tab after a deploy) must not blank the page.
+const ImportDialog = lazy<ComponentType<ComponentProps<typeof ImportDialogType>>>(() =>
+  import('./ImportDialog')
+    .then((m) => ({ default: m.ImportDialog }))
+    .catch(() => {
+      toast.error('Could not open the import. Reload the page and try the link again.');
+      strip();
+      return { default: () => null };
+    }),
+);
 
 /** Opens the import preview for a share link (`#/home?settings=<code>`) and removes the code from the URL after. */
 export function UrlImport() {

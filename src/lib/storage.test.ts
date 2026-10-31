@@ -170,6 +170,8 @@ describe('normalizeUrl / parseConfig normalization', () => {
     expect(normalizeUrl('mailto:a@b.c')).toBe('mailto:a@b.c');
     expect(normalizeUrl('tel:5551234')).toBe('tel:5551234');
     expect(normalizeUrl('sms:12345')).toBe('sms:12345');
+    expect(normalizeUrl('nas:5000')).toBe('https://nas:5000');
+    expect(normalizeUrl('pc:8800/x')).toBe('https://pc:8800/x');
   });
 
   it('parseConfig normalizes urls and keeps empty ones empty', () => {

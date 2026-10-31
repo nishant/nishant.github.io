@@ -153,17 +153,25 @@ self.addEventListener('activate', (event) => {
   if (ENABLED) event.waitUntil(cleanup().then(() => self.clients.claim()));
 });
 
+async function cachedShell() {
+  return caches.match(new URL('./', SCOPE), { cacheName: SHELL });
+}
+
 async function navigate(request, shellPage) {
+  let res;
   try {
-    const res = await fetch(request);
-    if (shellPage && cacheable(res) && (res.headers.get('Content-Type') || '').includes('text/html')) {
-      const cache = await caches.open(SHELL);
-      await cache.put(new URL('./', SCOPE), res.clone());
-    }
-    return res;
+    res = await fetch(request);
   } catch {
-    return (await caches.match(new URL('./', SCOPE), { cacheName: SHELL })) || Response.error();
+    return (await cachedShell()) || Response.error();
   }
+  // The PC restarting the app during a deploy (or Cloudflare not reaching it) answers 5xx:
+  // the shell page falls back to the cached copy rather than an error page.
+  if (shellPage && res.status >= 500) return (await cachedShell()) || res;
+  if (shellPage && cacheable(res) && (res.headers.get('Content-Type') || '').includes('text/html')) {
+    const cache = await caches.open(SHELL);
+    await cache.put(new URL('./', SCOPE), res.clone());
+  }
+  return res;
 }
 
 async function cacheFirstAsset(request) {

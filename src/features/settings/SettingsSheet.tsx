@@ -46,7 +46,7 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
     // Broken saved text is still the only copy of the user's config; a structured edit must not replace it.
     if (rawError !== null) {
       setTab('json');
-      closeToast.current = toast.error('Fix the Raw JSON first, or discard it', {
+      closeToast.current = toast.error('Fix the JSON tab first, or discard it', {
         id: 'settings-close',
         action: { label: 'Discard', onClick: onClose },
       });
