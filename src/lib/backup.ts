@@ -202,7 +202,8 @@ async function pipe(
 
 /** Share code: `1.` + deflate-raw when CompressionStream exists, else `0.` + plain. Notes are never included. */
 export async function encodeShare(b: SettingsBundle): Promise<string> {
-  const { notes: _notes, ...rest } = b;
+  const rest: Partial<SettingsBundle> = { ...b };
+  delete rest.notes;
   const bytes = new TextEncoder().encode(JSON.stringify(rest));
   if (typeof CompressionStream !== 'undefined') {
     try {
