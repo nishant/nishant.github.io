@@ -22,8 +22,8 @@ function item(id: number, over: Record<string, unknown> = {}) {
     createdAt: NOW,
     updatedAt: NOW,
     occurredAt: NOW,
-    handledAt: null,
-    handledBy: null,
+    handledAt: null as string | null,
+    handledBy: null as string | null,
     snoozedUntil: null,
     data: null,
     ...over,
@@ -36,6 +36,8 @@ interface Server {
   handled: ReturnType<typeof item>[];
   calls: string[];
   failHandle: boolean;
+  /** The action route's answer: the target succeeded, failed, or the route errored. */
+  action: 'ok' | 'fail' | 409;
   sessionStatus: number;
 }
 
@@ -70,6 +72,23 @@ function install(server: Server): void {
           counts: { open: server.open.length, snoozed: 0, handled: server.handled.length, urgent: 0 },
           sources: [{ id: 'trackers', open: server.open.length }],
         });
+      }
+      const a = /^\/items\/(\d+)\/actions\/([a-z0-9-]+)$/.exec(path);
+      if (a && method === 'POST') {
+        const id = Number(a[1]);
+        if (server.action === 409) return json(409, { error: 'That action is still running.' });
+        const found = server.open.find((i) => i.id === id)!;
+        const ok = server.action === 'ok';
+        const lastAction = { actionId: a[2], ok, status: ok ? 200 : 500, error: ok ? null : 'The app answered 500.', at: NOW };
+        if (!ok) {
+          const updated = { ...found, lastAction };
+          server.open = server.open.map((i) => (i.id === id ? updated : i));
+          return json(200, updated);
+        }
+        const updated = { ...found, lastAction, handledAt: NOW, handledBy: 'user' };
+        server.open = server.open.filter((i) => i.id !== id);
+        server.handled = [updated, ...server.handled];
+        return json(200, updated);
       }
       const m = /^\/items\/(\d+)\/(handle|unhandle)$/.exec(path);
       if (m) {
@@ -123,6 +142,7 @@ beforeEach(() => {
     handled: [],
     calls: [],
     failHandle: false,
+    action: 'ok',
     sessionStatus: 200,
   };
   install(server);
@@ -172,6 +192,38 @@ describe('Inbox page', () => {
     await waitFor(() => expect(screen.getByText('Item 2')).toBeTruthy());
     const titles = screen.getAllByText(/^Item \d$/).map((n) => n.textContent);
     expect(titles).toEqual(['Item 1', 'Item 2', 'Item 3']);
+  });
+
+  describe('actions', () => {
+    const restart = { id: 'restart', label: 'Restart task', method: 'POST', target: 'http://127.0.0.1:8810/restart' };
+    beforeEach(() => {
+      server.authed = true;
+      server.open = [item(1), item(2, { actions: [restart], lastAction: null }), item(3)];
+    });
+
+    it('runs an action and drops the item once the target succeeded', async () => {
+      mount();
+      fireEvent.click(await screen.findByRole('button', { name: 'Restart task' }));
+      await waitFor(() => expect(screen.queryByText('Item 2')).toBeNull());
+      expect(server.calls).toContain('POST /items/2/actions/restart');
+      expect(await screen.findByText('Restart task: done')).toBeTruthy();
+    });
+
+    it('keeps the item and shows the error when the target failed', async () => {
+      server.action = 'fail';
+      mount();
+      fireEvent.click(await screen.findByRole('button', { name: 'Restart task' }));
+      expect(await screen.findByText('Restart task failed: The app answered 500.')).toBeTruthy();
+      expect(screen.getByText('Item 2')).toBeTruthy();
+    });
+
+    it('shows the route error (409 double tap) and keeps the item', async () => {
+      server.action = 409;
+      mount();
+      fireEvent.click(await screen.findByRole('button', { name: 'Restart task' }));
+      expect(await screen.findByText('That action is still running.')).toBeTruthy();
+      expect(screen.getByText('Item 2')).toBeTruthy();
+    });
   });
 
   it('shows the login card when the session ends (401 on a later call)', async () => {

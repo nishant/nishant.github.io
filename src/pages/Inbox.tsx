@@ -357,6 +357,30 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
       });
     }
   };
+  /** Runs one of an item's actions. The service answers the updated item either way: handled when the
+   *  target succeeded, still open with `lastAction.error` when it did not. */
+  const onAction = async (id: number, actionId: string): Promise<void> => {
+    const label = itemsRef.current.find((i) => i.id === id)?.actions?.find((a) => a.id === actionId)?.label ?? 'Action';
+    const slot = `inbox-${id}`;
+    const r = await inboxApi.runAction(id, actionId);
+    if (!r.ok) {
+      if (r.status === 401) loggedOut();
+      else toast.error(r.error, { id: slot });
+      void loadRef.current(true);
+      return;
+    }
+    const item = r.data;
+    if (item.lastAction?.ok) {
+      const from = viewRef.current;
+      setItems((cur) => cur.filter((i) => i.id !== id));
+      if (from !== 'handled') shift(from, 'handled', 1);
+      toast.success(`${label}: done`, { id: slot });
+    } else {
+      setItems((cur) => cur.map((i) => (i.id === id ? item : i)));
+      toast.error(`${label} failed: ${item.lastAction?.error ?? 'no result'}`, { id: slot });
+    }
+    void loadRef.current(true);
+  };
   const onHandleAll = async (): Promise<void> => {
     const ids = itemsRef.current.map((i) => i.id);
     const r = await mutate(ids, 'handled', () => inboxApi.handleAll(source), 'inbox-all');
@@ -416,6 +440,7 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
         onUnhandle={(id) => void mutate([id], 'open', () => inboxApi.unhandle(id), `inbox-${id}`)}
         onSnooze={(id, until) => void onSnooze(id, until)}
         onUnsnooze={(id) => void mutate([id], 'open', () => inboxApi.unsnooze(id), `inbox-${id}`)}
+        onAction={onAction}
         onHandleAll={view === 'open' ? () => void onHandleAll() : undefined}
         loading={loading}
         error={error}

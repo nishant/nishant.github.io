@@ -91,3 +91,20 @@ describe('request shape', () => {
     expect(bodies).toEqual([{ source: 'ci' }, {}]);
   });
 });
+
+describe('inboxApi.runAction', () => {
+  it('POSTs to the action route and returns the updated item', async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ id: 7 }), { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+    expect(await inboxApi.runAction(7, 'restart_task')).toEqual({ ok: true, data: { id: 7 } });
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/inbox/items/7/actions/restart_task',
+      expect.objectContaining({ method: 'POST', body: '{}' }),
+    );
+  });
+
+  it('passes a failed target through as an error', async () => {
+    respond(502, { error: 'Target answered 500.' });
+    expect(await inboxApi.runAction(7, 'go')).toEqual({ ok: false, status: 502, error: 'Target answered 500.' });
+  });
+});

@@ -85,6 +85,9 @@ export const inboxApi = {
   snooze: (id: number, until: Date) =>
     inboxRequest<InboxItem>(`/items/${id}/snooze`, { method: 'POST', body: { until: until.toISOString() } }),
   unsnooze: (id: number) => inboxRequest<InboxItem>(`/items/${id}/unsnooze`, { method: 'POST', body: {} }),
+  /** Runs one of the item's actions; the inbox service calls the action's target and answers the updated item. */
+  runAction: (id: number, actionId: string) =>
+    inboxRequest<InboxItem>(`/items/${id}/actions/${encodeURIComponent(actionId)}`, { method: 'POST', body: {} }),
   handleAll: (source?: string | null) =>
     inboxRequest<{ count: number }>('/items/handle-all', { method: 'POST', body: source ? { source } : {} }),
   getSettings: () => inboxRequest<InboxSettings>('/settings'),
