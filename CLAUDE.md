@@ -17,6 +17,9 @@ disagrees. A push to `master` deploys; `npm run build` rebuilds `docs/`; commit 
 - This repo is **public** (GitHub Pages). Never commit or put in a PR body an app password, the hosting password pattern, or a spec that names them; such specs go in a private repo (the inbox spec lives in nishant/inbox for that reason).
 - Lockfile: `npm install` under npm 10 crashes on jsdom's optional `canvas` peer
   (`reading 'edgesOut'`). Install with npm 11, then confirm `npx npm@10 ci` (CI's npm) works.
+- Cloud sessions: the proxy blocks `codeload.github.com` (403), so `npm ci` cannot fetch `@nish/ui`.
+  For local checks, `git archive` the ui tag into a tarball, point package.json and the lockfile at it
+  temporarily, `npx npm@10 ci`, then restore both files; never commit that change.
 - The Watchlist calls trading.nish.software from the browser. It resolves to a Tailscale address,
   which Chrome's Local Network Access treats as local, so Chrome asks once to allow local network
   access for start.nish.software. Headless Playwright denies it unless the context runs
