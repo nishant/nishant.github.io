@@ -35,7 +35,7 @@ export function WeatherChip({ onOpen }: { onOpen: () => void }) {
       onClick={onOpen}
       aria-haspopup="dialog"
       aria-label={`Weather, ${temp} degrees. Open forecast`}
-      className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm text-th-hi2 hover:bg-th-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-th-accent pointer-fine:min-h-8"
+      className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm text-th-hi2 hover:bg-th-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-th-accent pointer-fine:min-h-8"
     >
       <WeatherIcon name={iconNameFor(current.weather?.[0]?.icon)} size={18} className="text-th-accent" />
       <span className="tabular-nums">{temp}°</span>

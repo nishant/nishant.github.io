@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { inboxApi, type InboxCounts } from './api';
+import { useLatest } from '../../lib/useLatest';
 import { inboxLive, subscribeInboxChanges } from './live';
 
 const POLL_MS = 60_000;
@@ -8,8 +9,7 @@ const POLL_MS = 60_000;
  *  live stream is open), when the stream reports a change, and when the service worker posts
  *  `{ type: 'inbox-updated' }`. */
 export function useInboxRefresh(fn: () => void): void {
-  const ref = useRef(fn);
-  ref.current = fn;
+  const ref = useLatest(fn);
   useEffect(() => {
     const tick = (): void => {
       if (document.visibilityState === 'visible') ref.current();
@@ -32,7 +32,7 @@ export function useInboxRefresh(fn: () => void): void {
       document.removeEventListener('visibilitychange', tick);
       sw?.removeEventListener('message', onMessage);
     };
-  }, []);
+  }, [ref]);
 }
 
 /** The open and urgent counts for the nav tab. `counts` is null until loaded and while logged out or
@@ -54,6 +54,7 @@ export function useInboxCounts(): {
     } else if (r.status === 401) setCounts(null);
   }, []);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loads the counts once on mount
     void refresh();
   }, [refresh]);
   useInboxRefresh(() => void refresh());

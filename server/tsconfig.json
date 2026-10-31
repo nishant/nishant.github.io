@@ -1,16 +1,13 @@
 {
+  "extends": "@nish/ui/tsconfig/node.json",
   "compilerOptions": {
-    "target": "es2022",
     "module": "commonjs",
-    "lib": ["es2022"],
+    "moduleResolution": "node10",
+    "noEmit": false,
     "rootDir": "./src",
     "outDir": "./dist",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
     "noUnusedLocals": true,
-    "noImplicitReturns": true,
-    "skipLibCheck": true
+    "noImplicitReturns": true
   },
   "include": ["src"]
 }

@@ -23,6 +23,7 @@ import { useInboxRefresh } from '../features/inbox/counts';
 import { closeInbox, reconnectInbox } from '../features/inbox/live';
 import { NotificationSettings } from '../features/inbox/NotificationSettings';
 import { useInboxParams } from '../lib/route';
+import { useLatest } from '../lib/useLatest';
 
 export { useInboxCounts } from '../features/inbox/counts';
 
@@ -83,10 +84,8 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [devices, setDevices] = useState<PushDevice[]>([]);
 
-  const itemsRef = useRef(items);
-  itemsRef.current = items;
-  const viewRef = useRef(view);
-  viewRef.current = view;
+  const itemsRef = useLatest(items);
+  const viewRef = useLatest(view);
   const seq = useRef(0);
   // Bumped only when the view, source or login state changes, so "Load more" ignores silent refreshes.
   const context = useRef(0);
@@ -94,8 +93,7 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
   const pendingInitial = useRef(false);
   const pending = useRef(new Set<number>());
   const dealtWith = useRef<number | null>(null);
-  const onCountsRef = useRef(onCounts);
-  onCountsRef.current = onCounts;
+  const onCountsRef = useLatest(onCounts);
 
   const checkSession = useCallback(async () => {
     setPhase('checking');
@@ -105,6 +103,7 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
     else setPhase('down');
   }, []);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- checks the session once on mount
     void checkSession();
   }, [checkSession]);
 
@@ -113,6 +112,7 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
     setDevices(r.ok && Array.isArray(r.data) ? r.data : []);
   }, []);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loads devices once the session is ready
     if (phase === 'ready') void loadDevices();
   }, [phase, loadDevices]);
 
@@ -124,7 +124,7 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
     setLoading(true);
     setPhase('login');
     onCountsRef.current(null);
-  }, []);
+  }, [onCountsRef]);
 
   const load = useCallback(
     async (silent: boolean) => {
@@ -165,12 +165,12 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
       onCountsRef.current({ open: d.counts.open, urgent: d.counts.urgent });
       setLoading(false);
     },
-    [view, source, loggedOut],
+    [view, source, loggedOut, itemsRef, onCountsRef],
   );
-  const loadRef = useRef(load);
-  loadRef.current = load;
+  const loadRef = useLatest(load);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loads the list when the view, source or login state changes
     if (phase === 'ready') void load(false);
   }, [phase, load]);
   useInboxRefresh(() => {
@@ -184,7 +184,7 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
     setNextCursor(null);
     setLoading(true);
     setView(next);
-  }, []);
+  }, [viewRef]);
   const switchSource = useCallback((next: string | null) => {
     context.current++;
     setItems([]);
@@ -198,6 +198,7 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
   useEffect(() => {
     if (params.source === lastParamSource.current) return;
     lastParamSource.current = params.source;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- applies the ?source= filter from the hash
     if (params.source !== null) switchSource(params.source);
   }, [params.source, switchSource]);
 
@@ -220,6 +221,7 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
   }, [params.item, phase, source, loggedOut, switchSource, switchView]);
   useEffect(() => {
     if (!want || want.view !== view || loading) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- selects the item named in ?item= once its view has loaded
     if (items.some((i) => i.id === want.id)) setSelectedId(want.id);
     setWant(null);
   }, [want, view, loading, items]);

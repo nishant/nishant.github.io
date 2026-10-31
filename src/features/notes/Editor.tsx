@@ -99,7 +99,7 @@ export default function Editor({ initialHtml, onChange, onReady, fine }: EditorP
   useEffect(() => {
     onReady(editor);
     return () => onReady(null);
-  }, [editor]);
+  }, [editor, onReady]);
 
   if (!editor) return <div className="min-h-[40dvh]" aria-busy="true" />;
 

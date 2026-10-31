@@ -13,6 +13,7 @@ import {
   cn,
   linkClass,
   toast,
+  useResource,
 } from '@nish/ui';
 import { money } from '@nish/ui/format';
 import { ArrowLeft, Briefcase, ChartCandlestick, ExternalLink, Lock, RefreshCw, ShieldAlert, Star, WifiOff } from 'lucide-react';
@@ -36,54 +37,34 @@ import {
 const POLL_MS = 30_000;
 const FALLBACK_URL = 'https://trading.nish.software';
 
-interface OverviewState {
-  data: Overview | null;
-  error: Error | null;
-  loading: boolean;
-}
-
-/** The watchlist overview, refreshed every 30s while the tab is visible. A failed refresh keeps the last data. */
-function useOverview(): OverviewState & { refresh: () => void } {
-  const [state, setState] = useState<OverviewState>({ data: null, error: null, loading: true });
-  const ctrl = useRef<AbortController | null>(null);
+/** The watchlist overview, refreshed every 30s while the tab is visible and on every return to the tab.
+ *  A failed refresh keeps the last data; a failed manual refresh with data on screen also toasts. */
+function useOverview() {
+  const manual = useRef(false);
   const hasData = useRef(false);
-
-  const load = useCallback((manual: boolean) => {
-    ctrl.current?.abort();
-    const c = new AbortController();
-    ctrl.current = c;
-    setState((s) => ({ ...s, loading: true }));
-    getOverview({ signal: c.signal })
-      .then((data) => {
-        if (c.signal.aborted) return;
+  const res = useResource<Overview>(
+    'watchlist-overview',
+    async (signal) => {
+      const wasManual = manual.current;
+      manual.current = false;
+      try {
+        const data = await getOverview({ signal });
         hasData.current = true;
-        setState({ data, error: null, loading: false });
-      })
-      .catch((e: unknown) => {
-        if (c.signal.aborted) return;
+        return data;
+      } catch (e) {
         const error = e instanceof Error ? e : new Error('Could not load the watchlist');
-        setState((s) => ({ ...s, error, loading: false }));
-        if (manual && hasData.current) toast.error(`Could not refresh: ${error.message}`);
-      });
-  }, []);
-
-  useEffect(() => {
-    load(false);
-    const tick = window.setInterval(() => {
-      if (!document.hidden) load(false);
-    }, POLL_MS);
-    const onVisible = () => {
-      if (!document.hidden) load(false);
-    };
-    document.addEventListener('visibilitychange', onVisible);
-    return () => {
-      window.clearInterval(tick);
-      document.removeEventListener('visibilitychange', onVisible);
-      ctrl.current?.abort();
-    };
-  }, [load]);
-
-  return { ...state, refresh: () => load(true) };
+        if (wasManual && hasData.current && !signal.aborted) toast.error(`Could not refresh: ${error.message}`);
+        throw error;
+      }
+    },
+    { intervalMs: POLL_MS, refetchOnVisible: 0, refetchOnReconnect: false },
+  );
+  const { reload } = res;
+  const refresh = useCallback(() => {
+    manual.current = true;
+    void reload();
+  }, [reload]);
+  return { data: res.data ?? null, error: res.error ?? null, loading: res.loading || res.refreshing, refresh };
 }
 
 /** Trading's per-symbol pick scores and open positions, loaded once when the sheet opens (and on a
@@ -141,7 +122,7 @@ function SymbolRow({ s, badges, onSelect }: { s: Snapshot; badges?: SymbolBadges
         aria-label={`${s.symbol}, ${money(s.price)}, ${change.text}.${extra ? ` ${extra}` : ''} Show chart`}
         className={cn(
           'flex w-full flex-col justify-center gap-1 px-4 py-2 text-left outline-none',
-          'min-h-[52px] hover:bg-th-hover focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-th-accent',
+          'min-h-[52px] hover:bg-th-elevated focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-th-accent',
         )}
       >
         <span className="flex items-center justify-between gap-3">

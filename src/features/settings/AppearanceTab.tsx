@@ -41,7 +41,7 @@ export function AppearanceTab() {
                 key={family}
                 className={cn(
                   'flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border px-3 py-2',
-                  'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-th-focus',
+                  'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-th-accent',
                   selected ? 'border-th-accent bg-th-accent-soft' : 'border-th-line hover:bg-th-ghost',
                 )}
               >

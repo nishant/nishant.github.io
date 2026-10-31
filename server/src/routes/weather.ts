@@ -133,7 +133,7 @@ export const createWeatherRouter = (opts: WeatherOptions = {}): express.Router =
         lon: coords.lon,
         exclude: 'minutely,alerts',
         appid: process.env.OPENWEATHERMAP_API_KEY,
-      })) ?? {}) as Record<string, any>;
+      })) ?? {}) as Record<string, unknown>;
       // One Call omits sections it cannot produce; the frontend needs a day of hours and a week of days.
       const payload = {
         current: data.current ?? null,

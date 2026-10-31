@@ -13,7 +13,7 @@ cd server && cp .env.example .env && npm ci && npm run build && npm start   # AP
 npm install && npm run dev                                                    # http://localhost:4200, /api proxied
 ```
 
-- `npm run check` is the gate: typecheck, vitest, then the build.
+- `npm run check` is the gate (typecheck, vitest, build); also run `npm run lint` (eslint src server/src).
 - `npm run build` writes the production bundle to `dist/` (gitignored). The deploy builds it on the PC;
   `docs/` only holds the GitHub Pages redirect to start.nish.software (it carries a visitor's links along as a
   share link) and specs.

@@ -1,5 +1,6 @@
 import { date, time } from '@nish/ui/format';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLatest } from '../../lib/useLatest';
 
 /** One OpenWeatherMap condition entry. */
 export interface OwmCondition {
@@ -350,8 +351,7 @@ export function useWeather(open: boolean): { state: WeatherState; refreshing: bo
   const [state, setState] = useState<WeatherState>({ status: 'idle' });
   const [refreshing, setRefreshing] = useState(false);
   const run = useRef(0);
-  const ready = useRef(false);
-  ready.current = state.status === 'ready';
+  const ready = useLatest(state.status === 'ready');
 
   const load = useCallback((keepCurrent: boolean) => {
     const id = ++run.current;
@@ -378,6 +378,7 @@ export function useWeather(open: boolean): { state: WeatherState; refreshing: bo
   useEffect(() => {
     if (!open) {
       run.current++;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clears the refreshing flag when the sheet closes; the cache read below sets state when it opens
       setRefreshing(false);
       return;
     }
@@ -389,11 +390,12 @@ export function useWeather(open: boolean): { state: WeatherState; refreshing: bo
       load(false);
     }
     return () => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- `run` is a request counter, not a DOM ref; the cleanup must bump the current value
       run.current++;
     };
   }, [open, load]);
 
-  const refresh = useCallback(() => load(ready.current), [load]);
+  const refresh = useCallback(() => load(ready.current), [load, ready]);
 
   return { state, refreshing, refresh };
 }
