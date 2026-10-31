@@ -23,7 +23,7 @@
     "@codemirror/view": "^6.43.15",
     "@fontsource-variable/fira-code": "^5.3.0",
     "@fontsource-variable/roboto": "^5.3.0",
-    "@nish/ui": "https://codeload.github.com/nishant/ui/tar.gz/refs/tags/v1.0.0",
+    "@nish/ui": "https://codeload.github.com/nishant/ui/tar.gz/refs/tags/v1.0.1",
     "@tiptap/core": "^2.27.3",
     "@tiptap/extension-color": "^2.26.1",
     "@tiptap/extension-highlight": "^2.26.1",
