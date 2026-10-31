@@ -2,7 +2,7 @@
 
 Read `README.md` first ("Hosting on nish.software" covers the server and deploy). Hosting
 conventions live in `nishant/hosting` (`CLAUDE.md`, `docs/OPERATIONS.md`); they win if this file
-disagrees. A push to `master` deploys; `npm run build` rebuilds `docs/`; commit it.
+disagrees. A push to `master` deploys; the deploy builds the frontend on the PC into `dist/` (never committed).
 
 - Target device: Samsung Galaxy Z Fold 7 (cover screen ~360-390 CSS px, unfolded a near-square
   ~840px). Every page must look right, with no horizontal page scroll, at 360px (not just
@@ -11,9 +11,7 @@ disagrees. A push to `master` deploys; `npm run build` rebuilds `docs/`; commit 
 - Every page must be reachable on the phone through a visible UI element (bottom bar, More
   sheet, menu, or a link on another page), never only by typing its URL: no desktop-only nav
   entries, and no page that tells a phone user to open it on a desktop.
-- `npm run build` empties `docs/` (Vite `emptyOutDir`), so nothing else can live there: specs go
-  in `docs/` only until the next build. Merging master into a branch conflicts on the hashed files
-  in `docs/assets`; delete them and rebuild rather than resolving file by file.
+- `docs/` holds only the GitHub Pages redirect (`docs/index.html`, `docs/.nojekyll`) and `docs/specs/`. The build goes to `dist/`.
 - This repo is **public** (GitHub Pages). Never commit or put in a PR body an app password, the hosting password pattern, or a spec that names them; such specs go in a private repo (the inbox spec lives in nishant/inbox for that reason).
 - Lockfile: `npm install` under npm 10 crashes on jsdom's optional `canvas` peer
   (`reading 'edgesOut'`). Install with npm 11, then confirm `npx npm@10 ci` (CI's npm) works.
@@ -33,7 +31,6 @@ live when you're done… Do not hold up development waiting for an answer from m
 
 - Claude sessions build, commit, push, open and merge PRs, release and deploy on their own judgment,
   without asking Nish. Work is done only when it is merged, the `deploy` run is green and
-  https://start.nish.software serves the new build (and `npm run build` rebuilt `docs/` for
-  frontend changes).
+  https://start.nish.software serves the new build.
 - Pick sensible defaults instead of asking. Stop for Nish only when critically necessary:
   credentials or account signups, or anything destructive to production data.

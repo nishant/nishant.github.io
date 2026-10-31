@@ -55,7 +55,7 @@ export interface WeatherLocation {
   lon: number;
 }
 
-/** What is stored in sessionStorage. */
+/** What is stored in localStorage (shared by all tabs). */
 export interface WeatherCache {
   data: WeatherData;
   location: WeatherLocation | null;
@@ -245,7 +245,7 @@ export function buildView(data: WeatherData, location: WeatherLocation | null): 
 /** The cached weather, or null when missing, unreadable or older than `maxAgeMs`. */
 export function readWeatherCache(maxAgeMs = CACHE_TTL_MS, now = Date.now()): WeatherCache | null {
   try {
-    const raw = sessionStorage.getItem(CACHE_KEY);
+    const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const c = JSON.parse(raw) as Partial<WeatherCache>;
     if (!c || typeof c.at !== 'number' || !c.data?.current || !Array.isArray(c.data.hourly) || !Array.isArray(c.data.daily)) {
@@ -263,7 +263,7 @@ export const CACHE_EVENT = 'start-weather-updated';
 
 export function writeWeatherCache(cache: WeatherCache): void {
   try {
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   } catch {
     // The cache is only a speed-up.
   }
@@ -297,7 +297,16 @@ async function getJson<T>(url: string): Promise<T> {
   } catch {
     throw new WeatherError('server');
   }
-  if (res.status === 503) throw new WeatherError('not-configured');
+  if (res.status === 429) throw new WeatherError('server');
+  if (res.status === 503) {
+    let code: unknown;
+    try {
+      code = ((await res.json()) as { code?: unknown } | null)?.code;
+    } catch {
+      code = undefined;
+    }
+    throw new WeatherError(code === 'daily_cap' ? 'server' : 'not-configured');
+  }
   if (!res.ok) throw new WeatherError('server');
   try {
     return (await res.json()) as T;
@@ -310,7 +319,9 @@ async function getJson<T>(url: string): Promise<T> {
 async function fetchWeather(onLoading: () => void): Promise<WeatherCache> {
   const pos = await getPosition();
   onLoading();
-  const { latitude: lat, longitude: lon } = pos.coords;
+  // Two decimals (about 1 km) is plenty for a forecast and matches what the server uses.
+  const lat = Math.round(pos.coords.latitude * 100) / 100;
+  const lon = Math.round(pos.coords.longitude * 100) / 100;
   const q = `lat=${lat}&lon=${lon}`;
   const [data, location] = await Promise.all([
     getJson<WeatherData>(`/api/weather/data?${q}`),

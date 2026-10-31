@@ -77,6 +77,8 @@ describe('urls', () => {
     expect(normalizeUrl('  http://x.test ')).toBe('http://x.test');
     expect(normalizeUrl('mailto:a@b.c')).toBe('mailto:a@b.c');
     expect(normalizeUrl('')).toBe('');
+    expect(normalizeUrl('localhost:3000')).toBe('https://localhost:3000');
+    expect(normalizeUrl('example.com:8080/x')).toBe('https://example.com:8080/x');
   });
   it('flags unparseable urls only', () => {
     expect(urlError('')).toBeNull();

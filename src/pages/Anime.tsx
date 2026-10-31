@@ -1,5 +1,6 @@
-import { Card, Favicon, ListRow, PageContainer, SectionNav } from '@nish/ui';
+import { Card, ListRow, PageContainer, SectionNav } from '@nish/ui';
 import { hostOf } from '../components/LinkGrid';
+import { SiteIcon } from '../components/SiteIcon';
 import { CATEGORIES, links } from './anime-links';
 
 const NAV_ITEMS = CATEGORIES.map((c) => {
@@ -36,7 +37,7 @@ export function Anime() {
                     dense
                     external
                     href={l.link}
-                    icon={<Favicon url={l.link} label={l.text} size={20} />}
+                    icon={<SiteIcon url={l.link} label={l.text} size={20} />}
                     title={<span title={l.text}>{l.text}</span>}
                     meta={<span className="hidden text-xs text-th-hi3 md:inline">{hostOf(l.link)}</span>}
                     className="min-h-11"

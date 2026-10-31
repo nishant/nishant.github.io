@@ -1,18 +1,21 @@
 import { Button, Modal, TabPanel, Tabs, dismissToast, toast } from '@nish/ui';
 import { useEffect, useRef, useState } from 'react';
 import { useConfig } from '../../lib/config-context';
+import { takeSettingsTab } from '../../lib/settings-tab';
 import { parseConfig, type Config } from '../../lib/storage';
 import { AppearanceTab } from './AppearanceTab';
+import { BackupTab } from './BackupTab';
 import { JsonTab, type RawState } from './JsonTab';
 import { LinksEditor } from './LinksEditor';
 import { decideClose, decideSave, isDirty } from './settings-state';
 
-type TabId = 'links' | 'appearance' | 'json';
+type TabId = 'links' | 'appearance' | 'json' | 'backup';
 
 const TABS = [
   { value: 'links', label: 'Links' },
   { value: 'appearance', label: 'Appearance' },
   { value: 'json', label: 'Raw JSON' },
+  { value: 'backup', label: 'Backup' },
 ];
 
 /** Settings: links, font and theme, and the raw config. Edits apply when the sheet closes. */
@@ -24,7 +27,9 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
 function SettingsBody({ onClose }: { onClose: () => void }) {
   const { config, setConfig, rawInvalid } = useConfig();
   const [draft, setDraft] = useState<Config>(config);
-  const [tab, setTab] = useState<TabId>(rawInvalid !== undefined ? 'json' : 'links');
+  const [tab, setTab] = useState<TabId>(
+    () => (takeSettingsTab() as TabId | null) ?? (rawInvalid !== undefined ? 'json' : 'links'),
+  );
   // A saved config that failed to parse is shown as-is so the user can repair it.
   const [raw, setRaw] = useState<RawState | null>(() => {
     if (rawInvalid === undefined) return null;
@@ -134,6 +139,15 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
             onRaw={setRaw}
             onDraft={(c) => {
               setDraft(c);
+            }}
+          />
+        </TabPanel>
+        <TabPanel value="backup" className="pt-4">
+          <BackupTab
+            dirty={isDirty(draft, config)}
+            onImported={(c) => {
+              setDraft(c);
+              setRaw(null);
             }}
           />
         </TabPanel>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { WeatherIcon } from './WeatherIcon';
-import { CACHE_EVENT, iconNameFor, kelvinToF, readWeatherCache, type WeatherCache } from './weather';
+import { CACHE_EVENT, CACHE_KEY, iconNameFor, kelvinToF, readWeatherCache, type WeatherCache } from './weather';
 
 const MAX_AGE_MS = 60 * 60_000;
 
@@ -13,8 +13,16 @@ export function WeatherChip({ onOpen }: { onOpen: () => void }) {
 
   useEffect(() => {
     const update = () => setCache(readWeatherCache(MAX_AGE_MS));
+    // Another tab writing a fresh forecast fires `storage` here (never in the writing tab).
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === CACHE_KEY || e.key === null) update();
+    };
     window.addEventListener(CACHE_EVENT, update);
-    return () => window.removeEventListener(CACHE_EVENT, update);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener(CACHE_EVENT, update);
+      window.removeEventListener('storage', onStorage);
+    };
   }, []);
 
   const current = cache?.data.current;

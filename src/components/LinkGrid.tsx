@@ -1,6 +1,7 @@
-import { Button, Card, EmptyState, Favicon, ListRow, cn } from '@nish/ui';
+import { Button, Card, EmptyState, ListRow, cn } from '@nish/ui';
 import { AlertTriangle, Link as LinkIcon } from 'lucide-react';
 import type { Config, Section } from '../lib/storage';
+import { SiteIcon } from './SiteIcon';
 
 /** Only http, https and mailto links are rendered as anchors; anything else is plain text. */
 export function isSafeUrl(url: string): boolean {
@@ -93,7 +94,7 @@ function LinkRow({ text, url }: { text: string; url: string }) {
       dense
       chevron={false}
       href={url}
-      icon={<Favicon url={url} label={text} size={20} />}
+      icon={<SiteIcon url={url} label={text} size={20} />}
       title={<span title={text}>{text}</span>}
       className={rowClass}
     />

@@ -3,7 +3,8 @@ import { Suspense, lazy, useCallback, useState, type ComponentType } from 'react
 import { ConfigProvider } from './lib/config-context';
 import { useHashRoute } from './lib/route';
 import type { AppId } from './lib/api';
-import { Anime } from './pages/Anime';
+import { CommandMenu } from './features/palette/CommandMenu';
+import { UrlImport } from './features/backup/UrlImport';
 import { Home } from './pages/Home';
 import { InboxPage, useInboxCounts } from './pages/Inbox';
 
@@ -12,6 +13,7 @@ interface SheetProps {
   onClose: () => void;
 }
 
+const Anime = lazy(() => import('./pages/Anime').then((m) => ({ default: m.Anime })));
 const NotesSheet = lazy(() =>
   import('./features/notes/NotesSheet').then((m) => ({ default: m.NotesSheet as ComponentType<SheetProps> })),
 );
@@ -105,13 +107,23 @@ function Shell() {
     <>
       <AppHeader name="Start" sticky={route === 'jp'} nav={nav} navLabel="Start" />
       {route === 'jp' ? (
-        <Anime />
+        <Suspense
+          fallback={
+            <div className="flex min-h-60 items-center justify-center">
+              <Spinner />
+            </div>
+          }
+        >
+          <Anime />
+        </Suspense>
       ) : route === 'inbox' ? (
         <InboxPage onCounts={inbox.setCounts} />
       ) : (
         <Home onOpen={setSheet} openSheet={sheet} />
       )}
       <Sheets sheet={sheet} onClose={closeSheet} />
+      <CommandMenu onOpenSheet={setSheet} />
+      <UrlImport />
       <Toaster />
     </>
   );
