@@ -5,10 +5,17 @@ import { after, before, describe, it } from 'node:test';
 import express from 'express';
 import { createWeatherRouter } from './weather';
 
+interface ReplyBody {
+  error?: string;
+  code?: string;
+  city?: string;
+  current?: { n: number };
+}
+
 interface Reply {
   status: number;
   headers: http.IncomingHttpHeaders;
-  json: any;
+  json: ReplyBody;
 }
 
 const request = (port: number, path: string, headers: Record<string, string> = { 'sec-fetch-site': 'same-origin' }) =>
@@ -119,13 +126,13 @@ describe('weather router', () => {
       const stale = await request(port, '/api/weather/data?lat=10&lon=10');
       assert.equal(stale.status, 200);
       assert.equal(stale.headers['x-cache'], 'STALE');
-      assert.equal(stale.json.current.n, 1);
+      assert.equal(stale.json.current?.n, 1);
       assert.equal(upstream, 1);
       // Past UTC midnight the cap resets and the entry is refreshed.
       t = Date.UTC(2026, 10, 1, 0, 5, 0);
       const fresh = await request(port, '/api/weather/data?lat=10&lon=10');
       assert.equal(fresh.headers['x-cache'], 'MISS');
-      assert.equal(fresh.json.current.n, 2);
+      assert.equal(fresh.json.current?.n, 2);
     } finally {
       server.close();
     }

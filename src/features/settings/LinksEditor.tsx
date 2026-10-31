@@ -3,6 +3,7 @@ import { SiteIcon } from '../../components/SiteIcon';
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { Config, LinkItem } from '../../lib/storage';
+import { useLatest } from '../../lib/useLatest';
 import {
   addLink,
   addSection,
@@ -52,8 +53,7 @@ export function LinksEditor({ draft, update, focusLink }: LinksEditorProps) {
 
   // An Undo toast must not outlive the editor: dismiss it when the Links tab or the sheet goes away.
   const undoToast = useRef<number | null>(null);
-  const latestDraft = useRef(draft);
-  latestDraft.current = draft;
+  const latestDraft = useLatest(draft);
   useEffect(
     () => () => {
       if (undoToast.current !== null) dismissToast(undoToast.current);

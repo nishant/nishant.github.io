@@ -6,6 +6,7 @@ import { linter, lintGutter } from '@codemirror/lint';
 import { EditorState } from '@codemirror/state';
 import { drawSelection, EditorView, highlightActiveLine, keymap, lineNumbers } from '@codemirror/view';
 import { useEffect, useRef } from 'react';
+import { useLatest } from '../../lib/useLatest';
 
 export interface JsonEditorProps {
   /** The text to show. Pushing a different value than the editor holds replaces its content. */
@@ -56,8 +57,7 @@ const makeTheme = () =>
 export default function JsonEditor({ value, onChange, label = 'Raw JSON' }: JsonEditorProps) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+  const onChangeRef = useLatest(onChange);
 
   useEffect(() => {
     if (!host.current) return;
@@ -93,6 +93,7 @@ export default function JsonEditor({ value, onChange, label = 'Raw JSON' }: Json
       view.current = null;
     };
     // The editor is created once; later `value` changes are applied below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

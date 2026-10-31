@@ -41,9 +41,13 @@ export function NotesSheet({ open, onClose }: { open: boolean; onClose: () => vo
   const initialHtml = useMemo(() => (open ? loadNotes() : ''), [open]);
 
   // Write anything still queued when the sheet goes away (closed, or the app unmounts).
+  const [shownOpen, setShownOpen] = useState(open);
+  if (open !== shownOpen) {
+    setShownOpen(open);
+    if (open) setStatus('saved');
+  }
   useEffect(() => {
     if (!open) return undefined;
-    setStatus('saved');
     return () => {
       saver.flush();
     };

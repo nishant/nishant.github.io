@@ -1,5 +1,5 @@
 import { Button, Card, Kbd } from '@nish/ui';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useConfig } from '../lib/config-context';
 import { loadWelcomeDismissed, saveWelcomeDismissed } from '../lib/storage';
 
@@ -15,9 +15,9 @@ interface WelcomeProps {
 export function Welcome({ onEditLinks, onImport }: WelcomeProps) {
   const { firstVisit, config } = useConfig();
   const [dismissed, setDismissed] = useState(loadWelcomeDismissed);
-  const initialConfig = useRef(config);
+  const [initialConfig] = useState(config);
   // An import (or any save) replaces the config: the starter links are gone, so the card is moot.
-  const changed = config !== initialConfig.current;
+  const changed = config !== initialConfig;
   useEffect(() => {
     if (changed) saveWelcomeDismissed();
   }, [changed]);

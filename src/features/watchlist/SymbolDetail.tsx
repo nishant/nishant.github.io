@@ -31,6 +31,7 @@ function useBars(symbol: string, range: BarRange): BarsState & { retry: () => vo
 
   useEffect(() => {
     const ctrl = new AbortController();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loading flag flips when a new symbol or range is requested
     setState((s) => ({ ...s, loading: true, error: null }));
     getBars(symbol, range, { signal: ctrl.signal })
       .then((data) => {

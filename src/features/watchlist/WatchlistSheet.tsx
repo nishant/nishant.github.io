@@ -68,6 +68,7 @@ function useOverview(): OverviewState & { refresh: () => void } {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetches the overview on mount and on a timer
     load(false);
     const tick = window.setInterval(() => {
       if (!document.hidden) load(false);
@@ -141,7 +142,7 @@ function SymbolRow({ s, badges, onSelect }: { s: Snapshot; badges?: SymbolBadges
         aria-label={`${s.symbol}, ${money(s.price)}, ${change.text}.${extra ? ` ${extra}` : ''} Show chart`}
         className={cn(
           'flex w-full flex-col justify-center gap-1 px-4 py-2 text-left outline-none',
-          'min-h-[52px] hover:bg-th-hover focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-th-accent',
+          'min-h-[52px] hover:bg-th-elevated focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-th-accent',
         )}
       >
         <span className="flex items-center justify-between gap-3">

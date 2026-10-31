@@ -75,6 +75,14 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
   };
 
   const closeToast = useRef<number | null>(null);
+  const showCloseToast = (message: string, extra: { duration?: 'sticky' }) => {
+    closeToast.current = toast.error(message, {
+      id: 'settings-close',
+      ...extra,
+      action: { label: 'Discard', onClick: onClose },
+    });
+  };
+
   useEffect(
     () => () => {
       if (closeToast.current !== null) dismissToast(closeToast.current);
@@ -92,17 +100,10 @@ function SettingsBody({ onClose }: { onClose: () => void }) {
     }
     if (decision.reason === 'raw-json') {
       setTab('json');
-      closeToast.current = toast.error('Fix the JSON before closing, or discard your edits', {
-        id: 'settings-close',
-        duration: 'sticky',
-        action: { label: 'Discard', onClick: onClose },
-      });
+      showCloseToast('Fix the JSON before closing, or discard your edits', { duration: 'sticky' });
     } else {
       showUrlProblem(decision.section, decision.link);
-      closeToast.current = toast.error('Enter a full address, like https://example.com', {
-        id: 'settings-close',
-        action: { label: 'Discard', onClick: onClose },
-      });
+      showCloseToast('Enter a full address, like https://example.com', {});
     }
     return false;
   };

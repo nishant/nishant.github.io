@@ -148,6 +148,7 @@ function SettingsModal({ onClose, sources }: Omit<NotificationSettingsProps, 'op
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loads the settings once on mount; state is set after the request, not synchronously
     void load();
   }, [load]);
 
@@ -160,6 +161,7 @@ function SettingsModal({ onClose, sources }: Omit<NotificationSettingsProps, 'op
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loads the device list once on mount
     void loadDevices();
   }, [loadDevices]);
 

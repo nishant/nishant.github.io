@@ -1,5 +1,5 @@
 import { Favicon, cn } from '@nish/ui';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { hostOf } from './LinkGrid';
 
 interface SiteIconProps {
@@ -18,18 +18,21 @@ export function SiteIcon({ url, label, size = 20, className }: SiteIconProps) {
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
+  // A new host starts from scratch (adjusted during render, so the old state never paints).
+  const [shownHost, setShownHost] = useState(host);
+  if (host !== shownHost) {
+    setShownHost(host);
     setFailed(false);
     setLoaded(false);
-  }, [host]);
+  }
 
   if (!host || failed) return <Favicon url="" label={label ?? url} size={size} className={className} />;
 
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center justify-center rounded-sm dark:bg-white/90 dark:p-px',
-        loaded ? '' : 'bg-th-surface2',
+        'inline-flex shrink-0 items-center justify-center rounded-sm dark:bg-[rgb(255_255_255/0.9)] dark:p-px',
+        loaded ? '' : 'bg-th-elevated',
       )}
       style={{ width: size, height: size }}
     >
