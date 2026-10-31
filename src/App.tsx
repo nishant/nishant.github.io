@@ -6,7 +6,7 @@ import type { AppId } from './lib/api';
 import { CommandMenu } from './features/palette/CommandMenu';
 import { UrlImport } from './features/backup/UrlImport';
 import { Home } from './pages/Home';
-import { InboxPage, useInboxCounts } from './pages/Inbox';
+import { useInboxCounts } from './features/inbox/counts';
 
 interface SheetProps {
   open: boolean;
@@ -14,6 +14,7 @@ interface SheetProps {
 }
 
 const Anime = lazy(() => import('./pages/Anime').then((m) => ({ default: m.Anime })));
+const InboxPage = lazy(() => import('./pages/Inbox').then((m) => ({ default: m.InboxPage })));
 const NotesSheet = lazy(() =>
   import('./features/notes/NotesSheet').then((m) => ({ default: m.NotesSheet as ComponentType<SheetProps> })),
 );
@@ -106,7 +107,9 @@ function Shell() {
   return (
     <>
       <AppHeader name="Start" sticky={route === 'jp'} nav={nav} navLabel="Start" />
-      {route === 'jp' ? (
+      {route === 'home' ? (
+        <Home onOpen={setSheet} openSheet={sheet} />
+      ) : (
         <Suspense
           fallback={
             <div className="flex min-h-60 items-center justify-center">
@@ -114,12 +117,8 @@ function Shell() {
             </div>
           }
         >
-          <Anime />
+          {route === 'jp' ? <Anime /> : <InboxPage onCounts={inbox.setCounts} />}
         </Suspense>
-      ) : route === 'inbox' ? (
-        <InboxPage onCounts={inbox.setCounts} />
-      ) : (
-        <Home onOpen={setSheet} openSheet={sheet} />
       )}
       <Sheets sheet={sheet} onClose={closeSheet} />
       <CommandMenu onOpenSheet={setSheet} />
