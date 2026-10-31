@@ -1,30 +1,11 @@
 /// <reference types="vitest/config" />
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
 import path from 'node:path';
+import { nishThemeInit } from '@nish/ui/vite';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig, type Plugin } from 'vite';
-
-const require = createRequire(import.meta.url);
-
-/** Inlines @nish/ui's theme-init.js right after <meta charset>, so the saved theme is on <html>
- *  before the first paint (and the charset still comes within the first 1024 bytes). */
-function nishThemeInit(): Plugin {
-  const code = readFileSync(require.resolve('@nish/ui/theme-init.js'), 'utf8');
-  return {
-    name: 'nish-theme-init',
-    transformIndexHtml: {
-      order: 'post',
-      handler(html) {
-        const charset = /<meta charset="utf-8"\s*\/?>/i;
-        if (!charset.test(html)) throw new Error('nish-theme-init: <meta charset="utf-8"> not found in index.html');
-        return html.replace(charset, (m) => `${m}\n    <script>${code}</script>`);
-      },
-    },
-  };
-}
 
 /** Stamps dist/sw.js with a build id and the precache list, so every deploy changes sw.js and the
  *  browser installs the new worker. An unstamped sw.js (npm run dev) does nothing on fetch. */
@@ -60,7 +41,7 @@ function swStamp(): Plugin {
 // The build goes to dist/, which the deploy builds on the PC and the server serves.
 export default defineConfig({
   base: './',
-  plugins: [nishThemeInit(), swStamp(), react(), tailwindcss()],
+  plugins: [nishThemeInit({ position: 'after-charset' }), swStamp(), react(), tailwindcss()],
   resolve: { dedupe: ['react', 'react-dom'] },
   build: { outDir: 'dist', emptyOutDir: true },
   server: { port: 4200, proxy: { '/api': 'http://localhost:8800' } },
