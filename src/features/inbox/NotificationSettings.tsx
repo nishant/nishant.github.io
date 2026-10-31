@@ -89,6 +89,7 @@ function SettingsModal({ onClose, sources }: Omit<NotificationSettingsProps, 'op
   const [subscribed, setSubscribed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [devices, setDevices] = useState<PushDevice[] | null>(null);
+  const [devicesError, setDevicesError] = useState<string | null>(null);
   const [ownHint, setOwnHint] = useState<string | null>(null);
   const [rulesOpen, setRulesOpen] = useState<string | null>(null);
   // What is typed in an hours field, so "999" stays visible next to its error.
@@ -107,10 +108,23 @@ function SettingsModal({ onClose, sources }: Omit<NotificationSettingsProps, 'op
     if (mine !== seq.current) return;
     if (res.ok) {
       saved.current = next;
+      // Drop typed text that now matches the stored rule, so the field shows what is saved.
+      setDrafts((d) => {
+        const kept: Record<string, string> = {};
+        for (const [key, text] of Object.entries(d)) {
+          const cut = key.lastIndexOf(':');
+          const stored = next.rules[key.slice(0, cut)]?.[key.slice(cut + 1) as HoursField] ?? null;
+          const parsed = parseHours(text);
+          if (text.trim() === '' ? stored === null : parsed !== null && parsed === stored) continue;
+          kept[key] = text;
+        }
+        return kept;
+      });
       toast.success('Saved', { id: 'inbox-settings' });
     } else {
       toast.error(res.error, { id: 'inbox-settings' });
       if (saved.current) setSettings(saved.current);
+      setDrafts({});
     }
   }, []);
 
@@ -139,8 +153,10 @@ function SettingsModal({ onClose, sources }: Omit<NotificationSettingsProps, 'op
 
   const loadDevices = useCallback(async () => {
     const res = await inboxApi.devices();
-    if (res.ok && Array.isArray(res.data)) setDevices(res.data);
-    else setDevices((prev) => prev ?? []);
+    if (res.ok && Array.isArray(res.data)) {
+      setDevices(res.data);
+      setDevicesError(null);
+    } else setDevicesError(res.ok ? 'Could not load devices.' : res.error);
   }, []);
 
   useEffect(() => {
@@ -311,11 +327,19 @@ function SettingsModal({ onClose, sources }: Omit<NotificationSettingsProps, 'op
           <h3 id="inbox-devices" className="mb-2 text-sm font-semibold text-th-hi">
             Devices
           </h3>
-          {devices === null && <SkeletonRows rows={2} />}
-          {devices !== null && devices.length === 0 && (
+          {devicesError && (
+            <div role="alert" className="flex flex-col items-start gap-2 text-sm text-th-hi2">
+              <p>{devicesError}</p>
+              <Button size="sm" variant="secondary" className="min-h-11" onClick={() => void loadDevices()}>
+                Try again
+              </Button>
+            </div>
+          )}
+          {devices === null && !devicesError && <SkeletonRows rows={2} />}
+          {devices !== null && !devicesError && devices.length === 0 && (
             <p className="text-sm text-th-hi2">No devices get notifications yet.</p>
           )}
-          {devices !== null && devices.length > 0 && (
+          {devices !== null && !devicesError && devices.length > 0 && (
             <ul className="m-0 flex list-none flex-col gap-2 p-0">
               {devices.map((device) => (
                 <li key={device.id} className="flex items-center justify-between gap-3">
@@ -437,7 +461,7 @@ function SettingsModal({ onClose, sources }: Omit<NotificationSettingsProps, 'op
                             <p className="text-sm text-th-hi">{name}</p>
                             {summary && <p className="text-xs text-th-hi3">{summary}</p>}
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="ml-auto flex items-center gap-2">
                             <Checkbox
                               label="Notify"
                               aria-label={`Notify for ${name}`}

@@ -30,7 +30,10 @@ describe('inboxRouter', () => {
       req.on('data', (c: Buffer) => chunks.push(c));
       req.on('end', () => {
         seen = { method: req.method, url: req.url, headers: req.headers, body: Buffer.concat(chunks).toString() };
-        if (req.url?.startsWith('/api/events')) {
+        if (req.url?.startsWith('/api/events') && !req.headers.cookie) {
+          res.writeHead(401, { 'content-type': 'application/json' });
+          res.end('{"error":"Not signed in."}');
+        } else if (req.url?.startsWith('/api/events')) {
           res.writeHead(200, { 'content-type': 'text/event-stream' });
           res.write('event: changed\ndata: {"open":1,"urgent":0}\n\n');
           const timer = setTimeout(() => {
@@ -165,7 +168,7 @@ describe('inboxRouter', () => {
   });
 
   it('streams /events without buffering or the buffered-path timeout', async () => {
-    const res = await fetch(`${frontUrl}/short/inbox/events`);
+    const res = await fetch(`${frontUrl}/short/inbox/events`, { headers: { cookie: 'inbox_session=x' } });
     assert.equal(res.status, 200);
     assert.equal(res.headers.get('content-type'), 'text/event-stream');
     assert.equal(res.headers.get('cache-control'), 'no-cache, no-transform');
@@ -194,6 +197,15 @@ describe('inboxRouter', () => {
   });
 
   it('relays a non-stream answer from /events like any response', async () => {
+    const started = Date.now();
+    const res = await fetch(`${frontUrl}/api/inbox/events`, { signal: AbortSignal.timeout(3000) });
+    assert.equal(res.status, 401);
+    assert.match(res.headers.get('content-type') ?? '', /^application\/json/);
+    assert.deepEqual(await res.json(), { error: 'Not signed in.' });
+    assert.ok(Date.now() - started < 2000, 'answered without hanging');
+  });
+
+  it('answers 503 for /events when the inbox is down', async () => {
     const res = await fetch(`${frontUrl}/dead/inbox/events`);
     assert.equal(res.status, 503);
     assert.deepEqual(await res.json(), { error: 'Inbox service is not answering.' });

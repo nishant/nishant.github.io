@@ -125,5 +125,5 @@ export const inboxApi = {
     inboxRequest<InboxSettingsV2>('/settings', { method: 'PUT', body: settings }),
   devices: () => inboxRequest<PushDevice[]>('/push/subscriptions'),
   removeDevice: (id: string) =>
-    inboxRequest<void>(`/push/subscriptions/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    inboxRequest<void>(`/push/subscriptions/${encodeURIComponent(id)}`, { method: 'DELETE', body: {} }),
 };
