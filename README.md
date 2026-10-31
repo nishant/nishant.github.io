@@ -41,6 +41,12 @@ The Watchlist sheet calls `https://trading.nish.software` (override with `TRADIN
 the browser with your Trading session cookie. It needs Tailscale and a Trading sign-in; otherwise the
 sheet says so.
 
+When the sheet opens it also asks Trading's `GET /api/watchlist/summary` (same cookie, in parallel
+with the overview) for per-symbol badges: a star with the top pick's score from the newest finished
+scan (its strategy in the tooltip and the row's label; no badge when there is no score) and an Open
+marker for real-money positions. Any failure there (an older Trading without the route, 401, CORS,
+network) just leaves the badges off. The page never uses Trading's API token.
+
 ## Hosting on nish.software
 
 The same bundle GitHub Pages serves from `docs/` also runs as **https://start.nish.software**,
