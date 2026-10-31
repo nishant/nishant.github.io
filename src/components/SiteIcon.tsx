@@ -31,7 +31,8 @@ export function SiteIcon({ url, label, size = 20, className }: SiteIconProps) {
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center justify-center rounded-sm dark:bg-[rgb(255_255_255/0.9)] dark:p-px',
+        // eslint-disable-next-line nish/no-white-black -- favicons need a white backing in dark mode
+        'inline-flex shrink-0 items-center justify-center rounded-sm dark:bg-white/90 dark:p-px',
         loaded ? '' : 'bg-th-elevated',
       )}
       style={{ width: size, height: size }}

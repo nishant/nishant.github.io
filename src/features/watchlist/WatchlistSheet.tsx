@@ -64,7 +64,7 @@ function useOverview() {
     manual.current = true;
     void reload();
   }, [reload]);
-  return { data: res.data ?? null, error: res.error ?? null, loading: res.refreshing, refresh };
+  return { data: res.data ?? null, error: res.error ?? null, loading: res.loading || res.refreshing, refresh };
 }
 
 /** Trading's per-symbol pick scores and open positions, loaded once when the sheet opens (and on a

@@ -40,12 +40,13 @@ export function NotesSheet({ open, onClose }: { open: boolean; onClose: () => vo
   // The notes as they were when the sheet opened; the editor ignores later changes.
   const initialHtml = useMemo(() => (open ? loadNotes() : ''), [open]);
 
-  // Write anything still queued when the sheet goes away (closed, or the app unmounts).
+  // Reopening starts from Saved (adjusted during render).
   const [shownOpen, setShownOpen] = useState(open);
   if (open !== shownOpen) {
     setShownOpen(open);
     if (open) setStatus('saved');
   }
+  // Write anything still queued when the sheet goes away (closed, or the app unmounts).
   useEffect(() => {
     if (!open) return undefined;
     return () => {

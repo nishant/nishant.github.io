@@ -378,7 +378,7 @@ export function useWeather(open: boolean): { state: WeatherState; refreshing: bo
   useEffect(() => {
     if (!open) {
       run.current++;
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncs state from the localStorage cache when the sheet opens
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clears the refreshing flag when the sheet closes; the cache read below sets state when it opens
       setRefreshing(false);
       return;
     }
