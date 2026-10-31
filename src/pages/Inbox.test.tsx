@@ -1,5 +1,5 @@
 import { Toaster } from '@nish/ui';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { InboxPage } from './Inbox';
 
@@ -39,6 +39,8 @@ interface Server {
   /** The action route's answer: the target succeeded, failed, or the route errored. */
   action: 'ok' | 'fail' | 409;
   sessionStatus: number;
+  devices: Array<Record<string, unknown>>;
+  bodies: Record<string, unknown>;
 }
 
 function json(status: number, body?: unknown): Response {
@@ -62,7 +64,19 @@ function install(server: Server): void {
         server.authed = true;
         return json(204);
       }
+      if (path === '/logout') {
+        server.authed = false;
+        return json(204);
+      }
       if (!server.authed) return json(401, { error: 'Log in to see this.' });
+      if (path === '/push/subscriptions') return json(200, server.devices);
+      if (path === '/items/handle-all') {
+        server.bodies[path] = JSON.parse(init?.body as string);
+        const count = server.open.length;
+        server.handled = [...server.open, ...server.handled];
+        server.open = [];
+        return json(200, { count });
+      }
       if (path.startsWith('/items?')) {
         const view = new URL(`http://x${path}`).searchParams.get('view');
         const items = view === 'handled' ? server.handled : view === 'open' ? server.open : [];
@@ -144,6 +158,8 @@ beforeEach(() => {
     failHandle: false,
     action: 'ok',
     sessionStatus: 200,
+    devices: [],
+    bodies: {},
   };
   install(server);
 });
@@ -252,6 +268,61 @@ describe('Inbox page', () => {
     server.authed = true;
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
     expect(await screen.findByText('Item 1')).toBeTruthy();
+  });
+
+  it('sends before = the newest loaded updatedAt with Mark all handled', async () => {
+    server.authed = true;
+    server.open = [
+      item(1, { updatedAt: '2026-10-29T10:00:00.000Z' }),
+      item(2, { updatedAt: '2026-10-29T12:30:00.000Z' }),
+      item(3, { updatedAt: '2026-10-29T11:00:00.000Z' }),
+    ];
+    mount();
+    await screen.findByText('Item 1');
+    fireEvent.click(screen.getByRole('button', { name: 'Mark all handled' }));
+    const dialog = await screen.findByRole('dialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Mark handled' }));
+    await waitFor(() => expect(server.calls).toContain('POST /items/handle-all'));
+    expect(server.bodies['/items/handle-all']).toEqual({ before: '2026-10-29T12:30:00.000Z' });
+  });
+
+  it('Log out calls logout and shows the login card', async () => {
+    server.authed = true;
+    mount();
+    await screen.findByText('Item 1');
+    fireEvent.click(screen.getByRole('button', { name: 'Log out' }));
+    expect(await screen.findByLabelText('Password')).toBeTruthy();
+    expect(server.calls).toContain('POST /logout');
+    expect(onCounts).toHaveBeenLastCalledWith(null);
+  });
+
+  it('shows the stale device banner and opens settings from it', async () => {
+    server.authed = true;
+    server.devices = [
+      {
+        id: '0123456789abcdef',
+        label: 'Fold',
+        endpointHint: 'abcdefabcdef',
+        createdAt: '2026-10-01T12:00:00.000Z',
+        lastOkAt: '2026-10-20T12:00:00.000Z',
+        lastFailAt: NOW,
+        failCount: 4,
+        stale: true,
+      },
+    ];
+    mount();
+    expect(await screen.findByText(/Notifications to Fold have failed since/)).toBeTruthy();
+    expect(screen.queryByText('settings modal')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Open settings' }));
+    expect(await screen.findByText('settings modal')).toBeTruthy();
+  });
+
+  it('shows no banner when no device is stale', async () => {
+    server.authed = true;
+    server.devices = [{ id: '0123456789abcdef', label: 'Fold', stale: false, createdAt: NOW, lastOkAt: NOW }];
+    mount();
+    await screen.findByText('Item 1');
+    expect(screen.queryByText(/have failed since/)).toBeNull();
   });
 
   it('ignores a non-numeric ?item= in the hash', async () => {

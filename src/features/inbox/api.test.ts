@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { inboxApi, inboxRequest } from './api';
+import { closeInbox, inboxLive, subscribeInboxChanges } from './live';
 
 function respond(status: number, body?: unknown, raw?: string): void {
   vi.stubGlobal(
@@ -106,5 +107,99 @@ describe('inboxApi.runAction', () => {
   it('passes a failed target through as an error', async () => {
     respond(502, { error: 'Target answered 500.' });
     expect(await inboxApi.runAction(7, 'go')).toEqual({ ok: false, status: 502, error: 'Target answered 500.' });
+  });
+});
+
+describe('inboxApi bodies', () => {
+  it('handleAll sends source and before only when given', async () => {
+    respond(200, { count: 1 });
+    await inboxApi.handleAll('trackers', '2026-10-29T12:00:00.000Z');
+    const call = vi.mocked(fetch).mock.calls[0]!;
+    expect(call[0]).toBe('/api/inbox/items/handle-all');
+    expect(JSON.parse((call[1] as RequestInit).body as string)).toEqual({
+      source: 'trackers',
+      before: '2026-10-29T12:00:00.000Z',
+    });
+    await inboxApi.handleAll();
+    expect(JSON.parse((vi.mocked(fetch).mock.calls[1]![1] as RequestInit).body as string)).toEqual({});
+  });
+
+  it('removeDevice sends DELETE', async () => {
+    respond(204);
+    await inboxApi.removeDevice('0123456789abcdef');
+    const call = vi.mocked(fetch).mock.calls[0]!;
+    expect(call[0]).toBe('/api/inbox/push/subscriptions/0123456789abcdef');
+    expect((call[1] as RequestInit).method).toBe('DELETE');
+  });
+});
+
+describe('subscribeInboxChanges', () => {
+  class FakeEventSource {
+    static all: FakeEventSource[] = [];
+    readyState = 0;
+    closed = false;
+    onopen: (() => void) | null = null;
+    onerror: (() => void) | null = null;
+    listeners = new Map<string, Array<() => void>>();
+    constructor(public url: string) {
+      FakeEventSource.all.push(this);
+    }
+    addEventListener(type: string, fn: () => void): void {
+      this.listeners.set(type, [...(this.listeners.get(type) ?? []), fn]);
+    }
+    emit(type: string): void {
+      for (const fn of this.listeners.get(type) ?? []) fn();
+    }
+    close(): void {
+      this.closed = true;
+      this.readyState = 2;
+    }
+  }
+
+  afterEach(() => {
+    closeInbox();
+    FakeEventSource.all = [];
+    vi.useRealTimers();
+  });
+
+  it('calls back once per burst, shares one stream and closes on the last unsubscribe', () => {
+    vi.useFakeTimers();
+    vi.stubGlobal('EventSource', FakeEventSource);
+    const a = vi.fn();
+    const b = vi.fn();
+    const offA = subscribeInboxChanges(a);
+    const offB = subscribeInboxChanges(b);
+    expect(FakeEventSource.all).toHaveLength(1);
+    const es = FakeEventSource.all[0]!;
+    expect(es.url).toBe('/api/inbox/events');
+    expect(inboxLive()).toBe(false);
+    es.onopen?.();
+    expect(inboxLive()).toBe(true);
+
+    es.emit('changed');
+    es.emit('changed');
+    es.emit('changed');
+    vi.advanceTimersByTime(299);
+    expect(a).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
+    expect(a).toHaveBeenCalledTimes(1);
+    expect(b).toHaveBeenCalledTimes(1);
+
+    es.emit('changed');
+    vi.advanceTimersByTime(300);
+    expect(a).toHaveBeenCalledTimes(2);
+
+    offA();
+    expect(es.closed).toBe(false);
+    offB();
+    expect(es.closed).toBe(true);
+    expect(inboxLive()).toBe(false);
+  });
+
+  it('does nothing without EventSource', () => {
+    vi.stubGlobal('EventSource', undefined);
+    const off = subscribeInboxChanges(() => undefined);
+    expect(inboxLive()).toBe(false);
+    off();
   });
 });

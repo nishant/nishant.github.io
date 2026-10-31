@@ -1,4 +1,4 @@
-/* global self, fetch, navigator */
+/* global self, fetch, navigator, Notification */
 /* Start page service worker: web push for the Inbox. No fetch handler and no caching,
    so the page keeps updating on deploy exactly as it does without a worker. */
 
@@ -15,6 +15,23 @@ async function setBadge(open) {
 async function tellWindows() {
   const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
   for (const client of windows) client.postMessage({ type: 'inbox-updated' });
+}
+
+/** The item's own buttons first, then "Mark handled" and "Snooze 1h" while the browser has room. */
+function notificationActions(payload) {
+  const max = (self.Notification && Notification.maxActions) || 2;
+  const own = (Array.isArray(payload.actions) ? payload.actions : [])
+    .filter((a) => a && typeof a.id === 'string' && typeof a.label === 'string')
+    .slice(0, max)
+    .map((a) => ({ action: 'act:' + a.id, title: a.label }));
+  const fixed = [
+    { action: 'handle', title: 'Mark handled' },
+    { action: 'snooze', title: 'Snooze 1h' },
+  ];
+  for (const f of fixed) {
+    if (own.length < max) own.push(f);
+  }
+  return own;
 }
 
 async function onPush(event) {
@@ -34,12 +51,7 @@ async function onPush(event) {
     badge: '/icon-192.png',
     data: payload,
     requireInteraction: payload.severity === 'urgent',
-    actions: isItem
-      ? [
-          { action: 'handle', title: 'Mark handled' },
-          { action: 'snooze', title: 'Snooze 1h' },
-        ]
-      : [],
+    actions: isItem ? notificationActions(payload) : [],
   });
   if (typeof payload.open === 'number') await setBadge(payload.open);
   await tellWindows();
@@ -82,12 +94,35 @@ async function runAction(action, id) {
   await tellWindows();
 }
 
+/** Runs one of the item's own actions. When it fails or reports a failure, opens the item to show why. */
+async function runItemAction(id, actionId) {
+  try {
+    const res = await fetch('/api/inbox/items/' + id + '/actions/' + encodeURIComponent(actionId), {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}',
+    });
+    if (!res.ok) return openTarget('/#/inbox?item=' + id);
+    const item = await res.json();
+    if (!item || !item.lastAction || item.lastAction.ok !== true) return openTarget('/#/inbox?item=' + id);
+  } catch {
+    return openTarget('/#/inbox?item=' + id);
+  }
+  await refreshBadge();
+  await tellWindows();
+}
+
 self.addEventListener('notificationclick', (event) => {
   const notification = event.notification;
   const data = notification.data || {};
   notification.close();
   if ((event.action === 'handle' || event.action === 'snooze') && typeof data.id === 'number') {
     event.waitUntil(runAction(event.action, data.id));
+    return;
+  }
+  if (typeof event.action === 'string' && event.action.startsWith('act:') && typeof data.id === 'number') {
+    event.waitUntil(runItemAction(data.id, event.action.slice(4)));
     return;
   }
   const url = typeof data.url === 'string' && data.url ? data.url : '/#/inbox';

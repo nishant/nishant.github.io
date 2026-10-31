@@ -17,14 +17,17 @@ import {
 } from '@nish/ui';
 import { dateTime } from '@nish/ui/format';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { inboxApi, type ApiResult, type InboxCounts } from '../features/inbox/api';
+import { inboxApi, type ApiResult, type InboxCounts, type PushDevice } from '../features/inbox/api';
+import { SOURCE_LABELS } from '../features/inbox/labels';
+import { closeInbox, inboxLive, reconnectInbox, subscribeInboxChanges } from '../features/inbox/live';
 import { NotificationSettings } from '../features/inbox/NotificationSettings';
 import { useInboxParams } from '../lib/route';
 
 const POLL_MS = 60_000;
 
-/** Calls `fn` on window focus, when the tab becomes visible, every 60 s while visible, and when the
- *  service worker posts `{ type: 'inbox-updated' }`. */
+/** Calls `fn` on window focus, when the tab becomes visible, every 60 s while visible (skipped while the
+ *  live stream is open), when the stream reports a change, and when the service worker posts
+ *  `{ type: 'inbox-updated' }`. */
 function useInboxRefresh(fn: () => void): void {
   const ref = useRef(fn);
   ref.current = fn;
@@ -32,7 +35,10 @@ function useInboxRefresh(fn: () => void): void {
     const tick = (): void => {
       if (document.visibilityState === 'visible') ref.current();
     };
-    const id = window.setInterval(tick, POLL_MS);
+    const id = window.setInterval(() => {
+      if (!inboxLive()) tick();
+    }, POLL_MS);
+    const unsubscribe = subscribeInboxChanges(() => ref.current());
     const onMessage = (e: MessageEvent): void => {
       if ((e.data as { type?: unknown } | null)?.type === 'inbox-updated') ref.current();
     };
@@ -42,6 +48,7 @@ function useInboxRefresh(fn: () => void): void {
     sw?.addEventListener('message', onMessage);
     return () => {
       window.clearInterval(id);
+      unsubscribe();
       window.removeEventListener('focus', tick);
       document.removeEventListener('visibilitychange', tick);
       sw?.removeEventListener('message', onMessage);
@@ -141,6 +148,7 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [want, setWant] = useState<{ id: number; view: InboxView } | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [devices, setDevices] = useState<PushDevice[]>([]);
 
   const itemsRef = useRef(items);
   itemsRef.current = items;
@@ -166,6 +174,14 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
   useEffect(() => {
     void checkSession();
   }, [checkSession]);
+
+  const loadDevices = useCallback(async () => {
+    const r = await inboxApi.devices();
+    setDevices(r.ok && Array.isArray(r.data) ? r.data : []);
+  }, []);
+  useEffect(() => {
+    if (phase === 'ready') void loadDevices();
+  }, [phase, loadDevices]);
 
   const loggedOut = useCallback(() => {
     seq.current++;
@@ -382,10 +398,25 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
     void loadRef.current(true);
   };
   const onHandleAll = async (): Promise<void> => {
-    const ids = itemsRef.current.map((i) => i.id);
-    const r = await mutate(ids, 'handled', () => inboxApi.handleAll(source), 'inbox-all');
+    const loaded = itemsRef.current;
+    const ids = loaded.map((i) => i.id);
+    // Only what the page has seen: anything newer arrived after the list was loaded.
+    const before = loaded.reduce((max, i) => (i.updatedAt > max ? i.updatedAt : max), '');
+    const r = await mutate(ids, 'handled', () => inboxApi.handleAll(source, before || undefined), 'inbox-all');
     if (r.ok) toast.success(`Marked ${r.data.count} handled`, { id: 'inbox-all' });
   };
+
+  const onLogout = async (): Promise<void> => {
+    const r = await inboxApi.logout();
+    if (!r.ok) {
+      toast.error(r.error, { id: 'inbox-logout' });
+      return;
+    }
+    closeInbox();
+    loggedOut();
+  };
+
+  const staleDevices = devices.filter((d) => d.stale);
 
   if (phase === 'noapi') {
     return (
@@ -420,6 +451,7 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
     body = (
       <LoginCard
         onLoggedIn={() => {
+          reconnectInbox();
           setLoading(true);
           setError(null);
           setPhase('ready');
@@ -449,6 +481,7 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
         onLoadMore={() => void loadMore()}
         loadingMore={loadingMore}
         selectedId={selectedId}
+        sourceLabels={SOURCE_LABELS}
       />
     );
   }
@@ -459,15 +492,42 @@ export function InboxPage({ onCounts }: { onCounts: (c: InboxCounts | null) => v
         <div className="mb-3 flex items-center justify-between gap-2">
           <h1 className="text-2xl font-semibold text-th-hi">Inbox</h1>
           {phase === 'ready' ? (
-            <IconButton label="Notification settings" onClick={() => setSettingsOpen(true)}>
-              <SettingsIcon aria-hidden />
-            </IconButton>
+            <div className="flex items-center gap-1">
+              <IconButton label="Notification settings" onClick={() => setSettingsOpen(true)}>
+                <SettingsIcon aria-hidden />
+              </IconButton>
+              <Button variant="ghost" size="sm" className="min-h-11" onClick={() => void onLogout()}>
+                Log out
+              </Button>
+            </div>
           ) : null}
+        </div>
+      ) : null}
+      {phase === 'ready' && staleDevices.length > 0 ? (
+        <div
+          role="alert"
+          className="mb-3 flex flex-wrap items-center gap-2 rounded-md border border-th-warn bg-th-warn-soft p-3 text-sm text-th-hi"
+        >
+          <span>
+            Notifications to {staleDevices[0]!.label}
+            {staleDevices.length > 1 ? ` and ${staleDevices.length - 1} more` : ''} have failed since{' '}
+            {dateTime(new Date(staleDevices[0]!.lastOkAt ?? staleDevices[0]!.createdAt))}.
+          </span>
+          <Button size="sm" variant="secondary" className="min-h-11" onClick={() => setSettingsOpen(true)}>
+            Open settings
+          </Button>
         </div>
       ) : null}
       {body}
       {settingsOpen ? (
-        <NotificationSettings open onClose={() => setSettingsOpen(false)} sources={sources} />
+        <NotificationSettings
+          open
+          onClose={() => {
+            setSettingsOpen(false);
+            void loadDevices();
+          }}
+          sources={sources}
+        />
       ) : null}
     </PageContainer>
   );

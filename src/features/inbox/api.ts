@@ -1,4 +1,4 @@
-import type { InboxItem, InboxListResponse, InboxSettings, InboxView } from '@nish/ui';
+import type { InboxItem, InboxListResponse, InboxSettings, InboxSeverity, InboxView } from '@nish/ui';
 
 /** Every call returns this: the data, or the HTTP status and the text to show. `status` is 0 when
  *  the request never reached a server (offline) or the answer was not JSON. */
@@ -67,6 +67,32 @@ export interface ListParams {
   limit?: number;
 }
 
+/** Per-source rules kept in the settings. Null fields mean "no rule". */
+export interface SourceRule {
+  /** Replaces the severity of every new event from this source; null = as sent. */
+  severity: InboxSeverity | null;
+  /** Open items are handled automatically this many hours after their last update; null = never. */
+  autoHandleHours: number | null;
+  /** After you handle an item, repeats of it stay handled for this many hours; null = they reopen. */
+  noReopenHours: number | null;
+}
+
+export type InboxSettingsV2 = InboxSettings & { rules: Record<string, SourceRule> };
+
+/** One device that gets notifications, as the service lists it. */
+export interface PushDevice {
+  id: string;
+  label: string;
+  /** The last 12 characters of the endpoint, to compare with this browser's own subscription. */
+  endpointHint: string;
+  createdAt: string;
+  lastOkAt: string | null;
+  lastFailAt: string | null;
+  failCount: number;
+  /** Pushes are failing and nothing was delivered for 3 days. */
+  stale: boolean;
+}
+
 export const inboxApi = {
   session: () => inboxRequest<{ authed: boolean }>('/session'),
   login: (password: string) => inboxRequest<void>('/login', { method: 'POST', body: { password } }),
@@ -88,8 +114,16 @@ export const inboxApi = {
   /** Runs one of the item's actions; the inbox service calls the action's target and answers the updated item. */
   runAction: (id: number, actionId: string) =>
     inboxRequest<InboxItem>(`/items/${id}/actions/${encodeURIComponent(actionId)}`, { method: 'POST', body: {} }),
-  handleAll: (source?: string | null) =>
-    inboxRequest<{ count: number }>('/items/handle-all', { method: 'POST', body: source ? { source } : {} }),
-  getSettings: () => inboxRequest<InboxSettings>('/settings'),
-  putSettings: (settings: InboxSettings) => inboxRequest<InboxSettings>('/settings', { method: 'PUT', body: settings }),
+  /** Handles open items; `before` (ISO) limits it to items updated at or before that time. */
+  handleAll: (source?: string | null, before?: string) =>
+    inboxRequest<{ count: number }>('/items/handle-all', {
+      method: 'POST',
+      body: { ...(source ? { source } : {}), ...(before ? { before } : {}) },
+    }),
+  getSettings: () => inboxRequest<InboxSettingsV2>('/settings'),
+  putSettings: (settings: InboxSettings & { rules?: Record<string, SourceRule> }) =>
+    inboxRequest<InboxSettingsV2>('/settings', { method: 'PUT', body: settings }),
+  devices: () => inboxRequest<PushDevice[]>('/push/subscriptions'),
+  removeDevice: (id: string) =>
+    inboxRequest<void>(`/push/subscriptions/${encodeURIComponent(id)}`, { method: 'DELETE' }),
 };

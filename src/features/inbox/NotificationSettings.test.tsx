@@ -11,10 +11,26 @@ const subscription = {
 
 let calls: Array<{ url: string; method: string; body: unknown }>;
 let putStatus: number;
+let settingsBody: string;
+let devicesBody: unknown;
+const hint = subscription.endpoint.slice(-12);
+const device = (over: Record<string, unknown> = {}) => ({
+  id: '0123456789abcdef',
+  label: 'Phone',
+  endpointHint: hint,
+  createdAt: '2026-10-01T10:00:00.000Z',
+  lastOkAt: '2026-10-30T10:00:00.000Z',
+  lastFailAt: null,
+  failCount: 0,
+  stale: false,
+  ...over,
+});
 
 beforeEach(() => {
   calls = [];
   putStatus = 200;
+  settingsBody = '{}';
+  devicesBody = [];
   const registration = { pushManager: { getSubscription: async () => subscription } };
   Object.defineProperty(navigator, 'serviceWorker', {
     configurable: true,
@@ -28,7 +44,9 @@ beforeEach(() => {
     vi.fn(async (url: string, init?: RequestInit) => {
       calls.push({ url, method: init?.method ?? 'GET', body: init?.body ? JSON.parse(String(init.body)) : null });
       if (init?.method === 'PUT' && putStatus !== 200) return new Response('{"error":"Inbox service is not answering."}', { status: putStatus });
-      return new Response(url.endsWith('/settings') ? '{}' : '{"ok":true}', { status: 200 });
+      if (init?.method === 'DELETE' && url.includes('/push/subscriptions/')) return new Response(null, { status: 204 });
+      if (url === '/api/inbox/push/subscriptions' && (init?.method ?? 'GET') === 'GET') return new Response(JSON.stringify(devicesBody), { status: 200 });
+      return new Response(url.endsWith('/settings') ? settingsBody : '{"ok":true}', { status: 200 });
     }),
   );
 });
@@ -52,7 +70,7 @@ describe('NotificationSettings', () => {
     await waitFor(() =>
       expect(calls.find((c) => c.url === '/api/inbox/push/subscriptions' && c.method === 'POST')).toBeTruthy(),
     );
-    const post = calls.find((c) => c.url === '/api/inbox/push/subscriptions')!;
+    const post = calls.find((c) => c.url === '/api/inbox/push/subscriptions' && c.method === 'POST')!;
     expect(post.body).toEqual({ subscription: subscription.toJSON(), label: 'Phone' });
   });
 
@@ -99,5 +117,83 @@ describe('NotificationSettings', () => {
 
     expect(await screen.findByText('Inbox service is not answering.')).toBeTruthy();
     await waitFor(() => expect(screen.getByRole('switch', { name: /Quiet hours/ }).getAttribute('aria-checked')).toBe('true'));
+  });
+
+  const lastPut = () => puts()[puts().length - 1]!.body as { rules: Record<string, unknown> };
+
+  it('saves a severity rule under rules', async () => {
+    renderModal();
+    fireEvent.click(await screen.findByRole('button', { name: 'Rules for Trading' }));
+    expect(screen.getByRole('button', { name: 'Rules for Trading' }).getAttribute('aria-expanded')).toBe('true');
+    fireEvent.change(screen.getByLabelText('Severity'), { target: { value: 'urgent' } });
+
+    await waitFor(() => expect(puts()).toHaveLength(1));
+    expect(lastPut().rules).toEqual({ trading: { severity: 'urgent', autoHandleHours: null, noReopenHours: null } });
+    expect(await screen.findByText('Urgent', { selector: 'p' })).toBeTruthy();
+  });
+
+  it('saves hours as numbers and an emptied field as null', async () => {
+    settingsBody = JSON.stringify({ rules: { trading: { severity: 'urgent', autoHandleHours: 24, noReopenHours: 6 } } });
+    renderModal();
+    expect(await screen.findByText('Urgent · auto-handle 24 h · no reopen 6 h')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Rules for Trading' }));
+    const auto = screen.getByLabelText('Auto-handle after (hours)') as HTMLInputElement;
+    expect(auto.value).toBe('24');
+    fireEvent.change(auto, { target: { value: '' } });
+
+    await waitFor(() => expect(puts()).toHaveLength(1), { timeout: 2000 });
+    expect(lastPut().rules).toEqual({ trading: { severity: 'urgent', autoHandleHours: null, noReopenHours: 6 } });
+  });
+
+  it('shows an error for 999 hours and saves null', async () => {
+    renderModal();
+    fireEvent.click(await screen.findByRole('button', { name: 'Rules for Trading' }));
+    fireEvent.change(screen.getByLabelText("Don't reopen for (hours)"), { target: { value: '999' } });
+
+    expect(await screen.findByText('Use 1 to 720 hours.')).toBeTruthy();
+    await waitFor(() => expect(puts()).toHaveLength(1), { timeout: 2000 });
+    expect(lastPut().rules).toEqual({});
+  });
+
+  it('lists devices, marks this one and flags a stale one', async () => {
+    devicesBody = [
+      device(),
+      device({ id: 'fedcba9876543210', label: 'Computer', endpointHint: 'other-hint-xx', lastOkAt: null, stale: true, failCount: 4 }),
+    ];
+    renderModal();
+    expect(await screen.findByText('Phone (this device)')).toBeTruthy();
+    expect(screen.getByText('Computer')).toBeTruthy();
+    expect(screen.getByText('No notification delivered yet')).toBeTruthy();
+    expect(screen.getByText(/the last 4 tries failed./)).toBeTruthy();
+  });
+
+  it('says so when no device gets notifications', async () => {
+    renderModal();
+    expect(await screen.findByText('No devices get notifications yet.')).toBeTruthy();
+  });
+
+  it('removes a device with DELETE and reloads the list', async () => {
+    devicesBody = [device({ endpointHint: 'other-hint-xx' })];
+    renderModal();
+    const remove = await screen.findByRole('button', { name: 'Remove Phone' });
+    devicesBody = [];
+    fireEvent.click(remove);
+
+    await waitFor(() =>
+      expect(calls.some((c) => c.method === 'DELETE' && c.url === '/api/inbox/push/subscriptions/0123456789abcdef')).toBe(true),
+    );
+    expect(await screen.findByText('No devices get notifications yet.')).toBeTruthy();
+    expect(screen.getByText('Notifications are on for this device.')).toBeTruthy();
+  });
+
+  it('turns this device off in the modal when its own entry is removed', async () => {
+    devicesBody = [device()];
+    renderModal();
+    await screen.findByText('Phone (this device)');
+    await waitFor(() => expect(screen.getByText('Notifications are on for this device.')).toBeTruthy());
+    devicesBody = [];
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Phone' }));
+
+    expect(await screen.findByRole('button', { name: 'Turn on notifications' })).toBeTruthy();
   });
 });

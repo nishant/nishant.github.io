@@ -21,6 +21,7 @@ describe('inboxRouter', () => {
   let frontUrl: string;
   let seen: Seen | undefined;
   let upstreamHits = 0;
+  let streamClosed = 0;
 
   before(async () => {
     upstream = http.createServer((req, res) => {
@@ -29,7 +30,22 @@ describe('inboxRouter', () => {
       req.on('data', (c: Buffer) => chunks.push(c));
       req.on('end', () => {
         seen = { method: req.method, url: req.url, headers: req.headers, body: Buffer.concat(chunks).toString() };
-        if (req.url?.startsWith('/api/session')) {
+        if (req.url?.startsWith('/api/events')) {
+          res.writeHead(200, { 'content-type': 'text/event-stream' });
+          res.write('event: changed\ndata: {"open":1,"urgent":0}\n\n');
+          const timer = setTimeout(() => {
+            res.write('event: changed\ndata: {"open":2,"urgent":0}\n\n');
+          }, 300);
+          res.on('close', () => {
+            clearTimeout(timer);
+            streamClosed += 1;
+          });
+        } else if (req.url?.startsWith('/api/slow')) {
+          setTimeout(() => {
+            res.writeHead(200, { 'content-type': 'application/json' });
+            res.end('{}');
+          }, 400);
+        } else if (req.url?.startsWith('/api/session')) {
           res.writeHead(200, {
             'content-type': 'application/json',
             'set-cookie': ['inbox_session=abc; HttpOnly', 'other=1; Path=/'],
@@ -56,6 +72,7 @@ describe('inboxRouter', () => {
 
     const app = express();
     app.use('/api/inbox', inboxRouter(`http://127.0.0.1:${upstreamPort}`));
+    app.use('/short/inbox', inboxRouter(`http://127.0.0.1:${upstreamPort}`, { timeoutMs: 100 }));
     app.use('/dead/inbox', inboxRouter(`http://127.0.0.1:${deadPort}`));
     front = http.createServer(app);
     frontUrl = `http://127.0.0.1:${await listen(front)}`;
@@ -143,6 +160,41 @@ describe('inboxRouter', () => {
 
   it('answers 503 when the upstream is down', async () => {
     const res = await fetch(`${frontUrl}/dead/inbox/counts`);
+    assert.equal(res.status, 503);
+    assert.deepEqual(await res.json(), { error: 'Inbox service is not answering.' });
+  });
+
+  it('streams /events without buffering or the buffered-path timeout', async () => {
+    const res = await fetch(`${frontUrl}/short/inbox/events`);
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('content-type'), 'text/event-stream');
+    assert.equal(res.headers.get('cache-control'), 'no-cache, no-transform');
+    assert.equal(res.headers.get('x-accel-buffering'), 'no');
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+    let text = '';
+    const started = Date.now();
+    while (!text.includes('"open":2')) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      text += decoder.decode(value);
+      if (!text.includes('"open":2')) assert.ok(Date.now() - started < 5000);
+    }
+    assert.ok(Date.now() - started >= 250, 'first event arrived before the second was sent');
+    assert.ok(text.indexOf('"open":1') < text.indexOf('"open":2'));
+    const closedBefore = streamClosed;
+    await reader.cancel();
+    for (let i = 0; i < 50 && streamClosed === closedBefore; i += 1) await new Promise((r) => setTimeout(r, 20));
+    assert.equal(streamClosed, closedBefore + 1, 'upstream connection closed after the client left');
+  });
+
+  it('still times out other paths at the buffered limit', async () => {
+    const res = await fetch(`${frontUrl}/short/inbox/slow`);
+    assert.equal(res.status, 503);
+  });
+
+  it('relays a non-stream answer from /events like any response', async () => {
+    const res = await fetch(`${frontUrl}/dead/inbox/events`);
     assert.equal(res.status, 503);
     assert.deepEqual(await res.json(), { error: 'Inbox service is not answering.' });
   });
