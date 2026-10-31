@@ -28,9 +28,10 @@ function Stop-Task {
   # A developer's own `npm start` is never touched: it is not SYSTEM-owned.
   Start-Sleep -Seconds 1
   $live = [regex]::Escape($root)
+  # A process can exit between the listing and GetOwner; skip it instead of failing the deploy.
   Get-CimInstance Win32_Process -Filter "Name='node.exe'" | Where-Object {
     $_.CommandLine -and $_.CommandLine -match $live -and
-      ((Invoke-CimMethod -InputObject $_ -MethodName GetOwner).User -eq 'SYSTEM')
+      ($(try { (Invoke-CimMethod -InputObject $_ -MethodName GetOwner -ErrorAction Stop).User } catch { $null }) -eq 'SYSTEM')
   } | ForEach-Object {
     Write-Host "killing straggler node.exe $($_.ProcessId)"
     Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
