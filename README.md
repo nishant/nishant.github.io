@@ -1,5 +1,5 @@
 # Start page
-Nish's start page at https://start.nish.software (and https://nishant.github.io): search, a grid of
+A homepage anyone can bookmark and set up, at https://start.nish.software (https://nishant.github.io redirects there): search, a grid of
 link sections, a clock and weather chip, and sheets for Notes, Weather, Mail, the trading Watchlist
 and Settings. `#/jp` is the Anime + Manga page.
 
@@ -14,8 +14,24 @@ npm install && npm run dev                                                    # 
 ```
 
 - `npm run check` is the gate: typecheck, vitest, then the build.
-- `npm run build` writes the production bundle to `docs/` (emptying it first). Commit the result:
-  GitHub Pages and the server both serve that folder.
+- `npm run build` writes the production bundle to `dist/` (gitignored). The deploy builds it on the PC;
+  `docs/` only holds the GitHub Pages redirect to start.nish.software (it carries a visitor's links along as a
+  share link) and specs.
+
+## Features for anyone
+
+- **Command palette:** Ctrl/Cmd+K or `/` searches links, apps and actions. Bangs work there and in the search
+  bar: `!g`, `!gh`, `!yt`, `!w`, `!a`, `!m`, `!i`, `!r`, `!so`, `!mdn`, `!npm`, `!hn`, `!ddg`, `!tr`, `!imdb`,
+  as `!gh react` or `react !gh`. Custom bangs go in the config (Settings, then JSON):
+  `"bangs": [{ "bang": "jira", "name": "Jira", "url": "https://x.atlassian.net/search?q=%s" }]`.
+- **Backup** (Settings, then Backup): download or import a `.json` file (links, font, theme, notes), or copy
+  a share link. The share link carries links, font and theme in the URL fragment, which never reaches a
+  server. Opening one shows a preview and asks before replacing anything.
+- **First visit:** starter links and a welcome card.
+- **Offline:** `public/sw.js` caches the app shell and the hashed assets. The build stamps its version and
+  precache list, and navigations stay network-first.
+- **Privacy:** link icons come from the server's `/api/favicon` proxy (DuckDuckGo, then Google, cached),
+  never from the browser to Google. Fira Code and Roboto are bundled.
 
 ## Saved data
 
@@ -26,6 +42,8 @@ Everything lives in the browser's localStorage. The formats are unchanged from t
 | `nishant.github.io-config` | JSON `{ "sections": [{ "header", "links": [{ "text", "url" }] }] }`, tab-indented |
 | `nishant.github.io-notes` | The Notes HTML string |
 | `nishant.github.io-font` | The font family name, e.g. `Fira Code` |
+| `nishant.github.io-welcome-dismissed` | `"1"` once the welcome card is dismissed |
+| `start-weather` | The last forecast, `{ data, location, at }`, reused for 10 minutes across tabs |
 | `nishant.github.io-google-access-token` | `{ "accessToken", "timestamp" }`, valid 55 minutes |
 
 ## Gmail
@@ -49,15 +67,17 @@ network) just leaves the badges off. The page never uses Trading's API token.
 
 ## Hosting on nish.software
 
-The same bundle GitHub Pages serves from `docs/` also runs as **https://start.nish.software**,
+The app runs as **https://start.nish.software**,
 served by the small Express server in [`server/`](./server) together with the weather API it used
 to get from Render. One Node process, port 8800, fronted by Caddy and the Cloudflare tunnel from
 [nishant/hosting](https://github.com/nishant/hosting).
 
 | Path | What |
 |---|---|
-| `server/src/index.ts` | Express: serves `docs/`, mounts `/api/weather`, `/api/config` (Gmail client id, Trading URL); `/health` for the deploy |
-| `server/src/routes/weather.ts` | OpenWeatherMap One Call 3.0 + reverse geocode, cached, key from `server/.env` |
+| `server/src/index.ts` | Express: serves `dist/`, mounts `/api/weather`, `/api/favicon`, `/api/config` (Gmail client id, Trading URL); `/health` for the deploy |
+| `server/src/routes/weather.ts` | OpenWeatherMap One Call 3.0 + reverse geocode, cached, key from `server/.env`. Same-site only, 60 requests per 10 min per IP, `WEATHER_DAILY_CAP` (default 900) upstream calls a day, coordinates rounded to 2 decimals |
+| `server/src/routes/favicon.ts` | `/api/favicon?host=`: icons from DuckDuckGo, else Google, cached in memory (7 days; 1 day for misses), no SVG, same-site only |
+| `server/src/lib/guard.ts` | Client IP (cf-connecting-ip, then rightmost non-loopback XFF), capped limiter, daily cap, same-site check |
 | `vite.config.ts` | `npm run dev` proxies `/api` to `localhost:8800` so dev works against the local server |
 | `scripts/deploy.ps1` | Run by the self-hosted runner on push to `master`: pull into `C:\Apps\startpage`, build `server/`, restart the task |
 | `scripts/tasks.ps1`, `scripts/Startpage.task.xml`, `scripts/supervise.mjs` | The `Startpage` scheduled task (SYSTEM, at boot) and its log-teeing supervisor (`logs\app.log`) |
@@ -68,7 +88,7 @@ to get from Render. One Node process, port 8800, fronted by Caddy and the Cloudf
 cd server
 cp .env.example .env        # then paste your OPENWEATHERMAP_API_KEY
 npm ci && npm run build && npm start
-# http://localhost:8800/#/home  (serves ../docs)  -  http://localhost:8800/health
+# http://localhost:8800/#/home  (serves ../dist; run `npm run build` at the root first)  -  http://localhost:8800/health
 ```
 
 For frontend work keep that server running and use `npm run dev` at the repo root; the proxy sends
@@ -76,8 +96,8 @@ For frontend work keep that server running and use `npm run dev` at the repo roo
 
 ### Deploying
 
-1. Frontend changes: `npm run build` (writes `docs/`), commit the result. GitHub Pages and the
-   server both serve that committed folder; the deploy never builds the frontend on the PC.
+1. Never commit a build: `dist/` is gitignored, and the deploy runs `npm ci` and `npm run build` at the
+   repo root on the PC.
 2. Push to `master`. The `deploy` workflow checks the build on GitHub, then the runner on the
    hosting PC (`C:\actions-runner-startpage`, labels `self-hosted, windows, startpage`) runs
    `scripts\deploy.ps1`.

@@ -15,7 +15,7 @@ import {
 const data = fixture as unknown as WeatherData;
 const austin = { city: 'Austin', state: 'TX', country: 'US', lat: 30.27, lon: -97.74 };
 
-afterEach(() => sessionStorage.clear());
+afterEach(() => localStorage.clear());
 
 describe('kelvinToF', () => {
   it.each([
@@ -136,10 +136,16 @@ describe('weather cache', () => {
     expect(readWeatherCache(undefined, at + 11 * 60_000)).toBeNull();
   });
 
+  it('lives in localStorage, not sessionStorage', () => {
+    writeWeatherCache({ data, location: austin, at: Date.now() });
+    expect(localStorage.getItem(CACHE_KEY)).not.toBeNull();
+    expect(sessionStorage.getItem(CACHE_KEY)).toBeNull();
+  });
+
   it('ignores junk', () => {
-    sessionStorage.setItem(CACHE_KEY, '{nope');
+    localStorage.setItem(CACHE_KEY, '{nope');
     expect(readWeatherCache()).toBeNull();
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data: {} }));
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data: {} }));
     expect(readWeatherCache()).toBeNull();
   });
 });

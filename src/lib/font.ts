@@ -1,8 +1,8 @@
 import { loadFont } from './storage';
 
-export const FONTS: { family: string; source: 'google' | 'system' }[] = [
-  { family: 'Fira Code', source: 'google' },
-  { family: 'Roboto', source: 'google' },
+export const FONTS: { family: string; source: 'bundled' | 'system' }[] = [
+  { family: 'Fira Code', source: 'bundled' },
+  { family: 'Roboto', source: 'bundled' },
   { family: 'Helvetica', source: 'system' },
   { family: 'Verdana', source: 'system' },
   { family: 'Times', source: 'system' },
@@ -13,32 +13,32 @@ export const FONTS: { family: string; source: 'google' | 'system' }[] = [
   { family: 'Arial Narrow', source: 'system' },
 ];
 
-const GOOGLE_CSS: Record<string, string> = {
-  'Fira Code': 'https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&display=swap',
-  Roboto: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap',
-};
-
 function fallbackFor(family: string): string {
   return family === 'Fira Code' || family.startsWith('Courier') ? 'ui-monospace, monospace' : 'system-ui, sans-serif';
 }
 
-function loadGoogleFont(family: string): void {
-  const href = GOOGLE_CSS[family];
-  if (!href) return;
-  const existing = Array.from(document.head.querySelectorAll('link[rel="stylesheet"]')).some(
-    (l) => l.getAttribute('href') === href,
-  );
-  if (existing) return;
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = href;
-  link.setAttribute('data-app-font', family);
-  document.head.appendChild(link);
+let robotoRequested = false;
+
+/** Loads a self-hosted font's CSS. Fira Code ships in the main CSS; Roboto loads on first use. */
+export function loadBundledFont(family: string): void {
+  if (family !== 'Roboto' || robotoRequested) return;
+  robotoRequested = true;
+  import('@fontsource-variable/roboto').catch(() => {
+    // Offline: stay on the fallback and allow a retry on the next pick.
+    robotoRequested = false;
+  });
+}
+
+/** The CSS font-family stack for a font. Keep the inline script in index.html in step with this. */
+export function fontStack(family: string): string {
+  if (family === 'Fira Code') return `'Fira Code Variable', 'Fira Code', ${fallbackFor(family)}`;
+  if (family === 'Roboto') return `'Roboto Variable', 'Roboto', ${fallbackFor(family)}`;
+  return `'${family}', ${fallbackFor(family)}`;
 }
 
 export function applyFont(family: string): void {
-  document.documentElement.style.setProperty('--app-font', `'${family}', ${fallbackFor(family)}`);
-  loadGoogleFont(family);
+  document.documentElement.style.setProperty('--app-font', fontStack(family));
+  loadBundledFont(family);
 }
 
 /** Applies the saved font (the inline script in index.html already did, before first paint). */

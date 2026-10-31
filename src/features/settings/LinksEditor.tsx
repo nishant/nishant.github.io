@@ -1,4 +1,5 @@
-import { Button, Card, ConfirmDialog, Favicon, Field, IconButton, Input, dismissToast, toast } from '@nish/ui';
+import { Button, Card, ConfirmDialog, Field, IconButton, Input, dismissToast, toast } from '@nish/ui';
+import { SiteIcon } from '../../components/SiteIcon';
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { Config, LinkItem } from '../../lib/storage';
@@ -204,7 +205,7 @@ function LinkRow({ link, s, l, count, focused, setFocused, onChange, onMove, onR
   return (
     <li className="flex items-start gap-2">
       <span className="mt-3 hidden shrink-0 pointer-coarse:mt-3.5 sm:block">
-        <Favicon url={error ? '' : link.url} label={link.text} size={20} />
+        <SiteIcon url={error ? '' : link.url} label={link.text} size={20} />
       </span>
       <div className="grid min-w-0 flex-1 grid-cols-1 gap-2 sm:grid-cols-[1fr_1.4fr]">
         <Input

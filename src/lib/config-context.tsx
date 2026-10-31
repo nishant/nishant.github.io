@@ -7,6 +7,8 @@ interface ConfigContextValue {
   setConfig: (c: Config) => void;
   /** The saved text that failed to parse, until the user saves a config over it. */
   rawInvalid?: string;
+  /** True when no config was saved at load (or only the old placeholder). */
+  firstVisit: boolean;
 }
 
 const ConfigContext = createContext<ConfigContextValue | null>(null);
@@ -34,7 +36,10 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const value = useMemo(() => ({ config, setConfig, rawInvalid }), [config, setConfig, rawInvalid]);
+  const value = useMemo(
+    () => ({ config, setConfig, rawInvalid, firstVisit: initial.firstVisit }),
+    [config, setConfig, rawInvalid, initial.firstVisit],
+  );
   return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>;
 }
 

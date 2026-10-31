@@ -3,8 +3,7 @@
   Deploys the pushed commit into the live checkout, builds server/, and restarts the
   Startpage scheduled task. Run by the GitHub Actions self-hosted runner (as SYSTEM) on
   every push to master; can also be run by hand from an elevated shell.
-  Never touches server\.env. The Angular bundle is the committed docs/ folder, so no
-  frontend build happens here (run `npm run deploy` at the repo root before committing).
+  Never touches server\.env. Builds the frontend (root `npm ci` + `npm run build` -> dist/) and server/.
 .EXAMPLE
   .\scripts\deploy.ps1                      # C:\Apps\startpage from origin/master
   .\scripts\deploy.ps1 -NoRestart           # update + build only
@@ -71,10 +70,13 @@ try {
     Run 'build server' { npm run build }
   } finally { Pop-Location }
 
+  Run 'npm ci (frontend)' { npm ci --no-audit --no-fund }
+  Run 'build frontend' { npm run build }
+
   if (-not (Test-Path 'server\.env')) {
     Write-Warning 'server\.env is missing in the live checkout - weather will answer 503 until it exists (see server\.env.example)'
   }
-  if (-not (Test-Path 'docs\index.html')) { throw 'docs\index.html is missing - the Angular bundle was not committed' }
+  if (-not (Test-Path 'dist\index.html')) { throw 'dist\index.html is missing - the frontend build did not produce it' }
 
   if (-not $NoRestart) {
     & "$Target\scripts\tasks.ps1" start
