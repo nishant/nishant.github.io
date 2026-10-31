@@ -4,13 +4,7 @@ Read `README.md` first ("Hosting on nish.software" covers the server and deploy)
 conventions live in `nishant/hosting` (`CLAUDE.md`, `docs/OPERATIONS.md`); they win if this file
 disagrees. A push to `master` deploys; `npm run build` rebuilds `docs/`; commit it.
 
-- Target device: Samsung Galaxy Z Fold 7 (cover screen ~360-390 CSS px, unfolded a near-square
-  ~840px). Every page must look right, with no horizontal page scroll, at 360px (not just
-  375/390), ~840px and desktop, in light and dark, with 44px touch targets. Check in a browser
-  at those widths before calling UI work done.
-- Every page must be reachable on the phone through a visible UI element (bottom bar, More
-  sheet, menu, or a link on another page), never only by typing its URL: no desktop-only nav
-  entries, and no page that tells a phone user to open it on a desktop.
+- UI follows "Phones and layout" in [`global/CLAUDE.md`](https://github.com/nishant/skills/blob/master/global/CLAUDE.md) in `nishant/skills`: 360px, ~840px and desktop, light and dark, 44px targets, no horizontal page scroll, and every page reachable through visible UI.
 - `npm run build` empties `docs/` (Vite `emptyOutDir`), so nothing else can live there: specs go
   in `docs/` only until the next build. Merging master into a branch conflicts on the hashed files
   in `docs/assets`; delete them and rebuild rather than resolving file by file.
@@ -27,13 +21,5 @@ disagrees. A push to `master` deploys; `npm run build` rebuilds `docs/`; commit 
 
 ## Autonomy
 
-Nish (2026-10-26): "you have full autonomy to merge and deploy. Just make sure everything is always
-live when you're done… Do not hold up development waiting for an answer from me unless absolutely
-100% critically necessary."
+Nish's standing rule: build, merge, release and deploy without asking; stop only for credentials, account signups, anything destructive to production data, and hosting's hard rules. The canonical text is "Autonomy" in [`global/CLAUDE.md`](https://github.com/nishant/skills/blob/master/global/CLAUDE.md) in `nishant/skills`. Done here means merged, the `deploy` run green and https://start.nish.software serving the new build (and `npm run build` rebuilt `docs/` for frontend changes).
 
-- Claude sessions build, commit, push, open and merge PRs, release and deploy on their own judgment,
-  without asking Nish. Work is done only when it is merged, the `deploy` run is green and
-  https://start.nish.software serves the new build (and `npm run build` rebuilt `docs/` for
-  frontend changes).
-- Pick sensible defaults instead of asking. Stop for Nish only when critically necessary:
-  credentials or account signups, or anything destructive to production data.
