@@ -12,10 +12,15 @@ applyStoredFont();
 
 // The service worker (web push for the Inbox) only runs on the start page and local hosts.
 if ('serviceWorker' in navigator && isPushHost()) {
-  navigator.serviceWorker
-    .register('./sw.js', { scope: './' })
-    .then((registration) => registration.update())
-    .catch(() => undefined);
+  const registerWorker = () => {
+    navigator.serviceWorker
+      .register('./sw.js', { scope: './' })
+      .then((registration) => registration.update())
+      .catch(() => undefined);
+  };
+  // After load, so the precache does not compete with the first render's requests.
+  if (document.readyState === 'complete') registerWorker();
+  else window.addEventListener('load', registerWorker, { once: true });
 }
 
 createRoot(document.getElementById('root')!).render(

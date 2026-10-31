@@ -1,19 +1,14 @@
 import { Badge, cn, ThemeToggle, toast } from '@nish/ui';
 import { useEffect, useState } from 'react';
-import { applyFont, FONTS, fontAvailable } from '../../lib/font';
+import { applyFont, FONTS, fontAvailable, fontStack } from '../../lib/font';
 import { loadFont, saveFont } from '../../lib/storage';
 
 const SAMPLE = 'The quick brown fox';
 
-function stackFor(family: string): string {
-  const mono = family === 'Fira Code' || family.startsWith('Courier');
-  return `'${family}', ${mono ? 'ui-monospace, monospace' : 'system-ui, sans-serif'}`;
-}
-
 /** Font picker (applies live) and the theme toggle. */
 export function AppearanceTab() {
   const [font, setFont] = useState(loadFont);
-  // Re-check availability once fonts finish loading, so Google fonts do not flash "Not on this device".
+  // Re-check availability once fonts finish loading, so bundled fonts do not flash "Not on this device".
   const [, setReady] = useState(0);
   useEffect(() => {
     let alive = true;
@@ -59,10 +54,10 @@ export function AppearanceTab() {
                   className="size-4 shrink-0 accent-[var(--nish-accent)]"
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-base text-th-hi" style={{ fontFamily: stackFor(family) }}>
+                  <span className="block truncate text-base text-th-hi" style={{ fontFamily: fontStack(family) }}>
                     {family}
                   </span>
-                  <span className="block truncate text-xs text-th-hi3" style={{ fontFamily: stackFor(family) }}>
+                  <span className="block truncate text-xs text-th-hi3" style={{ fontFamily: fontStack(family) }}>
                     {SAMPLE}
                   </span>
                 </span>

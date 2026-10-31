@@ -1,154 +1,104 @@
 {
-  "sections": [
-    {
-      "header": "header 1",
-      "links": [
-        {
-          "text": "link 1",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 2",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 3",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 4",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 5",
-          "url": "https://google.com"
-        }
-      ]
-    },
-    {
-      "header": "header 2",
-      "links": [
-        {
-          "text": "link 1",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 2",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 3",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 4",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 5",
-          "url": "https://google.com"
-        }
-      ]
-    },
-    {
-      "header": "header 3",
-      "links": [
-        {
-          "text": "link 1",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 2",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 3",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 4",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 5",
-          "url": "https://google.com"
-        }
-      ]
-    },
-    {
-      "header": "header 4",
-      "links": [
-        {
-          "text": "link 1",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 2",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 3",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 4",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 5",
-          "url": "https://google.com"
-        }
-      ]
-    },
-    {
-      "header": "header 5",
-      "links": [
-        {
-          "text": "link 1",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 2",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 3",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 4",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 5",
-          "url": "https://google.com"
-        }
-      ]
-    },
-    {
-      "header": "header 6",
-      "links": [
-        {
-          "text": "link 1",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 2",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 3",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 4",
-          "url": "https://google.com"
-        },
-        {
-          "text": "link 5",
-          "url": "https://google.com"
-        }
-      ]
-    }
-  ]
+	"sections": [
+		{
+			"header": "Everyday",
+			"links": [
+				{
+					"text": "Gmail",
+					"url": "https://mail.google.com"
+				},
+				{
+					"text": "Calendar",
+					"url": "https://calendar.google.com"
+				},
+				{
+					"text": "Drive",
+					"url": "https://drive.google.com"
+				},
+				{
+					"text": "YouTube",
+					"url": "https://www.youtube.com"
+				},
+				{
+					"text": "Maps",
+					"url": "https://maps.google.com"
+				}
+			]
+		},
+		{
+			"header": "News",
+			"links": [
+				{
+					"text": "Hacker News",
+					"url": "https://news.ycombinator.com"
+				},
+				{
+					"text": "BBC News",
+					"url": "https://www.bbc.com/news"
+				},
+				{
+					"text": "Reuters",
+					"url": "https://www.reuters.com"
+				},
+				{
+					"text": "The Verge",
+					"url": "https://www.theverge.com"
+				},
+				{
+					"text": "Wikipedia",
+					"url": "https://en.wikipedia.org"
+				}
+			]
+		},
+		{
+			"header": "Build",
+			"links": [
+				{
+					"text": "GitHub",
+					"url": "https://github.com"
+				},
+				{
+					"text": "Stack Overflow",
+					"url": "https://stackoverflow.com"
+				},
+				{
+					"text": "MDN",
+					"url": "https://developer.mozilla.org"
+				},
+				{
+					"text": "npm",
+					"url": "https://www.npmjs.com"
+				},
+				{
+					"text": "Claude",
+					"url": "https://claude.ai"
+				}
+			]
+		},
+		{
+			"header": "Tools",
+			"links": [
+				{
+					"text": "Translate",
+					"url": "https://translate.google.com"
+				},
+				{
+					"text": "Weather.gov",
+					"url": "https://www.weather.gov"
+				},
+				{
+					"text": "Speedtest",
+					"url": "https://www.speedtest.net"
+				},
+				{
+					"text": "Excalidraw",
+					"url": "https://excalidraw.com"
+				},
+				{
+					"text": "Photopea",
+					"url": "https://www.photopea.com"
+				}
+			]
+		}
+	]
 }

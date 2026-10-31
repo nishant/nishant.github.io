@@ -5,7 +5,9 @@ import {
   KEYS,
   loadConfig,
   loadFont,
+  isLegacyPlaceholder,
   loadNotes,
+  normalizeUrl,
   parseConfig,
   saveConfig,
   saveFont,
@@ -85,7 +87,20 @@ describe('loadConfig / saveConfig', () => {
   it('round-trips a saved config', () => {
     const c = { sections: [{ header: 'Z', links: [{ text: 'a', url: 'https://a.io' }] }], extra: 5 };
     saveConfig(c);
-    expect(loadConfig()).toEqual({ config: c });
+    expect(loadConfig()).toEqual({ config: c, firstVisit: false });
+  });
+
+  it('is a first visit when the key is absent, not after saving', () => {
+    expect(loadConfig().firstVisit).toBe(true);
+    expect(loadConfig().firstVisit).toBe(false);
+  });
+
+  it('treats the legacy placeholder as a first visit and replaces it', () => {
+    saveConfig(legacy());
+    const r = loadConfig();
+    expect(r.firstVisit).toBe(true);
+    expect(r.config).toEqual(DEFAULT_CONFIG);
+    expect(localStorage.getItem(KEYS.config)).toBe(serializeConfig(DEFAULT_CONFIG));
   });
 
   it('invalid → defaults + warning, and does not overwrite the bad value', () => {
@@ -125,5 +140,48 @@ describe('notes and font', () => {
     saveFont('Times New Roman');
     expect(localStorage.getItem(KEYS.font)).toBe('Times New Roman');
     expect(loadFont()).toBe('Times New Roman');
+  });
+});
+
+function legacy() {
+  return {
+    sections: [1, 2, 3, 4, 5, 6].map((i) => ({
+      header: `header ${i}`,
+      links: [1, 2, 3, 4, 5].map((j) => ({ text: `link ${j}`, url: 'https://google.com' })),
+    })),
+  };
+}
+
+describe('isLegacyPlaceholder', () => {
+  it('matches only the exact placeholder', () => {
+    expect(isLegacyPlaceholder(legacy())).toBe(true);
+    expect(isLegacyPlaceholder(DEFAULT_CONFIG)).toBe(false);
+    const edited = legacy();
+    edited.sections[2]!.links[0]!.url = 'https://example.com';
+    expect(isLegacyPlaceholder(edited)).toBe(false);
+    expect(isLegacyPlaceholder({ sections: legacy().sections.slice(0, 5) })).toBe(false);
+  });
+});
+
+describe('normalizeUrl / parseConfig normalization', () => {
+  it('handles host:port as a host, not a scheme', () => {
+    expect(normalizeUrl('localhost:3000')).toBe('https://localhost:3000');
+    expect(normalizeUrl('example.com:8080/x')).toBe('https://example.com:8080/x');
+    expect(normalizeUrl('mailto:a@b.c')).toBe('mailto:a@b.c');
+    expect(normalizeUrl('tel:5551234')).toBe('tel:5551234');
+    expect(normalizeUrl('sms:12345')).toBe('sms:12345');
+    expect(normalizeUrl('nas:5000')).toBe('https://nas:5000');
+    expect(normalizeUrl('pc:8800/x')).toBe('https://pc:8800/x');
+  });
+
+  it('parseConfig normalizes urls and keeps empty ones empty', () => {
+    const r = parseConfig(
+      '{"sections":[{"header":"H","links":[{"text":"a","url":"example.com"},{"text":"b","url":""},{"text":"c","url":"localhost:3000"}]}]}',
+    );
+    expect(r.ok && r.config.sections[0]?.links.map((l) => l.url)).toEqual([
+      'https://example.com',
+      '',
+      'https://localhost:3000',
+    ]);
   });
 });

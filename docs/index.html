@@ -1,99 +1,101 @@
 <!doctype html>
-<html lang="en" data-nish-themes="dark light">
+<html lang="en">
   <head>
-    <script>// Applies the saved theme before first paint. Inline it in <head> (or load it
-// render-blocking) on every page. Keep it dependency-free and tiny; src/theme.ts holds
-// the same rules for runtime switching. The build replaces __THEMES__ with
-// { name: scheme } and __BG__ with { name: bg hex } for every theme in src/tokens.mjs.
-(function () {
-  var THEMES = {"dark":"dark","light":"light","slate":"dark","terminal":"dark","mocha":"dark","ocean":"dark","contrast":"dark"};
-  var BG = {"dark":"#0a0b0f","light":"#f7f6f3","slate":"#18181b","terminal":"#050807","mocha":"#1c1917","ocean":"#020c18","contrast":"#000000"};
-  // An app's own themes: window.__nishExtraThemes = { rose: 'dark', paper: 'light' }.
-  var extra = window.__nishExtraThemes || {};
-  for (var k in extra) if (!THEMES[k]) THEMES[k] = extra[k];
-  var DEFAULT = "dark";
-  var KEY = 'nish-theme';
-  var root = document.documentElement;
-  var choice = null;
-  try {
-    var m = document.cookie.match(/(?:^|;\s*)nish-theme=([a-z0-9-]+)/);
-    choice = m ? m[1] : localStorage.getItem(KEY);
-  } catch (e) {}
-  if (choice !== 'system' && !THEMES[choice]) choice = 'system';
-  var theme = choice;
-  if (theme === 'system') {
-    theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : DEFAULT;
-  }
-  // A page can limit itself to some themes (<html data-nish-themes="dark light">);
-  // anything else falls back to the light/dark theme it is based on.
-  var allowed = root.getAttribute('data-nish-themes');
-  if (allowed && allowed.split(/\s+/).indexOf(theme) < 0) theme = THEMES[theme];
-  root.setAttribute('data-theme', theme);
-  root.setAttribute('data-scheme', THEMES[theme]);
-  root.setAttribute('data-theme-choice', choice);
-  root.style.colorScheme = THEMES[theme];
-  // Browser and PWA chrome in the theme's bg from the first frame. An app's own
-  // (registered) theme has no baked color: theme.ts sets it once its CSS is live.
-  if (BG[theme]) {
-    try {
-      var meta = document.querySelector('meta[name="theme-color"][data-nish]');
-      if (!meta) {
-        meta = document.createElement('meta');
-        meta.setAttribute('name', 'theme-color');
-        meta.setAttribute('data-nish', '');
-        (document.head || root).appendChild(meta);
-      }
-      meta.setAttribute('content', BG[theme]);
-      // A static theme-color an app ships would win over ours (the first one is used).
-      // Drop those, but keep the ones scoped by a media attribute.
-      var metas = document.querySelectorAll('meta[name="theme-color"]');
-      for (var i = 0; i < metas.length; i++) {
-        if (metas[i] !== meta && !metas[i].hasAttribute('media') && metas[i].parentNode) metas[i].parentNode.removeChild(metas[i]);
-      }
-    } catch (e) {}
-  }
-})();
-</script>
-
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark light" />
-    <meta name="description" content="Nish's start page" />
-    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="icon" href="favicon.ico" sizes="any" />
-    <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="apple-touch-icon" href="icon-192.png" />
-    <title>Start</title>
-    <script>
-      // Applies the saved font before first paint (mirrors src/lib/font.ts).
-      (function () {
-        try {
-          var f = localStorage.getItem('nishant.github.io-font') || 'Fira Code';
-          var mono = f === 'Fira Code' || f.indexOf('Courier') === 0;
-          document.documentElement.style.setProperty(
-            '--app-font',
-            "'" + f + "', " + (mono ? 'ui-monospace, monospace' : 'system-ui, sans-serif'),
-          );
-          var href =
-            f === 'Fira Code'
-              ? 'https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&display=swap'
-              : f === 'Roboto'
-                ? 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap'
-                : '';
-          if (href) {
-            var l = document.createElement('link');
-            l.rel = 'stylesheet';
-            l.href = href;
-            l.setAttribute('data-app-font', f);
-            document.head.appendChild(l);
-          }
-        } catch (e) {}
-      })();
-    </script>
-    <script type="module" crossorigin src="./assets/index-BVGa7U7X.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BMTcxSFi.css">
+    <title>Start has moved</title>
+    <style>
+      :root { --bg: #ffffff; --fg: #14151a; --muted: #5b5f6b; --accent: #4f46e5; --accent-fg: #ffffff; --line: #d9dbe3; }
+      @media (prefers-color-scheme: dark) {
+        :root { --bg: #0a0b0f; --fg: #eceef4; --muted: #9aa0b0; --accent: #818cf8; --accent-fg: #0a0b0f; --line: #2a2d38; }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, sans-serif; }
+      main { max-width: 32rem; width: 100%; }
+      h1 { font-size: 1.5rem; margin: 0 0 0.5rem; }
+      p { margin: 0 0 1rem; color: var(--muted); }
+      a { color: var(--accent); }
+      .actions { display: none; flex-wrap: wrap; gap: 8px; }
+      .actions.show { display: flex; }
+      button { min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: var(--fg); font: inherit; cursor: pointer; }
+      button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+      @media (max-width: 639px) { button { width: 100%; } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <main>
+      <h1>Start has moved</h1>
+      <p id="msg">Taking you to start.nish.software&hellip;</p>
+      <div class="actions" id="actions">
+        <button type="button" class="primary" id="download">Download backup</button>
+        <button type="button" id="continue">Continue to start.nish.software</button>
+      </div>
+      <noscript><p><a href="https://start.nish.software">Continue to start.nish.software</a></p></noscript>
+    </main>
+    <script>
+      (function () {
+        var ORIGIN = 'https://start.nish.software/';
+        var SHARE_MAX = 30000;
+        function read(key) {
+          try { return localStorage.getItem(key); } catch (e) { return null; }
+        }
+        function go(url) { location.replace(url); }
+        function b64url(bytes) {
+          var s = '';
+          for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+          return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+        function encode(bundle) {
+          var bytes = new TextEncoder().encode(JSON.stringify(bundle));
+          if (typeof CompressionStream === 'undefined') return Promise.resolve('0.' + b64url(bytes));
+          return new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw')))
+            .arrayBuffer()
+            .then(function (buf) { return '1.' + b64url(new Uint8Array(buf)); });
+        }
+
+        var fallback = ORIGIN + (location.hash || '#/home');
+        try {
+          var rawConfig = read('nishant.github.io-config');
+          var config = null;
+          try { config = rawConfig ? JSON.parse(rawConfig) : null; } catch (e) { config = null; }
+          if (!config || !Array.isArray(config.sections)) return go(fallback);
+
+          var bundle = { app: 'start', v: 1, exportedAt: new Date().toISOString(), config: config };
+          var font = read('nishant.github.io-font');
+          var theme = read('nish-theme');
+          if (font) bundle.font = font;
+          if (theme) bundle.theme = theme;
+          var notes = read('nishant.github.io-notes');
+          var hasNotes = !!notes && notes.replace(/\s+/g, '') !== '';
+
+          encode(bundle).then(function (code) {
+            var target = code.length > SHARE_MAX ? ORIGIN + '#/home' : ORIGIN + '#/home?settings=' + code;
+            if (!hasNotes) return go(target);
+            document.getElementById('msg').textContent =
+              "Start has moved to start.nish.software. Your links will come with you. Your notes don't fit in a link, so download them first.";
+            document.getElementById('actions').className = 'actions show';
+            document.getElementById('continue').onclick = function () { go(target); };
+            document.getElementById('download').onclick = function () {
+              var full = JSON.parse(JSON.stringify(bundle));
+              full.notes = notes;
+              var blob = new Blob([JSON.stringify(full, null, 2)], { type: 'application/json' });
+              var url = URL.createObjectURL(blob);
+              var d = new Date();
+              var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+              var a = document.createElement('a');
+              a.href = url;
+              a.download = 'start-settings-' + d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + '.json';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+            };
+          }).catch(function () { go(fallback); });
+        } catch (e) {
+          go(fallback);
+        }
+      })();
+    </script>
   </body>
 </html>

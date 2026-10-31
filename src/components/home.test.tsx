@@ -57,6 +57,14 @@ describe('Enter behaviour', () => {
     expect(resolveEnter([], -1, '   ')).toBeNull();
   });
 
+  it('honors bangs on Enter, but a highlighted link still wins', () => {
+    expect(resolveEnter([], -1, '!gh react')).toBe('https://github.com/search?q=react');
+    expect(resolveEnter([], -1, 'cats !w')).toBe('https://en.wikipedia.org/w/index.php?search=cats');
+    expect(resolveEnter([], -1, '!nope x')).toBe('https://www.google.com/search?q=!nope%20x');
+    const m = matchLinks(config, 'git');
+    expect(resolveEnter(m, 0, '!gh git')).toBe(m[0]?.url);
+  });
+
   it('wires the keyboard through the field', () => {
     const onNavigate = vi.fn();
     render(<SearchBar config={config} onNavigate={onNavigate} />);

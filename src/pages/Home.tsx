@@ -3,9 +3,11 @@ import { Clock } from '../components/Clock';
 import { Footer } from '../components/Footer';
 import { LinkGrid } from '../components/LinkGrid';
 import { SearchBar } from '../components/SearchBar';
+import { Welcome } from '../components/Welcome';
 import { WeatherChip } from '../features/weather/WeatherChip';
 import type { AppId } from '../lib/api';
 import { useConfig } from '../lib/config-context';
+import { requestSettingsTab } from '../lib/settings-tab';
 
 /** The start page: clock and weather, search, the grid of link sections and the app buttons. */
 export function Home({ onOpen, openSheet }: { onOpen: (id: AppId) => void; openSheet: AppId | null }) {
@@ -20,6 +22,16 @@ export function Home({ onOpen, openSheet }: { onOpen: (id: AppId) => void; openS
         <Clock trailing={<WeatherChip onOpen={() => onOpen('weather')} />} />
         <SearchBar config={config} />
         <AppDock onOpen={onOpen} openSheet={openSheet} />
+        <Welcome
+          onEditLinks={() => {
+            requestSettingsTab('links');
+            onOpen('settings');
+          }}
+          onImport={() => {
+            requestSettingsTab('backup');
+            onOpen('settings');
+          }}
+        />
         <LinkGrid config={config} onOpenSettings={() => onOpen('settings')} />
         <Footer />
       </div>

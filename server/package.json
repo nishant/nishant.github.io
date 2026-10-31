@@ -2,7 +2,7 @@
   "name": "startpage-server",
   "version": "1.0.0",
   "private": true,
-  "description": "Serves the built startpage (../docs) and its weather API as one process.",
+  "description": "Serves the built startpage (../dist) and its weather API as one process.",
   "main": "dist/index.js",
   "engines": {
     "node": ">=20"
@@ -12,7 +12,7 @@
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "tsc -p tsconfig.json && node --test dist/routes/inbox.test.js"
+    "test": "tsc -p tsconfig.json && node --test dist/routes/inbox.test.js dist/routes/weather.test.js dist/routes/favicon.test.js dist/lib/guard.test.js"
   },
   "dependencies": {
     "axios": "^1.8.4",

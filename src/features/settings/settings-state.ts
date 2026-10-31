@@ -1,4 +1,4 @@
-import { serializeConfig, type Config, type LinkItem, type Section } from '../../lib/storage';
+import { normalizeUrl, serializeConfig, type Config, type LinkItem, type Section } from '../../lib/storage';
 
 /** Moves the item at `from` to `to`. Out-of-range moves return a copy unchanged. */
 export function moveItem<T>(list: readonly T[], from: number, to: number): T[] {
@@ -64,13 +64,7 @@ export function updateLink(config: Config, s: number, l: number, patch: Partial<
   }));
 }
 
-/** Adds https:// when the text has no scheme (as on blur); empty stays empty. */
-export function normalizeUrl(url: string): string {
-  const t = url.trim();
-  if (!t) return '';
-  if (/^[a-z][a-z0-9+.-]*:/i.test(t)) return t;
-  return `https://${t.replace(/^\/\//, '')}`;
-}
+export { normalizeUrl } from '../../lib/storage';
 
 /** The field error for a URL, or null when it is empty (dropped on save) or parseable. */
 export function urlError(url: string): string | null {

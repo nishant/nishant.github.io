@@ -1,7 +1,9 @@
-import { Favicon, Kbd, ListRow, SearchInput, StickyBar, cn } from '@nish/ui';
+import { Kbd, ListRow, SearchInput, StickyBar, cn } from '@nish/ui';
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { BUILTIN_BANGS, allBangs, bangUrl, parseBang, type Bang } from '../features/palette/bangs';
 import type { Config } from '../lib/storage';
 import { hostOf, isSafeUrl } from './LinkGrid';
+import { SiteIcon } from './SiteIcon';
 
 export interface LinkMatch {
   text: string;
@@ -41,17 +43,19 @@ export function matchLinks(config: Config, query: string): LinkMatch[] {
   return [...prefix, ...rest].slice(0, MAX_MATCHES);
 }
 
-/** What Enter does: open the highlighted link, else search Google; nothing for an empty query. */
-export function resolveEnter(matches: LinkMatch[], highlight: number, query: string): string | null {
+/** What Enter does: open the highlighted link, else a bang search, else search Google; nothing for an empty query. */
+export function resolveEnter(
+  matches: LinkMatch[],
+  highlight: number,
+  query: string,
+  bangs: Bang[] = BUILTIN_BANGS,
+): string | null {
   const picked = highlight >= 0 ? matches[highlight] : undefined;
   if (picked) return picked.url;
   const q = query.trim();
+  const parsed = parseBang(q, bangs);
+  if (parsed) return bangUrl(parsed.bang, parsed.terms);
   return q ? googleSearchUrl(q) : null;
-}
-
-function isTyping(el: Element | null): boolean {
-  if (!(el instanceof HTMLElement)) return false;
-  return el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName);
 }
 
 interface SearchBarProps {
@@ -60,7 +64,7 @@ interface SearchBarProps {
   onNavigate?: (url: string) => void;
 }
 
-/** The sticky search field: link suggestions while typing, Enter searches Google. */
+/** The sticky search field: link suggestions while typing, Enter opens a link, a bang or Google. */
 export function SearchBar({ config, onNavigate }: SearchBarProps) {
   const [query, setQuery] = useState('');
   const [highlight, setHighlight] = useState(-1);
@@ -73,22 +77,11 @@ export function SearchBar({ config, onNavigate }: SearchBarProps) {
   const optionId = (i: number) => `${listId}-${i}`;
 
   const matches = useMemo(() => matchLinks(config, query), [config, query]);
+  const bangs = useMemo(() => allBangs(config), [config]);
   const open = focused && matches.length > 0;
   const fine = typeof window !== 'undefined' && window.matchMedia?.('(pointer: fine)').matches;
 
   const go = (url: string) => (onNavigate ? onNavigate(url) : window.location.assign(url));
-
-  useEffect(() => {
-    const onKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
-      if (isTyping(document.activeElement)) return;
-      if (document.querySelector('[data-nish-layer]')) return;
-      e.preventDefault();
-      inputRef.current?.focus();
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, []);
 
   // The bar stays transparent (so the hero gradient shows through) until it sticks.
   useEffect(() => {
@@ -108,7 +101,7 @@ export function SearchBar({ config, onNavigate }: SearchBarProps) {
       setHighlight((h) => (e.key === 'ArrowDown' ? (h + 1) % n : h <= 0 ? n - 1 : h - 1));
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      const url = resolveEnter(matches, highlight, query);
+      const url = resolveEnter(matches, highlight, query, bangs);
       if (url) go(url);
     } else if (e.key === 'Escape') {
       e.preventDefault();
@@ -140,7 +133,7 @@ export function SearchBar({ config, onNavigate }: SearchBarProps) {
               closeTimer.current = setTimeout(() => setFocused(false), 120);
             }}
             autoFocus={fine}
-            placeholder="Search Google"
+            placeholder="Search Google or type !gh …"
             aria-label="Search Google or your links"
             role="combobox"
             aria-autocomplete="list"
@@ -151,7 +144,7 @@ export function SearchBar({ config, onNavigate }: SearchBarProps) {
           />
           {query === '' ? (
             <Kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 md:pointer-fine:inline-flex">
-              /
+              {/Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent) ? '⌘K' : 'Ctrl K'}
             </Kbd>
           ) : null}
           {open ? (
@@ -170,7 +163,7 @@ export function SearchBar({ config, onNavigate }: SearchBarProps) {
                     chevron={false}
                     active={i === highlight}
                     onClick={() => go(m.url)}
-                    icon={<Favicon url={m.url} label={m.text} size={20} />}
+                    icon={<SiteIcon url={m.url} label={m.text} size={20} />}
                     title={
                       <>
                         {m.text}
