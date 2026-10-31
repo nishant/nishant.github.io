@@ -63,9 +63,22 @@ export const createFaviconRouter = (opts: { fetchImpl?: typeof fetch; now?: () =
     if (!IMAGE_TYPES.has(type)) return undefined;
     const declared = Number(res.headers.get('content-length'));
     if (Number.isFinite(declared) && declared > MAX_BODY) return undefined;
-    const body = Buffer.from(await res.arrayBuffer());
-    if (body.length === 0 || body.length > MAX_BODY) return undefined;
-    return { type, body };
+    if (!res.body) return undefined;
+    const reader = res.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.length;
+      if (total > MAX_BODY) {
+        await reader.cancel().catch(() => undefined);
+        return undefined;
+      }
+      chunks.push(value);
+    }
+    if (total === 0) return undefined;
+    return { type, body: Buffer.concat(chunks, total) };
   };
 
   const fromDuckDuckGo = async (host: string): Promise<Outcome> => {
@@ -84,13 +97,15 @@ export const createFaviconRouter = (opts: { fetchImpl?: typeof fetch; now?: () =
 
   const fromGoogle = async (host: string): Promise<Outcome> => {
     try {
-      const res = await fetchImpl(`https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(host)}`, {
-        redirect: 'follow',
-        signal: AbortSignal.timeout(TIMEOUT_MS),
-      });
-      if (res.url) {
-        const finalHost = new URL(res.url).hostname;
-        if (finalHost !== 'www.google.com' && !finalHost.endsWith('.gstatic.com')) return { kind: 'none' };
+      let target = new URL(`https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(host)}`);
+      let res = await fetchImpl(target.href, { redirect: 'manual', signal: AbortSignal.timeout(TIMEOUT_MS) });
+      for (let hop = 0; res.status >= 300 && res.status < 400; hop++) {
+        const location = res.headers.get('location');
+        if (hop >= 2 || !location) return { kind: 'none' };
+        target = new URL(location, target);
+        if (target.protocol !== 'https:') return { kind: 'none' };
+        if (target.hostname !== 'www.google.com' && !target.hostname.endsWith('.gstatic.com')) return { kind: 'none' };
+        res = await fetchImpl(target.href, { redirect: 'manual', signal: AbortSignal.timeout(TIMEOUT_MS) });
       }
       if (res.status !== 200) return { kind: 'none' };
       const img = await readImage(res);

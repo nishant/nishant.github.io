@@ -144,7 +144,7 @@ export function SearchBar({ config, onNavigate }: SearchBarProps) {
           />
           {query === '' ? (
             <Kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 md:pointer-fine:inline-flex">
-              Ctrl K
+              {/Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent) ? '⌘K' : 'Ctrl K'}
             </Kbd>
           ) : null}
           {open ? (

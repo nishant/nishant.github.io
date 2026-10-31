@@ -1,7 +1,10 @@
 import { Button, Card, Kbd } from '@nish/ui';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useConfig } from '../lib/config-context';
 import { loadWelcomeDismissed, saveWelcomeDismissed } from '../lib/storage';
+
+const SEARCH_SHORTCUT =
+  typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent) ? '⌘K' : 'Ctrl K';
 
 interface WelcomeProps {
   onEditLinks: () => void;
@@ -10,9 +13,15 @@ interface WelcomeProps {
 
 /** The first-visit card above the links. Every button dismisses it; the flag is stored. */
 export function Welcome({ onEditLinks, onImport }: WelcomeProps) {
-  const { firstVisit } = useConfig();
+  const { firstVisit, config } = useConfig();
   const [dismissed, setDismissed] = useState(loadWelcomeDismissed);
-  if (!firstVisit || dismissed) return null;
+  const initialConfig = useRef(config);
+  // An import (or any save) replaces the config: the starter links are gone, so the card is moot.
+  const changed = config !== initialConfig.current;
+  useEffect(() => {
+    if (changed) saveWelcomeDismissed();
+  }, [changed]);
+  if (!firstVisit || dismissed || changed) return null;
 
   const dismiss = (then?: () => void) => () => {
     saveWelcomeDismissed();
@@ -29,8 +38,8 @@ export function Welcome({ onEditLinks, onImport }: WelcomeProps) {
         A fast homepage for your browser. Your links, notes and settings stay in this browser, with no account.
       </p>
       <ul className="list-disc space-y-1 pl-5 text-sm text-th-hi2">
-        <li>
-          Press <Kbd>Ctrl K</Kbd> or <Kbd>/</Kbd> to search your links, open apps or use bangs like !gh, !yt and !w.
+        <li className="hidden pointer-fine:list-item">
+          Press <Kbd>{SEARCH_SHORTCUT}</Kbd> to search your links, open apps or use bangs like !gh, !yt and !w.
         </li>
         <li>Set this page as your browser&apos;s homepage or new tab page to see it every time.</li>
       </ul>

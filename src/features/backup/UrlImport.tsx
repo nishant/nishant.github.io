@@ -1,7 +1,8 @@
 import { toast } from '@nish/ui';
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { decodeShare, shareParam, type SettingsBundle } from '../../lib/backup';
-import { ImportDialog } from './ImportDialog';
+
+const ImportDialog = lazy(() => import('./ImportDialog').then((m) => ({ default: m.ImportDialog })));
 
 const BROKEN = 'That share link is broken or incomplete.';
 
@@ -48,5 +49,9 @@ export function UrlImport() {
     setBundle(null);
     strip();
   };
-  return <ImportDialog bundle={bundle} onCancel={close} onDone={close} />;
+  return (
+    <Suspense fallback={null}>
+      <ImportDialog bundle={bundle} onCancel={close} onDone={close} />
+    </Suspense>
+  );
 }

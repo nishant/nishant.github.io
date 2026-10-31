@@ -105,6 +105,7 @@ const ASSET_LIMIT = 150;
 const ICON_LIMIT = 300;
 const SCOPE = new URL(self.registration.scope);
 let putCount = 0;
+let iconPuts = 0;
 
 function rel(url) {
   const p = url.pathname;
@@ -152,10 +153,10 @@ self.addEventListener('activate', (event) => {
   if (ENABLED) event.waitUntil(cleanup().then(() => self.clients.claim()));
 });
 
-async function navigate(request) {
+async function navigate(request, shellPage) {
   try {
     const res = await fetch(request);
-    if (cacheable(res)) {
+    if (shellPage && cacheable(res) && (res.headers.get('Content-Type') || '').includes('text/html')) {
       const cache = await caches.open(SHELL);
       await cache.put(new URL('./', SCOPE), res.clone());
     }
@@ -178,15 +179,20 @@ async function cacheFirstAsset(request) {
   return res;
 }
 
-async function favicon(request) {
+async function favicon(request, event) {
   const cache = await caches.open(ICONS);
   const hit = await cache.match(request);
   const refresh = fetch(request).then(async (res) => {
-    if (cacheable(res)) await cache.put(request, res.clone());
+    if (cacheable(res)) {
+      await cache.put(request, res.clone());
+      iconPuts += 1;
+      if (iconPuts % 20 === 0) await prune(ICONS, ICON_LIMIT);
+    }
     return res;
   });
   if (hit) {
-    refresh.catch(() => {});
+    const quiet = refresh.catch(() => {});
+    event.waitUntil(quiet);
     return hit;
   }
   return refresh;
@@ -209,13 +215,14 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
   const path = rel(url);
   if (request.mode === 'navigate') {
-    event.respondWith(navigate(request));
+    if (path === null || path.startsWith('api/') || path === 'health') return;
+    event.respondWith(navigate(request, path === '' || path === 'index.html'));
   } else if (path === null) {
     return;
   } else if (path.startsWith('assets/')) {
     event.respondWith(cacheFirstAsset(request));
   } else if (path.startsWith('api/favicon')) {
-    event.respondWith(favicon(request));
+    event.respondWith(favicon(request, event));
   } else if (path.startsWith('api/')) {
     return;
   } else {

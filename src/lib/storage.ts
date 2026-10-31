@@ -33,7 +33,7 @@ export function normalizeUrl(url: string): string {
   const t = url.trim();
   if (!t) return '';
   // host:port (localhost:3000, example.com:8080/x) is not a scheme.
-  if (/^[a-z0-9.-]+:\d+(?:[/?#]|$)/i.test(t)) return `https://${t}`;
+  if (/^(?:localhost|[a-z0-9-]+(?:\.[a-z0-9-]+)+):\d+(?:[/?#]|$)/i.test(t)) return `https://${t}`;
   if (/^[a-z][a-z0-9+.-]*:/i.test(t)) return t;
   return `https://${t.replace(/^\/\//, '')}`;
 }

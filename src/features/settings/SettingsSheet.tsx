@@ -13,8 +13,8 @@ type TabId = 'links' | 'appearance' | 'json' | 'backup';
 
 const TABS = [
   { value: 'links', label: 'Links' },
-  { value: 'appearance', label: 'Appearance' },
-  { value: 'json', label: 'Raw JSON' },
+  { value: 'appearance', label: 'Look' },
+  { value: 'json', label: 'JSON' },
   { value: 'backup', label: 'Backup' },
 ];
 

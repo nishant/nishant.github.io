@@ -168,6 +168,8 @@ describe('normalizeUrl / parseConfig normalization', () => {
     expect(normalizeUrl('localhost:3000')).toBe('https://localhost:3000');
     expect(normalizeUrl('example.com:8080/x')).toBe('https://example.com:8080/x');
     expect(normalizeUrl('mailto:a@b.c')).toBe('mailto:a@b.c');
+    expect(normalizeUrl('tel:5551234')).toBe('tel:5551234');
+    expect(normalizeUrl('sms:12345')).toBe('sms:12345');
   });
 
   it('parseConfig normalizes urls and keeps empty ones empty', () => {

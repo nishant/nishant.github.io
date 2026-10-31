@@ -33,7 +33,7 @@ export function ImportDialog({
   return (
     <ConfirmDialog
       title="Import settings?"
-      tone="primary"
+      tone="danger"
       confirmLabel="Replace my settings"
       cancelLabel="Cancel"
       onConfirm={confirm}

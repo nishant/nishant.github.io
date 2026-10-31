@@ -37,6 +37,8 @@ export const createWeatherRouter = (opts: WeatherOptions = {}): express.Router =
   const fetchJson = opts.fetchJson ?? axiosFetchJson;
   const now = opts.now ?? Date.now;
   const dailyCap = createDailyCap(opts.dailyCap ?? DAILY_CAP);
+  // Upstream spends only (cache misses), so one client cannot drain the shared daily cap.
+  const spendLimiter = createLimiter({ limit: 100, windowMs: 24 * 60 * 60_000 });
   const limiter = createLimiter({ limit: 60, windowMs: 10 * 60_000 });
   // Expired entries are kept (bounded) so they can be served once the daily cap is reached.
   const cache = new Map<string, CacheEntry>();
@@ -73,7 +75,16 @@ export const createWeatherRouter = (opts: WeatherOptions = {}): express.Router =
   };
 
   /** Takes one unit of the daily cap; when spent, answers (stale copy or 503) and returns false. */
-  const spend = (res: Response, stale: object | undefined): boolean => {
+  const spend = (req: Request, res: Response, stale: object | undefined): boolean => {
+    if (!spendLimiter.hit(clientIp(req), now()).ok) {
+      if (stale) {
+        res.setHeader('X-Cache', 'STALE');
+        res.json(stale);
+      } else {
+        res.status(429).json({ error: 'Too many weather lookups today. Try again tomorrow.' });
+      }
+      return false;
+    }
     if (dailyCap.take(now())) return true;
     if (stale) {
       res.setHeader('X-Cache', 'STALE');
@@ -114,7 +125,7 @@ export const createWeatherRouter = (opts: WeatherOptions = {}): express.Router =
       res.json(cached.value);
       return;
     }
-    if (!spend(res, cached?.value)) return;
+    if (!spend(req, res, cached?.value)) return;
 
     try {
       const data = ((await fetchJson(DATA_BASE_URL, {
@@ -149,7 +160,7 @@ export const createWeatherRouter = (opts: WeatherOptions = {}): express.Router =
       res.json(cached.value);
       return;
     }
-    if (!spend(res, cached?.value)) return;
+    if (!spend(req, res, cached?.value)) return;
 
     try {
       const result = await fetchJson(LOCATION_BASE_URL, {

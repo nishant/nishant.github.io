@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { ConfigProvider } from '../../lib/config-context';
 import { CommandMenu } from './CommandMenu';
 
@@ -55,5 +55,19 @@ describe('CommandMenu', () => {
     const input = setup();
     fireEvent.change(input, { target: { value: 'zzqx' } });
     expect(options().some((t) => t.includes('Search Google for “zzqx”'))).toBe(true);
+  });
+
+  it('opens the site home for a bang with no terms', () => {
+    const assign = vi.fn();
+    const orig = window.location;
+    Object.defineProperty(window, 'location', { configurable: true, value: { ...orig, assign, href: orig.href } });
+    try {
+      const input = setup();
+      fireEvent.change(input, { target: { value: '!gh' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+      expect(assign).toHaveBeenCalledWith('https://github.com');
+    } finally {
+      Object.defineProperty(window, 'location', { configurable: true, value: orig });
+    }
   });
 });

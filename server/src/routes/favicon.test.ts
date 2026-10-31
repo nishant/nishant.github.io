@@ -128,14 +128,17 @@ describe('favicon router', () => {
     }
   });
 
-  it('ignores a Google redirect that leaves gstatic.com', async () => {
+  it('ignores a Google redirect that leaves gstatic.com without fetching it', async () => {
+    const log: string[] = [];
+    const redirect = (to: string): Response => new Response(null, { status: 302, headers: { location: to } });
     const { server, port } = await start(
       createFaviconRouter({
-        fetchImpl: fakeFetch((u) => (isDdg(u) ? notFound() : img('image/png', PNG, 'https://evil.example/x.png'))),
+        fetchImpl: fakeFetch((u) => (isDdg(u) ? notFound() : redirect('https://evil.example/x.png')), log),
       }),
     );
     try {
       assert.equal((await get(port, 'host=example.com')).status, 404);
+      assert.equal(log.some((u) => u.includes('evil.example')), false);
     } finally {
       server.close();
     }

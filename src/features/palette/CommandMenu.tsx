@@ -43,12 +43,12 @@ export function CommandMenu({ onOpenSheet }: { onOpenSheet: (id: AppId) => void 
     }
 
     const list: CommandItem[] = [];
-    for (const section of config.sections) {
+    for (const [si, section] of config.sections.entries()) {
       for (const [i, link] of section.links.entries()) {
         if (!isSafeUrl(link.url)) continue;
         const host = hostOf(link.url);
         list.push({
-          id: `link:${section.header}:${i}:${link.url}`,
+          id: `link:${si}:${i}`,
           group: 'Links',
           label: link.text,
           hint: host,
@@ -115,6 +115,7 @@ export function CommandMenu({ onOpenSheet }: { onOpenSheet: (id: AppId) => void 
           hint: `!${b.bang}`,
           keywords: [`!${b.bang}`],
           icon: <Globe size={18} aria-hidden />,
+          href: bangUrl(b, ''),
         });
       }
     } else if (q) {

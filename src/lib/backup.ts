@@ -1,4 +1,5 @@
 import { getThemeChoice, isThemeName, setThemeChoice, toast } from '@nish/ui';
+import { BUILTIN_BANGS, allBangs } from '../features/palette/bangs';
 import { applyFont, FONTS } from './font';
 import { loadFont, loadNotes, parseConfig, saveFont, saveNotes, type Config } from './storage';
 
@@ -102,6 +103,25 @@ export function summarize(b: SettingsBundle): string {
   if (b.font) parts.push(`Font: ${b.font}`);
   if (b.theme) parts.push(`Theme: ${themeLabel(b.theme)}`);
   if (b.notes) parts.push('Notes included');
+  const custom = allBangs(b.config).filter((x) => {
+    const builtin = BUILTIN_BANGS.find((d) => d.bang === x.bang);
+    return !builtin || builtin.url !== x.url;
+  });
+  if (custom.length > 0) {
+    const list = custom
+      .map((x) => {
+        const overrides = BUILTIN_BANGS.some((d) => d.bang === x.bang);
+        let host = x.url;
+        try {
+          host = new URL(x.url.replace('%s', 'x')).host;
+        } catch {
+          // keep the raw url
+        }
+        return `!${x.bang} → ${host}${overrides ? ' (replaces built-in)' : ''}`;
+      })
+      .join(', ');
+    parts.push(`Custom bangs: ${list}`);
+  }
   return parts.join(' · ');
 }
 
@@ -153,11 +173,31 @@ function fromBase64Url(s: string): Uint8Array {
 async function pipe(
   bytes: Uint8Array,
   stream: { writable: WritableStream; readable: ReadableStream },
+  maxOut = Infinity,
 ): Promise<Uint8Array> {
   const writer = stream.writable.getWriter();
   void writer.write(bytes as unknown as BufferSource).catch(() => undefined);
   void writer.close().catch(() => undefined);
-  return new Uint8Array(await new Response(stream.readable).arrayBuffer());
+  const reader = (stream.readable as ReadableStream<Uint8Array>).getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.length;
+    if (total > maxOut) {
+      await reader.cancel().catch(() => undefined);
+      throw new Error('too large');
+    }
+    chunks.push(value);
+  }
+  const out = new Uint8Array(total);
+  let at = 0;
+  for (const c of chunks) {
+    out.set(c, at);
+    at += c.length;
+  }
+  return out;
 }
 
 /** Share code: `1.` + deflate-raw when CompressionStream exists, else `0.` + plain. Notes are never included. */
@@ -176,12 +216,12 @@ export async function encodeShare(b: SettingsBundle): Promise<string> {
 
 export async function decodeShare(code: string): Promise<BundleResult> {
   const broken: BundleResult = { ok: false, error: BROKEN_LINK };
-  if (!/^[01]\.[A-Za-z0-9_-]+$/.test(code)) return broken;
+  if (code.length > SHARE_MAX || !/^[01]\.[A-Za-z0-9_-]+$/.test(code)) return broken;
   try {
     let bytes = fromBase64Url(code.slice(2));
     if (code.startsWith('1.')) {
       if (typeof DecompressionStream === 'undefined') return broken;
-      bytes = await pipe(bytes, new DecompressionStream('deflate-raw'));
+      bytes = await pipe(bytes, new DecompressionStream('deflate-raw'), FILE_MAX_BYTES);
     }
     return parseBundle(new TextDecoder().decode(bytes), { allowNotes: false });
   } catch {
